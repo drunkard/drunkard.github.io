@@ -1,0 +1,406 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>操纵集群 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="集群运维" href="../" />
+    <link rel="next" title="监控集群" href="../monitoring/" />
+    <link rel="prev" title="集群运维" href="../" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../monitoring/" title="监控集群"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../" title="集群运维"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" accesskey="U">集群运维</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="operating-a-cluster">
+<span id="id1"></span><h1>操纵集群<a class="headerlink" href="#operating-a-cluster" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="systemd-ceph">
+<span id="running-ceph-with-systemd"></span><span id="index-0"></span><h2>用 systemd 控制 Ceph<a class="headerlink" href="#systemd-ceph" title="Permalink to this headline">¶</a></h2>
+<p>现在，所有支持 systemd 的发行版（ CentOS 7 、 Fedora 、
+Debian Jessie 8.x 、 SUSE ）都用原生的 systemd 文件来管理 ceph
+守护进程，不再使用原来的 sysvinit 脚本了。例如：</p>
+<div class="highlight-python"><pre>sudo systemctl start ceph.target       # start all daemons
+sudo systemctl status ceph-osd@12      # check status of osd.12</pre>
+</div>
+<p>罗列节点上 Ceph 的 systemd unit 用此命令：</p>
+<div class="highlight-python"><pre>sudo systemctl status ceph\*.service ceph\*.target</pre>
+</div>
+<div class="section" id="id2">
+<h3>启动所有守护进程<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>要启动一 Ceph 节点（任何类型）上的所有守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo systemctl start ceph.target</pre>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>停止所有守护进程<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>要停止一 Ceph 节点（任何类型）上的所有守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo systemctl stop ceph\*.service ceph\*.target</pre>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>按类型启动所有守护进程<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>要启动一节点上的某一类守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo systemctl start ceph-osd.target
+sudo systemctl start ceph-mon.target
+sudo systemctl start ceph-mds.target</pre>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>按类型停止所有守护进程<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>要停止一节点上的某一类守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo systemctl stop ceph-mon\*.service ceph-mon.target
+sudo systemctl stop ceph-osd\*.service ceph-osd.target
+sudo systemctl stop ceph-mds\*.service ceph-mds.target</pre>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>启动单个进程<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>要启动某节点上的某个守护进程例程，用下列命令之一：</p>
+<div class="highlight-python"><pre>sudo systemctl start ceph-osd@{id}
+sudo systemctl start ceph-mon@{hostname}
+sudo systemctl start ceph-mds@{hostname}</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>sudo systemctl start ceph-osd@1
+sudo systemctl start ceph-mon@ceph-server
+sudo systemctl start ceph-mds@ceph-server</pre>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>停止单个进程<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>要停止某节点上的某个守护进程例程，用下列命令之一：</p>
+<div class="highlight-python"><pre>sudo systemctl stop ceph-osd@{id}
+sudo systemctl stop ceph-mon@{hostname}
+sudo systemctl stop ceph-mds@{hostname}</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>sudo systemctl stop ceph-osd@1
+sudo systemctl stop ceph-mon@ceph-server
+sudo systemctl stop ceph-mds@ceph-server</pre>
+</div>
+</div>
+</div>
+<div class="section" id="upstart-ceph">
+<span id="running-ceph-with-upstart"></span><span id="index-1"></span><h2>用 Upstart 控制 Ceph<a class="headerlink" href="#upstart-ceph" title="Permalink to this headline">¶</a></h2>
+<p>用 <tt class="docutils literal"><span class="pre">ceph-deploy</span></tt> 在 Ubuntu Trusty 上部署 Ceph 后，你可以用基于事件的 <a class="reference external" href="http://upstart.ubuntu.com/index.html">Upstart</a> 来启动、停止某一 <a class="reference internal" href="../../../glossary/#term-13"><em class="xref std std-term">Ceph 节点</em></a>上的
+Ceph 守护进程。 Upstart 不要求在 Ceph 配置文件里定义守护进程例程。</p>
+<p>要罗列一个节点上 Ceph 的 Upstart 作业，用下列命令：</p>
+<div class="highlight-python"><pre>sudo initctl list | grep ceph</pre>
+</div>
+<p>详细了解请看 <a class="reference external" href="http://manpages.ubuntu.com/manpages/raring/en/man8/initctl.8.html">initctl</a> 。</p>
+<div class="section" id="id8">
+<h3>启动所有守护进程<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>要启动一 Ceph 节点（任何类型）上的所有守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo start ceph-all</pre>
+</div>
+</div>
+<div class="section" id="id9">
+<h3>停止所有守护进程<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p>要停止一 Ceph 节点（任何类型）上的所有守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo stop ceph-all</pre>
+</div>
+</div>
+<div class="section" id="id10">
+<h3>按类型启动所有守护进程<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>要启动一节点上的某一类守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo start ceph-osd-all
+sudo start ceph-mon-all
+sudo start ceph-mds-all</pre>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>按类型停止所有守护进程<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p>要停止一节点上的某一类守护进程，用下列命令：</p>
+<div class="highlight-python"><pre>sudo stop ceph-osd-all
+sudo stop ceph-mon-all
+sudo stop ceph-mds-all</pre>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>启动单个进程<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<p>要启动某节点上的某个守护进程例程，用下列命令之一：</p>
+<div class="highlight-python"><pre>sudo start ceph-osd id={id}
+sudo start ceph-mon id={hostname}
+sudo start ceph-mds id={hostname}</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>sudo start ceph-osd id=1
+sudo start ceph-mon id=ceph-server
+sudo start ceph-mds id=ceph-server</pre>
+</div>
+</div>
+<div class="section" id="id13">
+<h3>停止单个进程<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<p>要停止某节点上的某个守护进程例程，用下列命令之一：</p>
+<div class="highlight-python"><pre>sudo stop ceph-osd id={id}
+sudo stop ceph-mon id={hostname}
+sudo stop ceph-mds id={hostname}</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>sudo stop ceph-osd id=1
+sudo start ceph-mon id=ceph-server
+sudo start ceph-mds id=ceph-server</pre>
+</div>
+</div>
+</div>
+<div class="section" id="ceph">
+<span id="running-ceph"></span><span id="index-2"></span><h2>运行 Ceph<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h2>
+<p>每次用命令<strong>启动</strong>、<strong>重启</strong>、<strong>停止</strong> Ceph 守护进程（或整个集群）时，你必须指定至少一个选项和一个命令，还可能要指定守护进程类型或具体例程。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">commandline</span><span class="p">}</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="p">[</span><span class="n">commands</span><span class="p">]</span> <span class="p">[</span><span class="n">daemons</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">ceph</span></tt> 命令的选项包括：</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="13%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">选项</th>
+<th class="head">简写</th>
+<th class="head">描述</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">--verbose</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">-v</span></tt></td>
+<td>详细的日志。</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">--valgrind</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">N/A</span></tt></td>
+<td>（只适合开发者和质检人员）用 <a class="reference external" href="http://www.valgrind.org/">Valgrind</a> 调试。</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">--allhosts</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">-a</span></tt></td>
+<td>在 <tt class="docutils literal"><span class="pre">ceph.conf</span></tt> 里配置的所有主机上执行，否
+则它只在本机执行。</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">--restart</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">N/A</span></tt></td>
+<td>核心转储后自动重启。</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">--norestart</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">N/A</span></tt></td>
+<td>核心转储后不自动重启。</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">--conf</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">-c</span></tt></td>
+<td>使用另外一个配置文件。</td>
+</tr>
+</tbody>
+</table>
+<p>Ceph 子命令包括：</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">命令</th>
+<th class="head">描述</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">start</span></tt></td>
+<td>启动守护进程。</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">stop</span></tt></td>
+<td>停止守护进程。</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">forcestop</span></tt></td>
+<td>暴力停止守护进程，等价于 <tt class="docutils literal"><span class="pre">kill</span> <span class="pre">-9</span></tt></td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">killall</span></tt></td>
+<td>杀死某一类守护进程。</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">cleanlogs</span></tt></td>
+<td>清理掉日志目录。</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">cleanalllogs</span></tt></td>
+<td>清理掉日志目录内的<strong>所有</strong>文件。</td>
+</tr>
+</tbody>
+</table>
+<p>至于子系统操作， <tt class="docutils literal"><span class="pre">ceph</span></tt> 服务能指定守护进程类型，在
+<tt class="docutils literal"><span class="pre">[daemons]</span></tt> 处指定守护进程类型就行了，守护进程类型包括：</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">mon</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">osd</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">mds</span></tt></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">操纵集群</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#systemd-ceph">用 systemd 控制 Ceph</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id2">启动所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id3">停止所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id4">按类型启动所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id5">按类型停止所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id6">启动单个进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id7">停止单个进程</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#upstart-ceph">用 Upstart 控制 Ceph</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id8">启动所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id9">停止所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id10">按类型启动所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id11">按类型停止所有守护进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id12">启动单个进程</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id13">停止单个进程</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#ceph">运行 Ceph</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../monitoring/" title="监控集群"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../" title="集群运维"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" >集群运维</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

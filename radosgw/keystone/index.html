@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>与 OpenStack Keystone 对接 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../" />
+    <link rel="up" title="Ceph 对象网关" href="../" />
+    <link rel="next" title="与 OpenStack Barbican 对接" href="../barbican/" />
+    <link rel="prev" title="LDAP 认证" href="../ldap-auth/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../barbican/" title="与 OpenStack Barbican 对接"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../ldap-auth/" title="LDAP 认证"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 对象网关</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="openstack-keystone">
+<span id="integrating-with-openstack-keystone"></span><h1>与 OpenStack Keystone 对接<a class="headerlink" href="#openstack-keystone" title="Permalink to this headline">¶</a></h1>
+<p>Ceph 对象网关可以与 Keystone 对接，它是 OpenStack 的鉴权服务。这需要让网关把 Keystone 当作用户认证机构，经过 Keystone 授权、允许访问网关的用户， Ceph 对象网关内也会自动创建此用户（如果此前还没有）。 Keystone 认定有效的令牌，网关也会认为有效。</p>
+<p>与 Keystone 对接相关的网关配置选项有：</p>
+<div class="highlight-python"><pre>[client.radosgw.gateway]
+rgw keystone api version = {keystone api version}
+rgw keystone url = {keystone server url:keystone server admin port}
+rgw keystone admin token = {keystone admin token}
+rgw keystone accepted roles = {accepted user roles}
+rgw keystone token cache size = {number of tokens to cache}
+rgw keystone revocation interval = {number of seconds before checking revoked tickets}
+rgw keystone implicit tenants = {true for private tenant for each new user}
+rgw s3 auth use keystone = true
+nss db path = {path to nss db}</pre>
+</div>
+<p>也能配置 Keystone 服务的租户、用户名、密码（适用于 v2.0 版的
+OpenStack Identity API ），与 OpenStack 服务的配置过程相似，这样可避免在配置文件中设置共享密钥 <tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">keystone</span> <span class="pre">admin</span> <span class="pre">token</span></tt> ，因为这在生产环境下是不推进的配置方法。此处，服务的租户凭证应该有管理员权限，详情见 <a class="reference external" href="http://docs.openstack.org/developer/keystone/configuringservices.html#setting-up-projects-users-and-roles">Openstack keystone 文档</a>，里面详细解释了机制。必需的配置选项有：</p>
+<div class="highlight-python"><pre>rgw keystone admin user = {keystone service tenant user name}
+rgw keystone admin password = {keystone service tenant user password}
+rgw keystone admin tenant = {keystone service tenant name}</pre>
+</div>
+<p>Ceph 对象网关的用户被映射为 Keystone 的 <tt class="docutils literal"><span class="pre">tenant</span></tt> 。 Keystone
+用户具有不同的角色，角色可能对应着不止一个租户。 Ceph 拿到票据后，它会检查其租户、以及给此票据分配的用户角色，然后根据配置的
+<tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">keystone</span> <span class="pre">accepted</span> <span class="pre">roles</span></tt> 决定接受、或拒绝此请求。</p>
+<p>对于 v3 版本的 Openstack Identity API ，需要把
+<tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">keystone</span> <span class="pre">admin</span> <span class="pre">tenant</span></tt> 换成：</p>
+<div class="highlight-python"><pre>rgw keystone admin domain = {keystone admin domain name}
+rgw keystone admin project = {keystone admin project name}</pre>
+</div>
+<div class="section" id="kilo">
+<span id="prior-to-kilo"></span><h2>Kilo 之前<a class="headerlink" href="#kilo" title="Permalink to this headline">¶</a></h2>
+<p>Keystone 自身作为对象存储服务的入口（ endpoint ），需要配置为指向 Ceph 对象网关。</p>
+<div class="highlight-python"><pre>keystone service-create --name swift --type object-store
+keystone endpoint-create --service-id &lt;id&gt; \
+        --publicurl   http://radosgw.example.com/swift/v1 \
+        --internalurl http://radosgw.example.com/swift/v1 \
+        --adminurl    http://radosgw.example.com/swift/v1</pre>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>从 Kilo 起<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Keystone 自身作为对象存储服务的入口（ endpoint ），需要配置为指向 Ceph 对象网关。</p>
+<div class="highlight-python"><pre>openstack service create --name=swift \
+                         --description="Swift Service" \
+                         object-store
++-------------+----------------------------------+
+| Field       | Value                            |
++-------------+----------------------------------+
+| description | Swift Service                    |
+| enabled     | True                             |
+| id          | 37c4c0e79571404cb4644201a4a6e5ee |
+| name        | swift                            |
+| type        | object-store                     |
++-------------+----------------------------------+
+
+openstack endpoint create --region RegionOne \
+     --publicurl   "http://radosgw.example.com:8080/swift/v1" \
+     --adminurl    "http://radosgw.example.com:8080/swift/v1" \
+     --internalurl "http://radosgw.example.com:8080/swift/v1" \
+     swift
++--------------+------------------------------------------+
+| Field        | Value                                    |
++--------------+------------------------------------------+
+| adminurl     | http://radosgw.example.com:8080/swift/v1 |
+| id           | e4249d2b60e44743a67b5e5b38c18dd3         |
+| internalurl  | http://radosgw.example.com:8080/swift/v1 |
+| publicurl    | http://radosgw.example.com:8080/swift/v1 |
+| region       | RegionOne                                |
+| service_id   | 37c4c0e79571404cb4644201a4a6e5ee         |
+| service_name | swift                                    |
+| service_type | object-store                             |
++--------------+------------------------------------------+
+
+$ openstack endpoint show object-store
++--------------+------------------------------------------+
+| Field        | Value                                    |
++--------------+------------------------------------------+
+| adminurl     | http://radosgw.example.com:8080/swift/v1 |
+| enabled      | True                                     |
+| id           | e4249d2b60e44743a67b5e5b38c18dd3         |
+| internalurl  | http://radosgw.example.com:8080/swift/v1 |
+| publicurl    | http://radosgw.example.com:8080/swift/v1 |
+| region       | RegionOne                                |
+| service_id   | 37c4c0e79571404cb4644201a4a6e5ee         |
+| service_name | swift                                    |
+| service_type | object-store                             |
++--------------+------------------------------------------+</pre>
+</div>
+<p>The keystone URL is the Keystone admin RESTful API URL. The admin token is the
+token that is configured internally in Keystone for admin requests.</p>
+<p>The Ceph Object Gateway will query Keystone periodically for a list of revoked
+tokens. These requests are encoded and signed. Also, Keystone may be configured
+to provide self-signed tokens, which are also encoded and signed. The gateway
+needs to be able to decode and verify these signed messages, and the process
+requires that the gateway be set up appropriately. Currently, the Ceph Object
+Gateway will only be able to perform the procedure if it was compiled with
+<tt class="docutils literal"><span class="pre">--with-nss</span></tt>. Configuring the Ceph Object Gateway to work with Keystone also
+requires converting the OpenSSL certificates that Keystone uses for creating the
+requests to the nss db format, for example:</p>
+<div class="highlight-python"><pre>mkdir /var/ceph/nss
+
+openssl x509 -in /etc/keystone/ssl/certs/ca.pem -pubkey | \
+        certutil -d /var/ceph/nss -A -n ca -t "TCu,Cu,Tuw"
+openssl x509 -in /etc/keystone/ssl/certs/signing_cert.pem -pubkey | \
+        certutil -A -d /var/ceph/nss -n signing_cert -t "P,P,P"</pre>
+</div>
+<p>OpenStack 的 keystone 组件也可以用自签名的 SSL 证书来终结，要使 radosgw 有能力与这种 keystone 交互，你可以在运行
+radosgw 的节点上安装 keystone 的 SSL 证书；另外， radosgw
+也可以配置为根本不校验 SSL 证书（类似加了 <tt class="docutils literal"><span class="pre">--insecure</span></tt>
+开关的 openstack 客户端请求），即把
+<tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">keystone</span> <span class="pre">verify</span> <span class="pre">ssl</span></tt> 配置为 <tt class="docutils literal"><span class="pre">false</span></tt> 。</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../federated-config/">联盟配置（已废弃）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">与 OpenStack Keystone 对接</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kilo">Kilo 之前</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">从 Kilo 起</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../upgrade_to_jewel/">升级到 Jewel 的早期版本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../barbican/" title="与 OpenStack Barbican 对接"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../ldap-auth/" title="LDAP 认证"
+             >previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" >Ceph 对象网关</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

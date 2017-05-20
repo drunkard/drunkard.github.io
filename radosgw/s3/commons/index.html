@@ -1,0 +1,352 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>常见问题 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="Ceph 对象网关的 S3 兼容 API" href="../" />
+    <link rel="next" title="Authentication and ACLs" href="../authentication/" />
+    <link rel="prev" title="Ceph 对象网关的 S3 兼容 API" href="../" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../authentication/" title="Authentication and ACLs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../" title="Ceph 对象网关的 S3 兼容 API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 对象网关的 S3 兼容 API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="id1">
+<h1>常见问题<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="id2">
+<h2>桶和主机名<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>访问桶有两种不同的方法。第一种（首选的）方法把桶当作 URI 中的顶极目录。</p>
+<div class="highlight-python"><pre>GET /mybucket HTTP/1.1
+Host: cname.domain.com</pre>
+</div>
+<p>第二种方法把桶当作虚拟主机名，例如：</p>
+<div class="highlight-python"><pre>GET / HTTP/1.1
+Host: mybucket.cname.domain.com</pre>
+</div>
+<p>要配置支持虚拟主机的桶，你可以在 ceph.conf 里设置
+<tt class="docutils literal"><span class="pre">rgw_dns_name</span> <span class="pre">=</span> <span class="pre">cname.domain.com</span></tt> ，或者把 <tt class="docutils literal"><span class="pre">cname.domain.com</span></tt>
+加进域组配置的 <tt class="docutils literal"><span class="pre">hostnames</span></tt> 里面。域组的配置请参考
+<a class="reference external" href="../../multisite">Ceph 对象网关——多站配置</a>。</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">我们倾向于第一个方法，因为第二个涉及到繁重的域认证和
+DNS 通配符。</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>常见请求头<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">请求头</th>
+<th class="head">描述</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">CONTENT_LENGTH</span></tt></td>
+<td>Length of the request body.</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">DATE</span></tt></td>
+<td>Request time and date (in UTC).</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">HOST</span></tt></td>
+<td>The name of the host server.</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">AUTHORIZATION</span></tt></td>
+<td>Authorization token.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id4">
+<h2>常见响应状态<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">HTTP 状态</th>
+<th class="head">响应代码</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">100</span></tt></td>
+<td>Continue</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">200</span></tt></td>
+<td>Success</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">201</span></tt></td>
+<td>Created</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">202</span></tt></td>
+<td>Accepted</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">204</span></tt></td>
+<td>NoContent</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">206</span></tt></td>
+<td>Partial content</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">304</span></tt></td>
+<td>NotModified</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidArgument</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidDigest</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>BadDigest</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidBucketName</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidObjectName</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>UnresolvableGrantByEmailAddress</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidPart</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>InvalidPartOrder</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>RequestTimeout</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">400</span></tt></td>
+<td>EntityTooLarge</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">403</span></tt></td>
+<td>AccessDenied</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">403</span></tt></td>
+<td>UserSuspended</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">403</span></tt></td>
+<td>RequestTimeTooSkewed</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">404</span></tt></td>
+<td>NoSuchKey</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">404</span></tt></td>
+<td>NoSuchBucket</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">404</span></tt></td>
+<td>NoSuchUpload</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">405</span></tt></td>
+<td>MethodNotAllowed</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">408</span></tt></td>
+<td>RequestTimeout</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">409</span></tt></td>
+<td>BucketAlreadyExists</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">409</span></tt></td>
+<td>BucketNotEmpty</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">411</span></tt></td>
+<td>MissingContentLength</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">412</span></tt></td>
+<td>PreconditionFailed</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">416</span></tt></td>
+<td>InvalidRange</td>
+</tr>
+<tr class="row-even"><td><tt class="docutils literal"><span class="pre">422</span></tt></td>
+<td>UnprocessableEntity</td>
+</tr>
+<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">500</span></tt></td>
+<td>InternalError</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../federated-config/">联盟配置（已废弃）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../admin/">管理指南</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">S3 API</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../#api">API</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="">常见的</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id2">桶和主机名</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id3">常见请求头</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id4">常见响应状态</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../authentication/">认证</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../serviceops/">Service Ops</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bucketops/">Bucket Ops</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objectops/">Object Ops</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cpp/">C++</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../csharp/">C#</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../java/">Java</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../perl/">Perl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../php/">PHP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/">Python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ruby/">Ruby AWS::SDK Examples (aws-sdk gem ~&gt;2)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ruby/#ruby-aws-s3-examples-aws-s3-gem">Ruby AWS::S3 Examples (aws-s3 gem)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">功能支持情况</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../#header">不支持的 Header 字段</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../upgrade_to_jewel/">升级到 Jewel 的早期版本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../authentication/" title="Authentication and ACLs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../" title="Ceph 对象网关的 S3 兼容 API"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" >Ceph 对象网关的 S3 兼容 API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,206 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Looking op Monitors through DNS &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="配置" href="../" />
+    <link rel="next" title="监视器与 OSD 交互的配置" href="../mon-osd-interaction/" />
+    <link rel="prev" title="监视器配置参考" href="../mon-config-ref/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../mon-osd-interaction/" title="监视器与 OSD 交互的配置"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../mon-config-ref/" title="监视器配置参考"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" accesskey="U">配置</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="looking-op-monitors-through-dns">
+<h1>Looking op Monitors through DNS<a class="headerlink" href="#looking-op-monitors-through-dns" title="Permalink to this headline">¶</a></h1>
+<p>从 11.0.0 版起， RADOS 支持通过 DNS 查询监视器。</p>
+<p>这样的话，守护进程和客户端们的 ceph.conf 配置文件里就不需要
+<em>mon host</em> 配置了。</p>
+<p>客户端可以通过 DNS SRV TCP 记录来查询监视器。</p>
+<p>这样可减少客户端和监视器的配置。因为通过更新 DNS ，客户端和守护进程们就可以发现监视器的拓扑变化。</p>
+<p>默认情况下，客户端和守护进程会查询名为 <em>ceph-mon</em> （可通过
+<em>mon_dns_srv_name</em> 配置）的 TCP 服务。</p>
+<p><tt class="docutils literal"><span class="pre">mon</span> <span class="pre">dns</span> <span class="pre">srv</span> <span class="pre">name</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">查询监视器主机、地址时，要向 DNS 查询的服务名称。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">ceph-mon</span></tt></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="id1">
+<h2>实例<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>假设 DNS 域名是 <em>example.com</em> ，域文件内可加上如下配置。</p>
+<p>首先，创建监视器的相关记录，可以是 IPv4 (A) 或 IPv6 (AAAA) 的。</p>
+<div class="highlight-python"><pre>mon1.example.com. AAAA 2001:db8::100
+mon2.example.com. AAAA 2001:db8::200
+mon3.example.com. AAAA 2001:db8::300</pre>
+</div>
+<div class="highlight-python"><pre>mon1.example.com. A 192.168.0.1
+mon2.example.com. A 192.168.0.2
+mon3.example.com. A 192.168.0.3</pre>
+</div>
+<p>这些记录配置好后，我们用 <em>ceph-mon</em> 名字创建 SRV TCP 记录，分别指向三个监视器。</p>
+<div class="highlight-python"><pre>_ceph-mon._tcp.example.com. 60 IN SRV 10 60 6789 mon1.example.com.
+_ceph-mon._tcp.example.com. 60 IN SRV 10 60 6789 mon2.example.com.
+_ceph-mon._tcp.example.com. 60 IN SRV 10 60 6789 mon3.example.com.</pre>
+</div>
+<p>这里，我们配置的监视器在 <em>6789</em> 端口上。</p>
+<p>当前的客户端和守护进程还<em>不</em>遵守或理睬 SRV 记录中的权重或优先级配置。</p>
+<p>返回的所有记录都会按轮询方式平等对待。</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../">配置</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../filesystem-recommendations/">硬盘和文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">配置 Ceph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../network-config-ref/">网络选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auth-config-ref/">认证选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mon-config-ref/">监视器选项</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Looking op Monitors through DNS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">实例</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../mon-osd-interaction/">心跳选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../osd-config-ref/">OSD 选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../filestore-config-ref/">filestore 选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../journal-ref/">日志选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pool-pg-config-ref/">存储池、归置组和 CRUSH 选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ms-ref/">消息传递选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general-config-ref/">常规选项</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../operations/">运维</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../mon-osd-interaction/" title="监视器与 OSD 交互的配置"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../mon-config-ref/" title="监视器配置参考"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" >配置</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

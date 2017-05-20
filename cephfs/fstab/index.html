@@ -1,0 +1,209 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>用 fstab 挂载 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../" />
+    <link rel="up" title="Ceph 文件系统" href="../" />
+    <link rel="next" title="ceph-fuse – 基于 FUSE 的 Ceph 客户端" href="../../man/8/ceph-fuse/" />
+    <link rel="prev" title="用户空间挂载 Ceph 文件系统" href="../fuse/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../man/8/ceph-fuse/" title="ceph-fuse – 基于 FUSE 的 Ceph 客户端"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../fuse/" title="用户空间挂载 Ceph 文件系统"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 文件系统</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fstab">
+<span id="mount-ceph-fs-in-your-file-systems-table"></span><h1>用 fstab 挂载<a class="headerlink" href="#fstab" title="Permalink to this headline">¶</a></h1>
+<p>如果你从文件系统表挂载， Ceph 文件系统将在启动时自动挂载。</p>
+<div class="section" id="kernel-driver">
+<span id="id1"></span><h2>内核驱动<a class="headerlink" href="#kernel-driver" title="Permalink to this headline">¶</a></h2>
+<p>要用内核驱动挂载 Ceph FS ，按下列格式添加到 <tt class="docutils literal"><span class="pre">/etc/fstab</span></tt> ：</p>
+<div class="highlight-python"><pre>{ipaddress}:{port}:/ {mount}/{mountpoint} {filesystem-name}     [name=username,secret=secretkey|secretfile=/path/to/secretfile],[{mount.options}]</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>10.10.10.10:6789:/     /mnt/ceph    ceph    name=admin,secretfile=/etc/ceph/secret.key,noatime,_netdev    0       2</pre>
+</div>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">启用了认证时， <tt class="docutils literal"><span class="pre">name</span></tt> 及 <tt class="docutils literal"><span class="pre">secret</span></tt> 或 <tt class="docutils literal"><span class="pre">secretfile</span></tt> 选项必须加。</p>
+</div>
+<p>详情见<a class="reference external" href="../../rados/operations/user-management/">用户管理</a>。</p>
+</div>
+<div class="section" id="fuse">
+<h2>FUSE<a class="headerlink" href="#fuse" title="Permalink to this headline">¶</a></h2>
+<p>要在用户空间挂载 Ceph 文件系统，按如下加入 <tt class="docutils literal"><span class="pre">/etc/fstab</span></tt> ：</p>
+<div class="highlight-python"><pre>#DEVICE PATH       TYPE      OPTIONS
+none    /mnt/ceph  fuse.ceph ceph.id={user-ID}[,ceph.conf={path/to/conf.conf}],_netdev,defaults  0 0</pre>
+</div>
+<p>例如：</p>
+<div class="highlight-python"><pre>none    /mnt/ceph  fuse.ceph ceph.id=myuser,_netdev,defaults  0 0
+none    /mnt/ceph  fuse.ceph ceph.id=myuser,ceph.conf=/etc/ceph/foo.conf,_netdev,defaults  0 0</pre>
+</div>
+<p>确保填上了 ID （如 <tt class="docutils literal"><span class="pre">admin</span></tt> ，不是 <tt class="docutils literal"><span class="pre">client.admin</span></tt> ）。你可以用此方法加上 <tt class="docutils literal"><span class="pre">ceph-fuse</span></tt> 的其它可用选项。</p>
+<p>详情见<a class="reference external" href="../../rados/operations/user-management/">用户管理</a>。</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../rados/deployment/ceph-deploy-mds/">增加/删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#managing-failover">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#configuring-standby-daemons">灾备守护进程的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#examples">实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/">创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/">挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/">把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">通过 fstab 挂载 CephFS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#kernel-driver">内核驱动</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fuse">FUSE</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/">ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/">mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../administration/">CephFS 管理命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#previously-experimental-features">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../file-layouts/">文件布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../eviction/">驱逐客户端</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../full/">文件系统占满的处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-messages/">健康消息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">旧文件系统的升级</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dirfrags/">目录分片的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multimds/">多活 MDS 的配置</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../#for-developers">开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../man/8/ceph-fuse/" title="ceph-fuse – 基于 FUSE 的 Ceph 客户端"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../fuse/" title="用户空间挂载 Ceph 文件系统"
+             >previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" >Ceph 文件系统</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

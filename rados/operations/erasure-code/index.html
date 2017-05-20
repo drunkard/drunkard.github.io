@@ -1,0 +1,297 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>纠删码 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="集群运维" href="../" />
+    <link rel="next" title="纠删码配置" href="../erasure-code-profile/" />
+    <link rel="prev" title="存储池" href="../pools/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../erasure-code-profile/" title="纠删码配置"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../pools/" title="存储池"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" accesskey="U">集群运维</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="id1">
+<h1>纠删码<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>A Ceph pool is associated to a type to sustain the loss of an OSD
+(i.e. a disk since most of the time there is one OSD per disk). The
+default choice when <a class="reference external" href="../pools">creating a pool</a> is <em>replicated</em>,
+meaning every object is copied on multiple disks. The <a class="reference external" href="https://en.wikipedia.org/wiki/Erasure_code">Erasure Code</a> pool type can be used
+instead to save space.</p>
+<div class="section" id="id2">
+<h2>创建样板纠删码存储池<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>The simplest erasure coded pool is equivalent to <a class="reference external" href="https://en.wikipedia.org/wiki/Standard_RAID_levels#RAID_5">RAID5</a> and
+requires at least three hosts:</p>
+<div class="highlight-python"><pre>$ ceph osd pool create ecpool 12 12 erasure
+pool 'ecpool' created
+$ echo ABCDEFGHI | rados --pool ecpool put NYAN -
+$ rados --pool ecpool get NYAN -
+ABCDEFGHI</pre>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">the 12 in <em>pool create</em> stands for
+<a class="reference external" href="../pools">the number of placement groups</a>.</p>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>纠删码配置<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>默认的纠删码配置可容忍单个 OSD 的损失，相当于副本数为二的副本存储池，但只需 1.5TB 的空间即可存储 1TB 数据，而无需 2TB 。默认配置可这样查看：</p>
+<div class="highlight-python"><pre>$ ceph osd erasure-code-profile get default
+k=2
+m=1
+plugin=jerasure
+ruleset-failure-domain=host
+technique=reed_sol_van</pre>
+</div>
+<p>Choosing the right profile is important because it cannot be modified
+after the pool is created: a new pool with a different profile needs
+to be created and all objects from the previous pool moved to the new.</p>
+<p>The most important parameters of the profile are <em>K</em>, <em>M</em> and
+<em>ruleset-failure-domain</em> because they define the storage overhead and
+the data durability. For instance, if the desired architecture must
+sustain the loss of two racks with a storage overhead of 40% overhead,
+the following profile can be defined:</p>
+<div class="highlight-python"><pre>$ ceph osd erasure-code-profile set myprofile \
+   k=3 \
+   m=2 \
+   ruleset-failure-domain=rack
+$ ceph osd pool create ecpool 12 12 erasure myprofile
+$ echo ABCDEFGHI | rados --pool ecpool put NYAN -
+$ rados --pool ecpool get NYAN -
+ABCDEFGHI</pre>
+</div>
+<p>The <em>NYAN</em> object will be divided in three (<em>K=3</em>) and two additional
+<em>chunks</em> will be created (<em>M=2</em>). The value of <em>M</em> defines how many
+OSD can be lost simultaneously without losing any data. The
+<em>ruleset-failure-domain=rack</em> will create a CRUSH ruleset that ensures
+no two <em>chunks</em> are stored in the same rack.</p>
+<p class="ditaa">
+<img src="../../../_images/ditaa-96fe8c3c73e5e54cf27fa8a4d64ed08d17679ba3.png"/>
+</p>
+<p>More information can be found in the <a class="reference external" href="../erasure-code-profile">erasure code profiles</a> documentation.</p>
+</div>
+<div class="section" id="erasure-coding-with-overwrites">
+<span id="id4"></span><h2>在纠删码存储池上启用重写功能<a class="headerlink" href="#erasure-coding-with-overwrites" title="Permalink to this headline">¶</a></h2>
+<p>默认情况下，纠删码存储池只适用于像 RGW 这样进行完整对象写入和追加的场景。</p>
+<p>从 Luminous 起，在纠删码存储池里进行部分写入的功能可以在存储池配置里启用，这样 RBD 和 CephFS 就可以使用纠删码存储池存储数据了：</p>
+<div class="highlight-python"><pre>ceph osd pool set ec_pool allow_ec_overwrites true</pre>
+</div>
+<p>只有当存储池座落于 bluestore 格式的 OSD 上时才能启用此功能，因为 bluestore 的校验和功能在深度洗刷时能探测到位翻转或者其它的损坏。除了不安全外，在 filestore 上使用 EC 重写的性能也比
+bluestore 上差得多。</p>
+<p>纠删码存储池不支持 omap ，所以用于 RBD 和 CephFS 时你必须让它们把数据存到 EC 存储池里、而元数据存到副本存储池里。对 RBD 而言，这意味着在创建映像时要用纠删码存储池作 <tt class="docutils literal"><span class="pre">--data-pool</span></tt> （数据存储池）的参数：</p>
+<div class="highlight-python"><pre>rbd create --size 1G --data-pool ec_pool replicated_pool/image_name</pre>
+</div>
+<p>对 CephFS 而言，要想使用纠删码存储池，可在<a class="reference external" href="/cephfs/file-layouts">文件布局</a>里设置成那个存储池。</p>
+</div>
+<div class="section" id="id6">
+<h2>纠删码存储池与缓存分级<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>纠删码存储池与副本存储池相比需要的计算资源更多，而且还缺少一些功能，像 omap 。要消除这些局限性，可以在纠删码存储池前加一个<a class="reference external" href="../cache-tiering">缓存层</a>。</p>
+<p>例如，假设存储池 <em>hot-storage</em> 性能比较好：</p>
+<div class="highlight-python"><pre>$ ceph osd tier add ecpool hot-storage
+$ ceph osd tier cache-mode hot-storage writeback
+$ ceph osd tier set-overlay ecpool hot-storage</pre>
+</div>
+<p>这样就把 <em>hot-storage</em> 存储池配置成了 <em>ecpool</em> 的缓存层，模式为
+<em>writeback</em> 。如此一来，到 <em>ecpool</em> 的每个写和读实际上用的是
+<em>hot-storage</em> ，而且还受益于其灵活性和速度。</p>
+<p>更详细的文档请参阅<a class="reference external" href="../cache-tiering">分级缓存</a>。</p>
+</div>
+<div class="section" id="id9">
+<h2>术语<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><em>chunk</em></dt>
+<dd>when the encoding function is called, it returns chunks of the same
+size. Data chunks which can be concatenated to reconstruct the original
+object and coding chunks which can be used to rebuild a lost chunk.</dd>
+<dt><em>K</em></dt>
+<dd>the number of data <em>chunks</em>, i.e. the number of <em>chunks</em> in which the
+original object is divided. For instance if <em>K</em> = 2 a 10KB object
+will be divided into <em>K</em> objects of 5KB each.</dd>
+<dt><em>M</em></dt>
+<dd>the number of coding <em>chunks</em>, i.e. the number of additional <em>chunks</em>
+computed by the encoding functions. If there are 2 coding <em>chunks</em>,
+it means 2 OSDs can be out without losing data.</dd>
+</dl>
+</div>
+<div class="section" id="id10">
+<h2>内容列表<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../erasure-code-profile/">纠删码配置</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../erasure-code-jerasure/">Jerasure 纠删码插件</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../erasure-code-isa/">ISA 纠删码插件</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../erasure-code-lrc/">局部自修复纠删码插件</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../erasure-code-shec/">SHEC 纠删码插件</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">纠删码</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">创建样板纠删码存储池</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">纠删码配置</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#erasure-coding-with-overwrites">在纠删码存储池上启用重写功能</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">纠删码存储池与缓存分级</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">术语</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">内容列表</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../erasure-code-profile/">纠删码配置</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../erasure-code-jerasure/">Jerasure 纠删码插件</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../erasure-code-isa/">ISA 纠删码插件</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../erasure-code-lrc/">局部自修复纠删码插件</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../erasure-code-shec/">SHEC 纠删码插件</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../erasure-code-profile/" title="纠删码配置"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../pools/" title="存储池"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
+          <li><a href="../" >集群运维</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

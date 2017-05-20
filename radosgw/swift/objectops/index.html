@@ -1,0 +1,502 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>对象操作 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="Ceph 对象网关 Swift API" href="../" />
+    <link rel="next" title="Temp URL 操作" href="../tempurl/" />
+    <link rel="prev" title="Container Operations" href="../containerops/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../tempurl/" title="Temp URL 操作"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../containerops/" title="Container Operations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 对象网关 Swift API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="id1">
+<h1>对象操作<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>对象是个用于存储数据和元数据的容器。容器可以包含很多对象，但是对象的名字必须唯一。这个 API 允许客户端创建对象、设置访问权限及元数据、读取对象的数据和元数据、以及删除对象。因为此 API 发出的请求是与用户帐户信息相关的，所以此 API 内的所有请求都必须认证，除非容器或对象的访问控制权限被故意设置成了可公开访问（即允许匿名请求）。</p>
+<div class="section" id="id2">
+<h2>创建或更新对象<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>要创建新对象，需发送带有 API 版本、帐户、容器名和新对象名的 <tt class="docutils literal"><span class="pre">PUT</span></tt> 请求。还必须有对应容器的写权限才能创建或更新对象。容器内的对象名字必须唯一。 <tt class="docutils literal"><span class="pre">PUT</span></tt> 请求不会预先检测，所以你要是没用唯一的名字，此请求就会更新对象。然而你可以在对象名中用伪分级语法来区分同名、但位于不同伪分级目录的对象。你可以在请求头里加上访问控制和元数据头。</p>
+<div class="section" id="id3">
+<h3>语法<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>PUT /{api version}/{account}/{container}/{object} HTTP/1.1
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>请求头<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">ETag</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">对象内容的 MD5 哈希值，建议设置。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Content-Type</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">对象所包含内容的类型。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Transfer-Encoding</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">用于标识此对象是否是更大的聚合对象的一部分。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">有效取值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">chunked</span></tt></td>
+</tr>
+<tr class="field-even field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>复制对象<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>对象复制方法允许你在服务器端创建对象副本，这样你就不必先下载、再上传到另一个容器或名字了。要把一对象的内容复制到另一对象，你可以发送 <tt class="docutils literal"><span class="pre">PUT</span></tt> 请求或 <tt class="docutils literal"><span class="pre">COPY</span></tt> 请求，要携带 API 版本、帐户、和容器名。发送 <tt class="docutils literal"><span class="pre">PUT</span></tt> 请求时，请求内容为目标容器和对象名，源容器和对象在请求头里设置；对于 <tt class="docutils literal"><span class="pre">COPY</span></tt> 请求，请求内容为源容器和对象，目标容器和对象在请求头里。要复制对象，你必须有写权限；目标对象名在其容器内也必须唯一。此请求不会预先检查，所以如果名字不唯一，它就会更新目标对象。然而你可以在对象名中用伪分级语法来区分同名、但位于不同伪分级目录的对象。你可以在请求头里加上访问控制和元数据头。</p>
+<div class="section" id="id6">
+<h3>语法<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>PUT /{api version}/{account}/{dest-container}/{dest-object} HTTP/1.1
+X-Copy-From: {source-container}/{source-object}
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+<p>或者这样：</p>
+<div class="highlight-python"><pre>COPY /{api version}/{account}/{source-container}/{source-object} HTTP/1.1
+Destination: {dest-container}/{dest-object}</pre>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>请求头<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">X-Copy-From</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">用于在 <tt class="docutils literal"><span class="pre">PUT</span></tt> 请求中定义源容器或对象的路径。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">用 <tt class="docutils literal"><span class="pre">PUT</span></tt> 方法时必需</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Destination</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">用于在 <tt class="docutils literal"><span class="pre">COPY</span></tt> 请求中定义目标容器或对象的路径。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">用 <tt class="docutils literal"><span class="pre">COPY</span></tt> 方法时必需</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">If-Modified-Since</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果从源对象的 <tt class="docutils literal"><span class="pre">last_modified</span></tt> 属性记录的时间起修改过，那就复制。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">日期</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">If-Unmodified-Since</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果从源对象的 <tt class="docutils literal"><span class="pre">last_modified</span></tt> 属性记录的时间起没有修改过，那就复制。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">日期</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Copy-If-Match</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">请求中的 ETag 与源对象的 ETag 属性相同时才复制。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">ETag.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Copy-If-None-Match</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">请求中的 ETag 与源对象的 ETag 属性不同时才复制。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">ETag.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>删除对象<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>要删除对象，可发送带有 API 版本、帐户、容器和对象名的 <tt class="docutils literal"><span class="pre">DELETE</span></tt> 请求。此帐户必须有容器的写权限，才能删除其内的对象。成功删除对象后，你就能重用对象名了。</p>
+<div class="section" id="id9">
+<h3>语法<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>DELETE /{api version}/{account}/{container}/{object} HTTP/1.1
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+</div>
+</div>
+<div class="section" id="id10">
+<h2>获取一对象<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<p>要获取一对象，需发出带有 API 版本、帐户、容器和对象名的 <tt class="docutils literal"><span class="pre">GET</span></tt> 请求，而且必须有此容器的读权限，才能读取其内的对象。</p>
+<div class="section" id="id11">
+<h3>语法<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>GET /{api version}/{account}/{container}/{object} HTTP/1.1
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>请求头<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">range</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">要获取某一对象内容的一部分，你可以指定字节范围。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">日期（译者：应为整数？）</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">If-Modified-Since</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果从源对象的 <tt class="docutils literal"><span class="pre">last_modified</span></tt> 属性记录的时间起修改过，那就下载。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">日期</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">If-Unmodified-Since</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果从源对象的 <tt class="docutils literal"><span class="pre">last_modified</span></tt> 属性记录的时间起没有修改过，那就下载。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">日期</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Copy-If-Match</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">请求中的 ETag 与源对象的 ETag 属性相同时才下载。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">ETag.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+<p><tt class="docutils literal"><span class="pre">Copy-If-None-Match</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">请求中的 ETag 与源对象的 ETag 属性不同时才下载。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">ETag.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id13">
+<h3>响应头<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">Content-Range</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">此区间表示对象内容的子集。只有在请求头中有 range 字段时才会返回此字段。</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="id14">
+<h2>获取对象元数据<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<p>要查看一对象的元数据，可发送带有 API 版本、帐户、容器和对象名的 <tt class="docutils literal"><span class="pre">HEAD</span></tt> 头。你还必须有此容器的读权限才能其内对象的元数据。此请求会返回和获取对象本身时相同的头信息，只是不返回对象的数据而已。</p>
+<div class="section" id="id15">
+<h3>语法<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>HEAD /{api version}/{account}/{container}/{object} HTTP/1.1
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+</div>
+</div>
+<div class="section" id="id16">
+<h2>增加或更新对象元数据<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<p>要给对象增加元数据需发送 <tt class="docutils literal"><span class="pre">POST</span></tt> 请求，要带上 API 版本、帐户、容器和对象名。你还必须有父容器的写权限才能增加或更新元数据。</p>
+<div class="section" id="id17">
+<h3>语法<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>POST /{api version}/{account}/{container}/{object} HTTP/1.1
+Host: {fqdn}
+X-Auth-Token: {auth-token}</pre>
+</div>
+</div>
+<div class="section" id="id18">
+<h3>请求头<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">X-Object-Meta-{key}</span></tt></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">一个用户定义的元数据关键字，其值为任意字符串。</td>
+</tr>
+<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">字符串</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">否</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../federated-config/">联盟配置（已废弃）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../s3/">S3 API</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">Swift API</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../#api">API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../auth/">认证</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../serviceops/">服务操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containerops/">容器操作</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">对象操作</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id2">创建或更新对象</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id3">语法</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id4">请求头</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id5">复制对象</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id6">语法</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id7">请求头</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id8">删除对象</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id9">语法</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id10">获取一对象</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id11">语法</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id12">请求头</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id13">响应头</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id14">获取对象元数据</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id15">语法</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id16">增加或更新对象元数据</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id17">语法</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id18">请求头</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../tempurl/">临时 URL 操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../tutorial/">指导手册</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../java/">Java</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../python/">Python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ruby/">Ruby</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">功能支持</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../upgrade_to_jewel/">升级到 Jewel 的早期版本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../tempurl/" title="Temp URL 操作"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../containerops/" title="Container Operations"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" >Ceph 对象网关 Swift API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

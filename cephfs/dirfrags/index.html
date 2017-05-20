@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>目录分片的配置 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../" />
+    <link rel="up" title="Ceph 文件系统" href="../" />
+    <link rel="next" title="多活 MDS 守护进程的配置" href="../multimds/" />
+    <link rel="prev" title="升级比 Firefly 老的文件系统，需过 Jewel 这个槛" href="../upgrading/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../multimds/" title="多活 MDS 守护进程的配置"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../upgrading/" title="升级比 Firefly 老的文件系统，需过 Jewel 这个槛"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 文件系统</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="configuring-directory-fragmentation">
+<span id="id1"></span><h1>目录分片的配置<a class="headerlink" href="#configuring-directory-fragmentation" title="Permalink to this headline">¶</a></h1>
+<p>在 CephFS 中，目录变得非常大或非常繁忙时会被<em>分片</em>。也就是把元数据拆分开，分成多个对象置于元数据存储池内，以便由多个 MDS
+守护进程共同处理。</p>
+<p>In normal operation, directory fragmentation is invisbible to
+users and administrators, and all the configuration settings mentioned
+here should be left at their default values.</p>
+<p>While directory fragmentation enables CephFS to handle very large
+numbers of entries in a single directory, application programmers should
+remain conservative about creating very large directories, as they still
+have a resource cost in situations such as a CephFS client listing
+the directory, where all the fragments must be loaded at once.</p>
+<p>All directories are initially created as a single fragment.  This fragment
+may be <em>split</em> to divide up the directory into more fragments, and these
+fragments may be <em>merged</em> to reduce the number of fragments in the directory.</p>
+<div class="section" id="splitting-and-merging">
+<span id="id2"></span><h2>拆分和合并<a class="headerlink" href="#splitting-and-merging" title="Permalink to this headline">¶</a></h2>
+<p>只有在 MDS 配置文件的 <tt class="docutils literal"><span class="pre">mds_bal_frag</span></tt> 为 true 、且文件系统图的
+allow_dirfrags 为 true （在监视器上设置）时， MDS 才允许拆分和合并。从 <em>Luminous</em> (12.2.x) 版起，这两个选项默认都是 true 。</p>
+<p>When an MDS identifies a directory fragment to be split, it does not
+do the split immediately.  Because splitting interrupts metadata IO,
+a short delay is used to allow short bursts of client IO to complete
+before the split begins.  This delay is configured with
+<tt class="docutils literal"><span class="pre">mds_bal_fragment_interval</span></tt>, which defaults to 5 seconds.</p>
+<p>When the split is done, the directory fragment is broken up into
+a power of two number of new fragments.  The number of new
+fragments is given by two to the power <tt class="docutils literal"><span class="pre">mds_bal_split_bits</span></tt>, i.e.
+if <tt class="docutils literal"><span class="pre">mds_bal_split_bits</span></tt> is 2, then four new fragments will be
+created.  The default setting is 3, i.e. splits create 8 new fragments.</p>
+<p>The criteria for initiating a split or a merge are described in the
+following sections.</p>
+</div>
+<div class="section" id="size-thresholds">
+<span id="id3"></span><h2>尺寸阈值<a class="headerlink" href="#size-thresholds" title="Permalink to this headline">¶</a></h2>
+<p>A directory fragment is elegible for splitting when its size exceeds
+<tt class="docutils literal"><span class="pre">mds_bal_split_size</span></tt> (default 10000).  Ordinarily this split is
+delayed by <tt class="docutils literal"><span class="pre">mds_bal_fragment_interval</span></tt>, but if the fragment size
+exceeds a factor of <tt class="docutils literal"><span class="pre">mds_bal_fragment_fast_factor</span></tt> the split size,
+the split will happen immediately (holding up any client metadata
+IO on the directory).</p>
+<p><tt class="docutils literal"><span class="pre">mds_bal_fragment_size_max</span></tt> is the hard limit on the size of
+directory fragments.  If it is reached, clients will receive
+ENOSPC errors if they try to create files in the fragment.  On
+a properly configured system, this limit should never be reached on
+ordinary directories, as they will have split long before.  By default,
+this is set to 10 times the split size, giving a dirfrag size limit of
+100000.  Increasing this limit may lead to oversized directory fragment
+objects in the metadata pool, which the OSDs may not be able to handle.</p>
+<p>A directory fragment is elegible for merging when its size is less
+than <tt class="docutils literal"><span class="pre">mds_bal_merge_size</span></tt>.  There is no merge equivalent of the
+&#8220;fast splitting&#8221; explained above: fast splitting exists to avoid
+creating oversized directory fragments, there is no equivalent issue
+to avoid when merging.  The default merge size is 50.</p>
+</div>
+<div class="section" id="activity-thresholds">
+<span id="id4"></span><h2>活跃度阈值<a class="headerlink" href="#activity-thresholds" title="Permalink to this headline">¶</a></h2>
+<p>In addition to splitting fragments based
+on their size, the MDS may split directory fragments if their
+activity exceeds a threshold.</p>
+<p>The MDS maintains separate time-decaying load counters for read and write
+operations on directory fragments.  The decaying load counters have an
+exponential decay based on the <tt class="docutils literal"><span class="pre">mds_decay_halflife</span></tt> setting.</p>
+<p>On writes, the write counter is
+incremented, and compared with <tt class="docutils literal"><span class="pre">mds_bal_split_wr</span></tt>, triggering a
+split if the threshold is exceeded.  Write operations include metadata IO
+such as renames, unlinks and creations.</p>
+<p>The <tt class="docutils literal"><span class="pre">mds_bal_split_rd</span></tt> threshold is applied based on the read operation
+load counter, which tracks readdir operations.</p>
+<p>By the default, the read threshold is 25000 and the write threshold is
+10000, i.e. 2.5x as many reads as writes would be required to trigger
+a split.</p>
+<p>After fragments are split due to the activity thresholds, they are only
+merged based on the size threshold (<tt class="docutils literal"><span class="pre">mds_bal_merge_size</span></tt>), so
+a spike in activity may cause a directory to stay fragmented
+forever unless some entries are unlinked.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../rados/deployment/ceph-deploy-mds/">增加/删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#managing-failover">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#configuring-standby-daemons">灾备守护进程的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#examples">实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/">创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/">挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/">把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fstab/">通过 fstab 挂载 CephFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/">ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/">mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../administration/">CephFS 管理命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#previously-experimental-features">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../file-layouts/">文件布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../eviction/">驱逐客户端</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../full/">文件系统占满的处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-messages/">健康消息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">旧文件系统的升级</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">目录分片的配置</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#splitting-and-merging">拆分和合并</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#size-thresholds">尺寸阈值</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#activity-thresholds">活跃度阈值</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../multimds/">多活 MDS 的配置</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../#for-developers">开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../multimds/" title="多活 MDS 守护进程的配置"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../upgrading/" title="升级比 Firefly 老的文件系统，需过 Jewel 这个槛"
+             >previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" >Ceph 文件系统</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

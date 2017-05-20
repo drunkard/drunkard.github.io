@@ -1,0 +1,331 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Java Swift Examples &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../../" />
+    <link rel="up" title="Ceph 对象网关 Swift API" href="../" />
+    <link rel="next" title="Python Swift 实例" href="../python/" />
+    <link rel="prev" title="Tutorial" href="../tutorial/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../python/" title="Python Swift 实例"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../tutorial/" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 对象网关 Swift API</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="java-swift-examples">
+<span id="java-swift"></span><h1>Java Swift Examples<a class="headerlink" href="#java-swift-examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>配置<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The following examples may require some or all of the following Java
+classes to be imported:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">org.javaswift.joss.client.factory.AccountConfig</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.javaswift.joss.client.factory.AccountFactory</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.javaswift.joss.client.factory.AuthenticationMethod</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.javaswift.joss.model.Account</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.javaswift.joss.model.Container</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.javaswift.joss.model.StoredObject</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>建立一个连接<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>This creates a connection so that you can interact with the server:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">String</span> <span class="n">username</span> <span class="o">=</span> <span class="s">&quot;USERNAME&quot;</span><span class="o">;</span>
+<span class="n">String</span> <span class="n">password</span> <span class="o">=</span> <span class="s">&quot;PASSWORD&quot;</span><span class="o">;</span>
+<span class="n">String</span> <span class="n">authUrl</span>  <span class="o">=</span> <span class="s">&quot;https://radosgw.endpoint/auth/1.0&quot;</span><span class="o">;</span>
+
+<span class="n">AccountConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AccountConfig</span><span class="o">();</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setUsername</span><span class="o">(</span><span class="n">username</span><span class="o">);</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setPassword</span><span class="o">(</span><span class="n">password</span><span class="o">);</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setAuthUrl</span><span class="o">(</span><span class="n">authUrl</span><span class="o">);</span>
+<span class="n">config</span><span class="o">.</span><span class="na">setAuthenticationMethod</span><span class="o">(</span><span class="n">AuthenticationMethod</span><span class="o">.</span><span class="na">BASIC</span><span class="o">);</span>
+<span class="n">Account</span> <span class="n">account</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AccountFactory</span><span class="o">(</span><span class="n">config</span><span class="o">).</span><span class="na">createAccount</span><span class="o">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>创建一个容器<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>This creates a new container called <tt class="docutils literal"><span class="pre">my-new-container</span></tt>:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">container</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-an-object">
+<h2>Create an Object<a class="headerlink" href="#create-an-object" title="Permalink to this headline">¶</a></h2>
+<p>This creates an object <tt class="docutils literal"><span class="pre">foo.txt</span></tt> from the file named <tt class="docutils literal"><span class="pre">foo.txt</span></tt> in
+the container <tt class="docutils literal"><span class="pre">my-new-container</span></tt>:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">StoredObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">);</span>
+<span class="n">object</span><span class="o">.</span><span class="na">uploadObject</span><span class="o">(</span><span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="add-update-object-metadata">
+<h2>Add/Update Object Metadata<a class="headerlink" href="#add-update-object-metadata" title="Permalink to this headline">¶</a></h2>
+<p>This adds the metadata key-value pair <tt class="docutils literal"><span class="pre">key</span></tt>:<tt class="docutils literal"><span class="pre">value</span></tt> to the object named
+<tt class="docutils literal"><span class="pre">foo.txt</span></tt> in the container <tt class="docutils literal"><span class="pre">my-new-container</span></tt>:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">StoredObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">);</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">metadata</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TreeMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;();</span>
+<span class="n">metadata</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;key&quot;</span><span class="o">,</span> <span class="s">&quot;value&quot;</span><span class="o">);</span>
+<span class="n">object</span><span class="o">.</span><span class="na">setMetadata</span><span class="o">(</span><span class="n">metadata</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-owned-containers">
+<h2>List Owned Containers<a class="headerlink" href="#list-owned-containers" title="Permalink to this headline">¶</a></h2>
+<p>This gets a list of Containers that you own.
+This also prints out the container name.</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">Container</span><span class="o">&gt;</span> <span class="n">containers</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">list</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">Container</span> <span class="n">currentContainer</span> <span class="o">:</span> <span class="n">containers</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">currentContainer</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The output will look something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mahbuckat1</span>
+<span class="n">mahbuckat2</span>
+<span class="n">mahbuckat3</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-a-container-s-content">
+<h2>List a Container&#8217;s Content<a class="headerlink" href="#list-a-container-s-content" title="Permalink to this headline">¶</a></h2>
+<p>This gets a list of objects in the container <tt class="docutils literal"><span class="pre">my-new-container</span></tt>; and, it also
+prints out each object&#8217;s name, the file size, and last modified date:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">Collection</span><span class="o">&lt;</span><span class="n">StoredObject</span><span class="o">&gt;</span> <span class="n">objects</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">list</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">StoredObject</span> <span class="n">currentObject</span> <span class="o">:</span> <span class="n">objects</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">currentObject</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The output will look something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">myphoto1</span><span class="o">.</span><span class="n">jpg</span>
+<span class="n">myphoto2</span><span class="o">.</span><span class="n">jpg</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieve-an-object-s-metadata">
+<h2>Retrieve an Object&#8217;s Metadata<a class="headerlink" href="#retrieve-an-object-s-metadata" title="Permalink to this headline">¶</a></h2>
+<p>This retrieves metadata and gets the MIME type for an object named <tt class="docutils literal"><span class="pre">foo.txt</span></tt>
+in a container named <tt class="docutils literal"><span class="pre">my-new-container</span></tt>:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">StoredObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">);</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">returnedMetadata</span> <span class="o">=</span> <span class="n">object</span><span class="o">.</span><span class="na">getMetadata</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">name</span> <span class="o">:</span> <span class="n">returnedMetadata</span><span class="o">.</span><span class="na">keySet</span><span class="o">())</span> <span class="o">{</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;META / &quot;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s">&quot;: &quot;</span><span class="o">+</span><span class="n">returnedMetadata</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">name</span><span class="o">));</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieve-an-object">
+<h2>Retrieve an Object<a class="headerlink" href="#retrieve-an-object" title="Permalink to this headline">¶</a></h2>
+<p>This downloads the object <tt class="docutils literal"><span class="pre">foo.txt</span></tt> in the container <tt class="docutils literal"><span class="pre">my-new-container</span></tt>
+and saves it in <tt class="docutils literal"><span class="pre">./outfile.txt</span></tt>:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">StoredObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">);</span>
+<span class="n">object</span><span class="o">.</span><span class="na">downloadObject</span><span class="o">(</span><span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">&quot;outfile.txt&quot;</span><span class="o">));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-an-object">
+<h2>Delete an Object<a class="headerlink" href="#delete-an-object" title="Permalink to this headline">¶</a></h2>
+<p>This deletes the object <tt class="docutils literal"><span class="pre">goodbye.txt</span></tt> in the container &#8220;my-new-container&#8221;:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">StoredObject</span> <span class="n">object</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="na">getObject</span><span class="o">(</span><span class="s">&quot;foo.txt&quot;</span><span class="o">);</span>
+<span class="n">object</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete-a-container">
+<h2>Delete a Container<a class="headerlink" href="#delete-a-container" title="Permalink to this headline">¶</a></h2>
+<p>This deletes a container named &#8220;my-new-container&#8221;:</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">Container</span> <span class="n">container</span> <span class="o">=</span> <span class="n">account</span><span class="o">.</span><span class="na">getContainer</span><span class="o">(</span><span class="s">&quot;my-new-container&quot;</span><span class="o">);</span>
+<span class="n">container</span><span class="o">.</span><span class="na">delete</span><span class="o">();</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The container must be empty! Otherwise it won&#8217;t work!</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../federated-config/">联盟配置（已废弃）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../s3/">S3 API</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">Swift API</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../#api">API</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../auth/">认证</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../serviceops/">服务操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../containerops/">容器操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objectops/">对象操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../tempurl/">临时 URL 操作</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../tutorial/">指导手册</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="">Java</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id1">配置</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">建立一个连接</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id3">创建一个容器</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-an-object">Create an Object</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#add-update-object-metadata">Add/Update Object Metadata</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#list-owned-containers">List Owned Containers</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#list-a-container-s-content">List a Container&#8217;s Content</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#retrieve-an-object-s-metadata">Retrieve an Object&#8217;s Metadata</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#retrieve-an-object">Retrieve an Object</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#delete-an-object">Delete an Object</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#delete-a-container">Delete a Container</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../python/">Python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../ruby/">Ruby</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">功能支持</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../upgrade_to_jewel/">升级到 Jewel 的早期版本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../python/" title="Python Swift 实例"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../tutorial/" title="Tutorial"
+             >previous</a> |</li>
+        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../../" >Ceph 对象网关</a> &raquo;</li>
+          <li><a href="../" >Ceph 对象网关 Swift API</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>

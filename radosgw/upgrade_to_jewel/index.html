@@ -1,0 +1,201 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>把 RGW 升级到 Jewel 版本 10.2.0 、 10.2.1 、 10.2.2 和 10.2.3 &mdash; Ceph Documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     'dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="Ceph Documentation" href="../../" />
+    <link rel="up" title="Ceph 对象网关" href="../" />
+    <link rel="next" title="故障排除" href="../troubleshooting/" />
+    <link rel="prev" title="Rados 网关的数据布局" href="../layout/" />
+    
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../troubleshooting/" title="故障排除"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../layout/" title="Rados 网关的数据布局"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" accesskey="U">Ceph 对象网关</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rgw-jewel-10-2-0-10-2-1-10-2-2-10-2-3">
+<h1>把 RGW 升级到 Jewel 版本 10.2.0 、 10.2.1 、 10.2.2 和 10.2.3<a class="headerlink" href="#rgw-jewel-10-2-0-10-2-1-10-2-2-10-2-3" title="Permalink to this headline">¶</a></h1>
+<p class="versionadded">
+<span class="versionmodified">New in version Jewel.</span></p>
+<p>把 <a class="reference internal" href="../../glossary/#term-34"><em class="xref std std-term">Ceph 对象网关</em></a>升级到 jewel 的早期版本（包括 10.2.3
+）会有问题，本文档给出了必要的恢复步骤。</p>
+<p><a class="reference internal" href="../../glossary/#term-34"><em class="xref std std-term">Ceph 对象网关</em></a>不支持多版本混合部署。</p>
+<div class="section" id="id1">
+<h2>备份旧配置文件<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>rados mkpool .rgw.root.backup
+rados cppool .rgw.root .rgw.root.backup</p>
+</div>
+<div class="section" id="rgw-region-root-pool">
+<h2><cite>rgw region root pool</cite> 选项不是默认值<a class="headerlink" href="#rgw-region-root-pool" title="Permalink to this headline">¶</a></h2>
+<p>如果已有的多站配置的 <tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">region</span> <span class="pre">root</span> <span class="pre">pool</span></tt> 选项不是默认值，那么新的存储池选项 <tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">zonegroup</span> <span class="pre">root</span> <span class="pre">pool</span></tt> 、
+<tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">period</span> <span class="pre">root</span> <span class="pre">pool</span></tt> 和 <tt class="docutils literal"><span class="pre">rgw</span> <span class="pre">realm</span> <span class="pre">root</span> <span class="pre">pool</span></tt> 也应该一并更改。</p>
+</div>
+<div class="section" id="fix-confgiuration-after-upgrade">
+<span id="id2"></span><h2>升级后更正配置<a class="headerlink" href="#fix-confgiuration-after-upgrade" title="Permalink to this headline">¶</a></h2>
+<p>停止集群内运行的所有 <a class="reference internal" href="../../glossary/#term-34"><em class="xref std std-term">Ceph 对象网关</em></a>。</p>
+<p>运行下面这些命令：</p>
+<div class="highlight-python"><pre>$ rados rmpool .rgw.root
+
+$ radosgw-admin zonegroup get --rgw-zonegroup=default | sed 's/"id":.*/"id": "default",/g' | sed 's/"master_zone.*/"master_zone":"default",/g' &gt; default-zg.json
+
+$ raodsgw-admin zone get --zone-id=default &gt; default-zone.json
+
+$ radosgw-admin realm create --rgw-realm=myrealm
+
+$ radosgw-admin zonegroup set --rgw-zonegroup=default --default &lt; default-zg.json
+
+$ radosgw-admin zone set --rgw-zone=default --default &lt; default-zone.json
+
+$ radosgw-admin period update --commit</pre>
+</div>
+<p>启动集群内的所有 <a class="reference internal" href="../../glossary/#term-34"><em class="xref std std-term">Ceph 对象网关</em></a>。</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../federated-config/">联盟配置（已废弃）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">升级到 Jewel 的早期版本</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">备份旧配置文件</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rgw-region-root-pool"><cite>rgw region root pool</cite> 选项不是默认值</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fix-confgiuration-after-upgrade">升级后更正配置</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../troubleshooting/" title="故障排除"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../layout/" title="Rados 网关的数据布局"
+             >previous</a> |</li>
+        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
+          <li><a href="../" >Ceph 对象网关</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    </div>
+  </body>
+</html>
