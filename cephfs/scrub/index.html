@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ceph 文件系统洗刷 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="FS volumes and subvolumes" href="../fs-volumes/" />
+    <link rel="prev" title="分布式文件系统之上的应用程序最佳实践" href="../app-best-practices/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../fs-volumes/" title="FS volumes and subvolumes"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../app-best-practices/" title="分布式文件系统之上的应用程序最佳实践"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 文件系统</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/cephfs/scrub.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="ceph">
+<span id="mds-scrub"></span><h1>Ceph 文件系统洗刷<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h1>
+<p>CephFS provides the cluster admin (operator) to check consistency of a file system
+via a set of scrub commands. Scrub can be classified into two parts:</p>
+<ol class="arabic simple">
+<li><p>Forward Scrub: In which the scrub operation starts at the root of the file system
+(or a sub directory) and looks at everything that can be touched in the hierarchy
+to ensure consistency.</p></li>
+<li><p>Backward Scrub: In which the scrub operation looks at every RADOS object in the
+file system pools and maps it back to the file system hierarchy.</p></li>
+</ol>
+<p>This document details commands to initiate and control forward scrub (referred as
+scrub thereafter).</p>
+<div class="section" id="id1">
+<h2>初始化文件系统洗刷<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>To start a scrub operation for a directory tree use the following command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span> <span class="n">scrub</span> <span class="n">start</span> <span class="o">/</span> <span class="n">recursive</span>
+<span class="p">{</span>
+    <span class="s2">&quot;return_code&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;scrub_tag&quot;</span><span class="p">:</span> <span class="s2">&quot;6f0d204c-6cfd-4300-9e02-73f382fd23c1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;asynchronous&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Recursive scrub is asynchronous (as hinted by <cite>mode</cite> in the output above). Scrub tag is
+a random string that can used to monitor the progress of the scrub operation (explained
+further in this document).</p>
+<p>Custom tag can also be specified when initiating the scrub operation. Custom tags get
+persisted in the metadata object for every inode in the file system tree that is being
+scrubbed.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span> <span class="n">scrub</span> <span class="n">start</span> <span class="o">/</span><span class="n">a</span><span class="o">/</span><span class="n">b</span><span class="o">/</span><span class="n">c</span> <span class="n">recursive</span> <span class="n">tag0</span>
+<span class="p">{</span>
+    <span class="s2">&quot;return_code&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;scrub_tag&quot;</span><span class="p">:</span> <span class="s2">&quot;tag0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;asynchronous&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monitor-ongoing-file-system-scrubs">
+<h2>Monitor (ongoing) File System Scrubs<a class="headerlink" href="#monitor-ongoing-file-system-scrubs" title="Permalink to this headline">¶</a></h2>
+<p>Status of ongoing scrubs can be monitored using in <cite>scrub status</cite> command. This commands
+lists out ongoing scrubs (identified by the tag) along with the path and options used to
+initiate the scrub.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span> <span class="n">scrub</span> <span class="n">status</span>
+<span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;scrub active (85 inodes in the stack)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scrubs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;6f0d204c-6cfd-4300-9e02-73f382fd23c1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="s2">&quot;recursive&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><cite>status</cite> shows the number of inodes that are scheduled to be scrubbed at any point in time,
+hence, can change on subsequent <cite>scrub status</cite> invocations. Also, a high level summary of
+scrub operation (which includes the operation state and paths on which scrub is triggered)
+gets displayed in <cite>ceph status</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">status</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+
+<span class="n">task</span> <span class="n">status</span><span class="p">:</span>
+  <span class="n">scrub</span> <span class="n">status</span><span class="p">:</span>
+      <span class="n">mds</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span> <span class="n">active</span> <span class="p">[</span><span class="n">paths</span><span class="p">:</span><span class="o">/</span><span class="p">]</span>
+
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="control-ongoing-file-system-scrubs">
+<h2>Control (ongoing) File System Scrubs<a class="headerlink" href="#control-ongoing-file-system-scrubs" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Pause: Pausing ongoing scrub operations results in no new or pending inodes being
+scrubbed after in-flight RADOS ops (for the inodes that are currently being scrubbed)
+finish.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span> <span class="n">scrub</span> <span class="n">pause</span>
+<span class="p">{</span>
+    <span class="s2">&quot;return_code&quot;</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><cite>scrub status</cite> after pausing reflects the paused state. At this point, initiating new scrub
+operations (via <cite>scrub start</cite>) would just queue the inode for scrub.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span> <span class="n">scrub</span> <span class="n">status</span>
+<span class="p">{</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;PAUSED (66 inodes in the stack)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scrubs&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;6f0d204c-6cfd-4300-9e02-73f382fd23c1&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="s2">&quot;recursive&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Resume: Resuming kick starts a paused scrub operation.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span><span class="o">.</span> <span class="n">scrub</span> <span class="n">resume</span>
+<span class="p">{</span>
+    <span class="s2">&quot;return_code&quot;</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Abort: Aborting ongoing scrub operations removes pending inodes from the scrub
+queue (thereby aborting the scrub) after in-flight RADOS ops (for the inodes that
+are currently being scrubbed) finish.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mds</span><span class="o">.</span><span class="n">a</span><span class="o">.</span> <span class="n">scrub</span> <span class="n">abort</span>
+<span class="p">{</span>
+    <span class="s2">&quot;return_code&quot;</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../add-remove-mds/">配备、增加、删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#id3">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds-standby-replay">热备的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/"> 创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/"> 挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/"> 把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fstab/"> 通过 fstab 挂载 CephFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-shell/"> CephFS Shell 的用法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel-features/"> 内核驱动支持的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/"> ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/"> mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.fuse.ceph/"> mount.fuse.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../administration/">CephFS 管理命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-size-limits/">深入理解 MDS 的缓存尺寸限制</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-states/">MDS 的各种状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#id4">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../file-layouts/">文件布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../eviction/">驱逐客户端</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../full/">文件系统占满的处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-messages/">健康消息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">升级 MDS 集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/#firefly-jewel">升级比 Firefly 老的文件系统，需过 Jewel 这个槛</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dirfrags/">目录分片的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multimds/">多活 MDS 的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../app-best-practices/">应用最佳实践</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">洗刷</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">初始化文件系统洗刷</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#monitor-ongoing-file-system-scrubs">Monitor (ongoing) File System Scrubs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#control-ongoing-file-system-scrubs">Control (ongoing) File System Scrubs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../fs-volumes/">FS 卷和子卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">元数据修复</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../#id2">开发者指南</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../fs-volumes/" title="FS volumes and subvolumes"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../app-best-practices/" title="分布式文件系统之上的应用程序最佳实践"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 文件系统</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

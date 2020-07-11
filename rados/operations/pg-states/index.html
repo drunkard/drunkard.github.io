@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>归置组状态 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>归置组状态 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="归置组" href="../placement-groups/" />
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="归置组术语解释" href="../pg-concepts/" />
-    <link rel="prev" title="归置组" href="../placement-groups/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="归置组" href="../placement-groups/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -48,67 +36,112 @@
         <li class="right" >
           <a href="../placement-groups/" title="归置组"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" >集群运维</a> &raquo;</li>
-          <li><a href="../placement-groups/" accesskey="U">归置组</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../placement-groups/" accesskey="U">归置组</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/operations/pg-states.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>归置组状态<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<p>检查集群状态时（如运行 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">-s</span></tt> 或 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">-w</span></tt> ）， Ceph 会报告归置组状态。一个归置组有一到多种状态，其最优状态为
-<tt class="docutils literal"><span class="pre">active+clean</span></tt> 。</p>
-<dl class="docutils">
-<dt><em>Creating</em></dt>
-<dd>Ceph 仍在创建归置组。</dd>
-<dt><em>Active</em></dt>
-<dd>Ceph 可处理到归置组的请求。</dd>
-<dt><em>Clean</em></dt>
-<dd>Ceph 把归置组内的对象复制了规定次数。</dd>
-<dt><em>Down</em></dt>
-<dd>包含必备数据的副本挂了，所以归置组离线。</dd>
-<dt><em>Scrubbing</em></dt>
-<dd>Ceph 正在检查归置组的一致性。</dd>
-<dt><em>Degraded</em></dt>
-<dd>归置组内的对象还没复制到规定次数。</dd>
-<dt><em>Inconsistent</em></dt>
-<dd>Ceph 检测到了归置组内某一对象的一或多个副本间不一致（如各对象大小不一、恢复后对象还没复制到副本那里、等等）。</dd>
-<dt><em>Peering</em></dt>
-<dd>归置组正在互联。</dd>
-<dt><em>Repair</em></dt>
-<dd>Ceph 正在检查归置组、并试图修复发现的不一致（如果可能的话）。</dd>
-<dt><em>Recovering</em></dt>
-<dd>Ceph 正在迁移/同步对象及其副本。</dd>
-<dt><em>Backfill</em></dt>
-<dd>Ceph 正在扫描并同步整个归置组的内容，而不是根据日志推算哪些最新操作需要同步。 <em>Backfill</em> 是恢复的一种特殊情况。</dd>
-<dt><em>Wait-backfill</em></dt>
-<dd>归置组正在排队，等候回填。</dd>
-<dt><em>Backfill-toofull</em></dt>
-<dd>一回填操作在等待，因为目标 OSD 使用率超过了占满率。</dd>
-<dt><em>Incomplete</em></dt>
-<dd>Ceph 探测到某一归置组丢失了写入信息，或者没有健康的副本。如果你遇到了这个状态，试着启动一下可能包含所需信息的失败 OSD 。如果是纠删码存储池，临时降低 min_size 也许能完成恢复。</dd>
-<dt><em>Stale</em></dt>
-<dd>归置组处于一种未知状态——归置组运行图变更后就没再收到它的更新。</dd>
-<dt><em>Remapped</em></dt>
-<dd>归置组被临时映射到了另外一组 OSD ，它们不是 CRUSH 算法指定的。</dd>
-<dt><em>Undersized</em></dt>
-<dd>此归置组的副本数小于配置的存储池副本水平。</dd>
-<dt><em>Peered</em></dt>
-<dd>此归置组已互联，但是不能向客户端提供服务，因为其副本数没达到本存储池的配置值（ min_size 参数）。在此状态下可以进行恢复，所以此归置组最终能达到 min_size 。</dd>
+<p>检查集群状态时（如运行 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">-s</span></code> 或 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">-w</span></code> ）， Ceph 会报告归置组状态。一个归置组有一到多种状态，其最优状态为
+<code class="docutils literal notranslate"><span class="pre">active+clean</span></code> 。</p>
+<dl class="simple">
+<dt><em>creating</em></dt><dd><p>Ceph 仍在创建归置组。</p>
+</dd>
+<dt><em>activating</em></dt><dd><p>归置组互联好了，但还没活跃起来。</p>
+</dd>
+<dt><em>active</em></dt><dd><p>Ceph 可处理到归置组的请求。</p>
+</dd>
+<dt><em>clean</em></dt><dd><p>Ceph 把归置组内的对象复制了规定次数。</p>
+</dd>
+<dt><em>down</em></dt><dd><p>包含必备数据的副本挂了，所以归置组离线。</p>
+</dd>
+<dt><em>laggy</em></dt><dd><p>一个副本没有及时确认主 PG 签发的新租期， IO 临时停顿了。</p>
+</dd>
+<dt><em>wait</em></dt><dd><p>负责此 PG 的 OSD 集合刚刚变更了、而且在前一个租期间隔过期前
+IO 临时停顿了，</p>
+</dd>
+<dt><em>scrubbing</em></dt><dd><p>Ceph 正在检查归置组元数据，看是否有不一致的地方。</p>
+</dd>
+<dt><em>deep</em></dt><dd><p>Ceph 正在检查比对归置组数据与存储的校验和。</p>
+</dd>
+<dt><em>degraded</em></dt><dd><p>归置组内的对象还没复制到规定次数。</p>
+</dd>
+<dt><em>inconsistent</em></dt><dd><p>Ceph 检测到了归置组内某一对象的一或多个副本间不一致（如各对象大小不一、恢复后对象还没复制到副本那里、等等）。</p>
+</dd>
+<dt><em>peering</em></dt><dd><p>归置组正在互联。</p>
+</dd>
+<dt><em>repair</em></dt><dd><p>Ceph 正在检查归置组、并试图修复发现的不一致（如果可能的话）。</p>
+</dd>
+<dt><em>recovering</em></dt><dd><p>Ceph 正在迁移/同步对象及其副本。</p>
+</dd>
+<dt><em>forced_recovery</em></dt><dd><p>用户人为提高了那个 PG 的恢复优先级。</p>
+</dd>
+<dt><em>recovery_wait</em></dt><dd><p>此归置组正排队等着启动恢复。</p>
+</dd>
+<dt><em>recovery_toofull</em></dt><dd><p>一个恢复操作正在等待，因为目标 OSD 超过了它的占满率。</p>
+</dd>
+<dt><em>recovery_unfound</em></dt><dd><p>由于有找不到的对象，恢复已停止。</p>
+</dd>
+<dt><em>backfilling</em></dt><dd><p>Ceph 正在扫描并同步整个归置组的内容，而不是根据日志推算哪些最新操作需要同步。 <em>Backfill</em> 是恢复的一种特殊情况。</p>
+</dd>
+<dt><em>forced_backfill</em></dt><dd><p>用户人为提高了那个 PG 的回填优先级。</p>
+</dd>
+<dt><em>backfill_wait</em></dt><dd><p>归置组正在排队，等候回填。</p>
+</dd>
+<dt><em>backfill_toofull</em></dt><dd><p>一回填操作在等待，因为目标 OSD 使用率超过了占满率。</p>
+</dd>
+<dt><em>backfill_unfound</em></dt><dd><p>由于有找不到的对象，回填已停止。</p>
+</dd>
+<dt><em>incomplete</em></dt><dd><p>Ceph 探测到某一归置组丢失了写入信息，或者没有健康的副本。如果你遇到了这个状态，试着启动一下可能包含所需信息的失败 OSD 。如果是纠删码存储池，临时降低 min_size 也许能完成恢复。</p>
+</dd>
+<dt><em>stale</em></dt><dd><p>归置组处于一种未知状态——归置组运行图变更后就没再收到它的更新。</p>
+</dd>
+<dt><em>remapped</em></dt><dd><p>归置组被临时映射到了另外一组 OSD ，它们不是 CRUSH 算法指定的。</p>
+</dd>
+<dt><em>undersized</em></dt><dd><p>此归置组的副本数小于配置的存储池副本水平。</p>
+</dd>
+<dt><em>peered</em></dt><dd><p>此归置组已互联，但是不能向客户端提供服务，因为其副本数没达到本存储池的配置值（ min_size 参数）。在此状态下可以进行恢复，所以此归置组最终能达到 min_size 。</p>
+</dd>
+<dt><em>snaptrim</em></dt><dd><p>正在修剪快照。</p>
+</dd>
+<dt><em>snaptrim_wait</em></dt><dd><p>在队列里等着修剪快照。</p>
+</dd>
+<dt><em>snaptrim_error</em></dt><dd><p>修剪快照时遇挫，已停止。</p>
+</dd>
+<dt><em>unknown</em></dt><dd><p>自从 mgr 启动以来， ceph-mgr 还没从 OSD 收到有关此 PG 状态的任何信息。</p>
+</dd>
 </dl>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -116,42 +149,51 @@
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-checks/">健康检查</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg-repair/">修复 PG 不一致状态</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../placement-groups/">归置组</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#pg-autoscaler">自伸缩归置组</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../placement-groups/#pg-num">预定义 pg_num</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id2">归置组是如何使用的？</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id6">归置组是如何使用的？</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../placement-groups/#placement-groups-tradeoffs">Placement Groups Tradeoffs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id5">确定归置组数量</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#choosing-number-of-placement-groups">确定归置组数量</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../placement-groups/#setting-the-number-of-placement-groups">设置归置组数量</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id7">获取归置组数量</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id8">获取归置组统计信息</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id9">获取卡住的归置组统计信息</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id10">获取一归置组运行图</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#pg">获取一 PG 的统计信息</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id11">洗刷归置组</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="../placement-groups/#id12">恢复丢失的</a><ul class="current">
-<li class="toctree-l5 current"><a class="current reference internal" href="">归置组状态</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id11">获取归置组数量</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id12">获取归置组统计信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id13">获取卡住的归置组统计信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id14">获取一归置组运行图</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id15">获取一 PG 的统计信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id16">洗刷归置组</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../placement-groups/#id17">改变归置组的回填/恢复优先级</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../placement-groups/#id18">恢复丢失的</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">归置组状态</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../pg-concepts/">归置组术语解释</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../balancer/">均衡器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upmap/">使用 pg-upmap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map-edits/">手动编辑一个 CRUSH 图</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devices/">设备管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-migration/">迁移到 BlueStore</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
@@ -168,40 +210,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -216,14 +259,14 @@
         <li class="right" >
           <a href="../placement-groups/" title="归置组"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" >集群运维</a> &raquo;</li>
-          <li><a href="../placement-groups/" >归置组</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../placement-groups/" >归置组</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

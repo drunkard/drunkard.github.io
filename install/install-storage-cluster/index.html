@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>安装 Ceph 存储集群 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>安装 Ceph 存储集群 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="安装（手动）" href="../" />
-    <link rel="next" title="安装 Ceph 对象网关" href="../install-ceph-gateway/" />
-    <link rel="prev" title="安装 ceph-deploy" href="../install-ceph-deploy/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="为块设备安装虚拟化支持" href="../install-vm-cloud/" />
+    <link rel="prev" title="安装 ceph-deploy" href="../install-ceph-deploy/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,52 +31,69 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../install-ceph-gateway/" title="安装 Ceph 对象网关"
+          <a href="../install-vm-cloud/" title="为块设备安装虚拟化支持"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../install-ceph-deploy/" title="安装 ceph-deploy"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">安装（手动）</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >安装 Ceph</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_manual/" accesskey="U">安装（手动）</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/install/install-storage-cluster.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="ceph">
 <h1>安装 Ceph 存储集群<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h1>
-<p>本指南说明了如何手动安装 Ceph 软件包，此方法只适用于那些没采用部署工具（如 <tt class="docutils literal"><span class="pre">ceph-deploy</span></tt> 、 <tt class="docutils literal"><span class="pre">chef</span></tt> 、 <tt class="docutils literal"><span class="pre">juju</span></tt> 等）的用户。</p>
+<p>本指南说明了如何手动安装 Ceph 软件包，此方法只适用于那些没采用部署工具（如 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 、 <code class="docutils literal notranslate"><span class="pre">chef</span></code> 、 <code class="docutils literal notranslate"><span class="pre">juju</span></code> 等）的用户。</p>
 <div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p class="last">你也可以用 <tt class="docutils literal"><span class="pre">ceph-deploy</span></tt> 安装 Ceph 软件包，也许它更方便，因为只需一个命令就可以把 <tt class="docutils literal"><span class="pre">ceph</span></tt> 安装到多台主机。</p>
+<p class="admonition-title">Tip</p>
+<p>你也可以用 <code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 安装 Ceph 软件包，也许它更方便，因为只需一个命令就可以把 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 安装到多台主机。</p>
 </div>
 <div class="section" id="apt">
 <h2>用 APT 安装<a class="headerlink" href="#apt" title="Permalink to this headline">¶</a></h2>
 <p>只要把正式版或开发版软件包源加入了 APT ，你就可以更新 APT 数据库并安装 Ceph 了：</p>
-<div class="highlight-python"><pre>sudo apt-get update &amp;&amp; sudo apt-get install ceph ceph-mds</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ceph</span> <span class="n">ceph</span><span class="o">-</span><span class="n">mds</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="rpm">
 <h2>用 RPM 安装<a class="headerlink" href="#rpm" title="Permalink to this headline">¶</a></h2>
 <p>要用 RPM 安装 Ceph ，可按如下步骤进行：</p>
 <ol class="arabic">
-<li><p class="first">安装 <tt class="docutils literal"><span class="pre">yum-plugin-priorities</span></tt> 。</p>
-<div class="highlight-python"><pre>sudo yum install yum-plugin-priorities</pre>
+<li><p>安装 <code class="docutils literal notranslate"><span class="pre">yum-plugin-priorities</span></code> 。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">yum</span><span class="o">-</span><span class="n">plugin</span><span class="o">-</span><span class="n">priorities</span>
+</pre></div>
 </div>
 </li>
-<li><p class="first">确认 <tt class="docutils literal"><span class="pre">/etc/yum/pluginconf.d/priorities.conf</span></tt> 文件存在。</p>
-</li>
-<li><p class="first">确认 <tt class="docutils literal"><span class="pre">priorities.conf</span></tt> 里面打开了插件支持。</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">main</span><span class="p">]</span>
+<li><p>确认 <code class="docutils literal notranslate"><span class="pre">/etc/yum/pluginconf.d/priorities.conf</span></code> 文件存在。</p></li>
+<li><p>确认 <code class="docutils literal notranslate"><span class="pre">priorities.conf</span></code> 里面打开了插件支持。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">main</span><span class="p">]</span>
 <span class="n">enabled</span> <span class="o">=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 </li>
-<li><p class="first">确认你的 YUM <tt class="docutils literal"><span class="pre">ceph.repo</span></tt> 库文件条目包含 <tt class="docutils literal"><span class="pre">priority=2</span></tt> ，详情见<a class="reference external" href="../get-packages">获取软件包</a>：</p>
-<div class="highlight-python"><pre>[ceph]
+<li><p>确认你的 YUM <code class="docutils literal notranslate"><span class="pre">ceph.repo</span></code> 库文件条目包含 <code class="docutils literal notranslate"><span class="pre">priority=2</span></code> ，详情见<a class="reference external" href="../get-packages">获取软件包</a>：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>[ceph]
 name=Ceph packages for $basearch
 baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/$basearch
 enabled=1
@@ -110,32 +115,37 @@ baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/SRPMS
 enabled=0
 priority=2
 gpgcheck=1
-gpgkey=https://download.ceph.com/keys/release.asc</pre>
+gpgkey=https://download.ceph.com/keys/release.asc
+</pre></div>
 </div>
 </li>
-<li><p class="first">安装依赖的的软件包：</p>
-<div class="highlight-python"><pre>sudo yum install snappy leveldb gdisk python-argparse gperftools-libs</pre>
+<li><p>安装依赖的的软件包：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">snappy</span> <span class="n">leveldb</span> <span class="n">gdisk</span> <span class="n">python</span><span class="o">-</span><span class="n">argparse</span> <span class="n">gperftools</span><span class="o">-</span><span class="n">libs</span>
+</pre></div>
 </div>
 </li>
 </ol>
-<p>成功添加正式版或开发版软件包的库文件之后，或把 <tt class="docutils literal"><span class="pre">ceph.repo</span></tt> 文件放入 <tt class="docutils literal"><span class="pre">/etc/yum.repos.d</span></tt> 之后，你就可以安装 Ceph 软件包了。</p>
-<div class="highlight-python"><pre>sudo yum install ceph</pre>
+<p>成功添加正式版或开发版软件包的库文件之后，或把 <code class="docutils literal notranslate"><span class="pre">ceph.repo</span></code> 文件放入 <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d</span></code> 之后，你就可以安装 Ceph 软件包了。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">ceph</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id1">
 <h2>从源码安装<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>如果你是从源码构建的 Ceph ，可以用下面的命令安装到用户区：</p>
-<div class="highlight-python"><pre>sudo make install</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">make</span> <span class="n">install</span>
+</pre></div>
 </div>
-<p>如果你是本地安装的， <tt class="docutils literal"><span class="pre">make</span></tt> 会把可执行文件放到 <tt class="docutils literal"><span class="pre">usr/local/bin</span></tt> 里面。你可以把 Ceph 配置文件放到 <tt class="docutils literal"><span class="pre">usr/local/bin</span></tt> 目录下，这样就能从这个目录运行 Ceph 了。</p>
+<p>如果你是本地安装的， <code class="docutils literal notranslate"><span class="pre">make</span></code> 会把可执行文件放到 <code class="docutils literal notranslate"><span class="pre">usr/local/bin</span></code> 里面。你可以把 Ceph 配置文件放到 <code class="docutils literal notranslate"><span class="pre">usr/local/bin</span></code> 目录下，这样就能从这个目录运行 Ceph 了。</p>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -143,61 +153,69 @@ gpgkey=https://download.ceph.com/keys/release.asc</pre>
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../">安装（手动）</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../#id2">获取软件</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../#id3">安装软件</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../install-ceph-deploy/">     安装 ceph-deploy</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">     安装 Ceph 存储集群</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#apt">用 APT 安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#rpm">用 RPM 安装</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">从源码安装</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">安装 Ceph</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../#id1">建议的方法</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../#id2">其他方法</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index_manual/">安装（手动）</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id2">获取软件</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index_manual/#id3">安装软件</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../install-ceph-deploy/">     安装 ceph-deploy</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">     安装 Ceph 存储集群</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#apt">用 APT 安装</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#rpm">用 RPM 安装</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id1">从源码安装</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../install-ceph-gateway/">     安装 Ceph 对象网关</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../install-vm-cloud/">     作为虚拟化的块设备</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../install-vm-cloud/">     Install Virtualization for Block</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../#id4">手动部署集群</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../#id5">升级软件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id4">手动部署一套集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id5">升级软件</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">安装 (ceph-deploy)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -207,17 +225,18 @@ gpgkey=https://download.ceph.com/keys/release.asc</pre>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../install-ceph-gateway/" title="安装 Ceph 对象网关"
+          <a href="../install-vm-cloud/" title="为块设备安装虚拟化支持"
              >next</a> |</li>
         <li class="right" >
           <a href="../install-ceph-deploy/" title="安装 ceph-deploy"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >安装（手动）</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >安装 Ceph</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_manual/" >安装（手动）</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

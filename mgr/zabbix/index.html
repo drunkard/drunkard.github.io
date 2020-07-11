@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zabbix 插件 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Prometheus 模块" href="../prometheus/" />
+    <link rel="prev" title="rest 风格的模块" href="../restful/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../prometheus/" title="Prometheus 模块"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../restful/" title="rest 风格的模块"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 管理器守护进程</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/mgr/zabbix.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="zabbix">
+<h1>Zabbix 插件<a class="headerlink" href="#zabbix" title="Permalink to this headline">¶</a></h1>
+<p>Zabbix 插件可向 Zabbix 服务器持续发送信息，像这些：</p>
+<ul class="simple">
+<li><p>Ceph 状态</p></li>
+<li><p>I/O 操作</p></li>
+<li><p>I/O 带宽</p></li>
+<li><p>OSD 状态</p></li>
+<li><p>存储空间利用率</p></li>
+</ul>
+<div class="section" id="id1">
+<h2>必需条件<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>此插件要求 <em>zabbix_sender</em> 可执行文件在<em>所有</em>运行 ceph-mgr
+的主机上都存在。大多数发行版都可以用软件包管理器安装它。</p>
+<div class="section" id="id2">
+<h3>依赖<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>在 Ubuntu 或 CentOS 上安装 zabbix_sender 可以用 apt 或 dnf
+命令。</p>
+<p>在 Ubuntu Xenial上：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">install</span> <span class="n">zabbix</span><span class="o">-</span><span class="n">agent</span>
+</pre></div>
+</div>
+<p>在 Fedora 上：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dnf</span> <span class="n">install</span> <span class="n">zabbix</span><span class="o">-</span><span class="n">sender</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>如何启用<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>你可以用以下命令启用 <em>zabbix</em> 模块：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">enable</span> <span class="n">zabbix</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>配置<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>有两个配置选项对于模块是否能运行至关重要：</p>
+<ul class="simple">
+<li><p>zabbix_host</p></li>
+<li><p>identifier （可选项）</p></li>
+</ul>
+<p>The parameter <em>zabbix_host</em> controls the hostname of the Zabbix server to which
+<em>zabbix_sender</em> will send the items. This can be a IP-Address if required by
+your installation.</p>
+<p>The <em>identifier</em> parameter controls the identifier/hostname to use as source
+when sending items to Zabbix. This should match the name of the <em>Host</em> in
+your Zabbix server.</p>
+<p>When the <em>identifier</em> parameter is not configured the ceph-&lt;fsid&gt; of the cluster
+will be used when sending data to Zabbix.</p>
+<p>This would for example be <em>ceph-c4d32a99-9e80-490f-bd3a-1d22d8a7d354</em></p>
+<p>Additional configuration keys which can be configured and their default values:</p>
+<ul class="simple">
+<li><p>zabbix_port: 10051</p></li>
+<li><p>zabbix_sender: /usr/bin/zabbix_sender</p></li>
+<li><p>interval: 60</p></li>
+<li><p>discovery_interval: 100</p></li>
+</ul>
+<div class="section" id="id5">
+<h3>配置键<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>可以在任何有合适 cephx 凭据的主机上配置键，通常是在持有
+<em>client.admin</em> 密钥的监视器主机上。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">config</span><span class="o">-</span><span class="nb">set</span> <span class="o">&lt;</span><span class="n">key</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">config</span><span class="o">-</span><span class="nb">set</span> <span class="n">zabbix_host</span> <span class="n">zabbix</span><span class="o">.</span><span class="n">localdomain</span>
+<span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">config</span><span class="o">-</span><span class="nb">set</span> <span class="n">identifier</span> <span class="n">ceph</span><span class="o">.</span><span class="n">eu</span><span class="o">-</span><span class="n">ams02</span><span class="o">.</span><span class="n">local</span>
+</pre></div>
+</div>
+<p>此模块的当前配置可以这样查看：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">config</span><span class="o">-</span><span class="n">show</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>模板<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference external" href="https://raw.githubusercontent.com/ceph/ceph/9c54334b615362e0a60442c2f41849ed630598ab/src/pybind/mgr/zabbix/zabbix_template.xml">template</a>.
+(XML) to be used on the Zabbix server can be found in the source directory of the plugin.</p>
+<p>This template contains all items and a few triggers. You can customize the triggers afterwards to fit your needs.</p>
+</div>
+<div class="section" id="id7">
+<h3>多个 Zabbix 服务器<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to instruct zabbix module to send data to multiple Zabbix servers.</p>
+<p>Parameter <em>zabbix_host</em> can be set with multiple hostnames separated by commas.
+Hosnames (or IP adderesses) can be followed by colon and port number. If a port
+number is not present module will use the port number defined in <em>zabbix_port</em>.</p>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">config</span><span class="o">-</span><span class="nb">set</span> <span class="n">zabbix_host</span> <span class="s2">&quot;zabbix1,zabbix2:2222,zabbix3:3333&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>手动发送数据<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>如有必要，此模块可以立即发送数据，无须间隔时间。</p>
+<p>用如下命令即可：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">send</span>
+</pre></div>
+</div>
+<p>此模块就会立即把它的最新数据发送给 Zabbix 服务器。</p>
+<p>Items discovery is accomplished also via zabbix_sender, and runs every <cite>discovery_interval * interval</cite> seconds. If you wish to launch discovery
+manually, this can be done with this command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">zabbix</span> <span class="n">discovery</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>调试<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>你要是想调试 Zabbix 模块，增大 ceph-mgr 的日志记录级别、并检查日志即可。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mgr</span><span class="p">]</span>
+    <span class="n">debug</span> <span class="n">mgr</span> <span class="o">=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+<p>With logging set to debug for the manager the plugin will print various logging
+lines prefixed with <em>mgr[zabbix]</em> for easy filtering.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 管理器守护进程</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../administrator/">安装和配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/">模块编程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator_modules/">编写 orchestrator 插件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dashboard/">仪表盘模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../alerts/">Alerts 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../diskprediction/">DiskPrediction 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../localpool/">localpool 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../restful/">REST 风格模块</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Zabbix 模块</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">必需条件</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">依赖</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">如何启用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">配置</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">配置键</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">模板</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">多个 Zabbix 服务器</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">手动发送数据</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">调试</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../prometheus/">Prometheus 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../influx/">Influx 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hello/">Hello 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telegraf/">Telegraf 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telemetry/">Telemetry 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iostat/">Iostat 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_support/">OSD Support 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crash/">Crash 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../insights/">Insights 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator/">Orchestrator 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rook/">Rook 模块</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../prometheus/" title="Prometheus 模块"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../restful/" title="rest 风格的模块"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 管理器守护进程</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

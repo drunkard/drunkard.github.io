@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>云同步模块 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="PubSub 同步模块" href="../pubsub-module/" />
+    <link rel="prev" title="ElasticSearch 同步模块" href="../elastic-sync-module/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../pubsub-module/" title="PubSub 同步模块"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../elastic-sync-module/" title="ElasticSearch 同步模块"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 对象网关</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../sync-modules/" accesskey="U">同步模块</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/radosgw/cloud-sync-module.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="id1">
+<h1>云同步模块<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version Mimic.</span></p>
+</div>
+<p>This module syncs zone data to a remote cloud service. The sync is unidirectional; data is not synced back from the
+remote zone. The goal of this module is to enable syncing data to multiple cloud providers. The currently supported
+cloud providers are those that are compatible with AWS (S3).</p>
+<p>User credentials for the remote cloud object store service need to be configured. Since many cloud services impose limits
+on the number of buckets that each user can create, the mapping of source objects and buckets is configurable.
+It is possible to configure different targets to different buckets and bucket prefixes. Note that source ACLs will not
+be preserved. It is possible to map permissions of specific source users to specific destination users.</p>
+<p>Due to API limitations there is no way to preserve original object modification time and ETag. The cloud sync module
+stores these as metadata attributes on the destination objects.</p>
+<div class="section" id="cloud-sync-tier-type-configuration">
+<h2>Cloud Sync Tier Type Configuration<a class="headerlink" href="#cloud-sync-tier-type-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="trivial-configuration">
+<h3>Trivial Configuration:<a class="headerlink" href="#trivial-configuration" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;connection&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;access_key&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">access</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;secret&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">secret</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">endpoint</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="s2">&quot;host_style&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">path</span> <span class="o">|</span> <span class="n">virtual</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;acls&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="p">{</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span> <span class="o">|</span> <span class="n">email</span> <span class="o">|</span> <span class="n">uri</span><span class="o">&gt;</span><span class="p">,</span>
+              <span class="s2">&quot;source_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">source_id</span><span class="o">&gt;</span><span class="p">,</span>
+              <span class="s2">&quot;dest_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">dest_id</span><span class="o">&gt;</span> <span class="p">}</span> <span class="o">...</span> <span class="p">],</span>
+  <span class="s2">&quot;target_path&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">target_path</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="non-trivial-configuration">
+<h3>Non Trivial Configuration:<a class="headerlink" href="#non-trivial-configuration" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;connection&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;access_key&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">access</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;secret&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">secret</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">endpoint</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;host_style&quot;</span> <span class="o">&lt;</span><span class="n">path</span> <span class="o">|</span> <span class="n">virtual</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;acls&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;type&quot;</span> <span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span> <span class="o">|</span> <span class="n">email</span> <span class="o">|</span> <span class="n">uri</span><span class="o">&gt;</span><span class="p">,</span>   <span class="c1">#  optional, default is id</span>
+      <span class="s2">&quot;source_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span>
+      <span class="s2">&quot;dest_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span>
+    <span class="p">}</span> <span class="o">...</span> <span class="p">]</span>
+    <span class="s2">&quot;target_path&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span> <span class="c1"># optional</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;connections&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;connection_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;access_key&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">access</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;secret&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">secret</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;endpoint&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">endpoint</span><span class="o">&gt;</span><span class="p">,</span>
+        <span class="s2">&quot;host_style&quot;</span> <span class="o">&lt;</span><span class="n">path</span> <span class="o">|</span> <span class="n">virtual</span><span class="o">&gt;</span><span class="p">,</span>  <span class="c1"># optional</span>
+      <span class="p">}</span> <span class="o">...</span> <span class="p">],</span>
+  <span class="s2">&quot;acl_profiles&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+        <span class="s2">&quot;acls_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span> <span class="c1"># acl mappings</span>
+        <span class="s2">&quot;acls&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span> <span class="o">|</span> <span class="n">email</span> <span class="o">|</span> <span class="n">uri</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;source_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">id</span><span class="o">&gt;</span>
+          <span class="p">}</span> <span class="o">...</span> <span class="p">]</span>
+      <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="s2">&quot;profiles&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span>
+       <span class="s2">&quot;source_bucket&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span><span class="p">,</span>
+       <span class="s2">&quot;connection_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">connection_id</span><span class="o">&gt;</span><span class="p">,</span>
+       <span class="s2">&quot;acls_id&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">mappings_id</span><span class="o">&gt;</span><span class="p">,</span>
+       <span class="s2">&quot;target_path&quot;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">dest</span><span class="o">&gt;</span><span class="p">,</span>          <span class="c1"># optional</span>
+      <span class="p">}</span> <span class="o">...</span> <span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Trivial configuration can coincide with the non-trivial one.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">connection</span></code> (container)</p></li>
+</ul>
+<p>Represents a connection to the remote cloud service. Contains <code class="docutils literal notranslate"><span class="pre">conection_id`,</span> <span class="pre">``access_key</span></code>,
+<code class="docutils literal notranslate"><span class="pre">secret</span></code>, <code class="docutils literal notranslate"><span class="pre">endpoint</span></code>, and <code class="docutils literal notranslate"><span class="pre">host_style</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">access_key</span></code> (string)</p></li>
+</ul>
+<p>The remote cloud access key that will be used for a specific connection.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">secret</span></code> (string)</p></li>
+</ul>
+<p>The secret key for the remote cloud service.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">endpoint</span></code> (string)</p></li>
+</ul>
+<p>URL of remote cloud service endpoint.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">host_style</span></code> (path | virtual)</p></li>
+</ul>
+<p>Type of host style to be used when accessing remote cloud endpoint (default: <code class="docutils literal notranslate"><span class="pre">path</span></code>).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acls</span></code> (array)</p></li>
+</ul>
+<p>Contains a list of <code class="docutils literal notranslate"><span class="pre">acl_mappings</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acl_mapping</span></code> (container)</p></li>
+</ul>
+<p>Each <code class="docutils literal notranslate"><span class="pre">acl_mapping</span></code> structure contains <code class="docutils literal notranslate"><span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">source_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">dest_id</span></code>. These
+will define the ACL mutation that will be done on each object. An ACL mutation allows converting source
+user id to a destination id.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code> (id | email | uri)</p></li>
+</ul>
+<p>ACL type: <code class="docutils literal notranslate"><span class="pre">id</span></code> defines user id, <code class="docutils literal notranslate"><span class="pre">email</span></code> defines user by email, and <code class="docutils literal notranslate"><span class="pre">uri</span></code> defines user by <code class="docutils literal notranslate"><span class="pre">uri</span></code> (group).</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">source_id</span></code> (string)</p></li>
+</ul>
+<p>ID of user in the source zone.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dest_id</span></code> (string)</p></li>
+</ul>
+<p>ID of user in the destination.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">target_path</span></code> (string)</p></li>
+</ul>
+<p>A string that defines how the target path is created. The target path specifies a prefix to which
+the source object name is appended. The target path configurable can include any of the following
+variables:
+- <code class="docutils literal notranslate"><span class="pre">sid</span></code>: unique string that represents the sync instance ID
+- <code class="docutils literal notranslate"><span class="pre">zonegroup</span></code>: the zonegroup name
+- <code class="docutils literal notranslate"><span class="pre">zonegroup_id</span></code>: the zonegroup ID
+- <code class="docutils literal notranslate"><span class="pre">zone</span></code>: the zone name
+- <code class="docutils literal notranslate"><span class="pre">zone_id</span></code>: the zone id
+- <code class="docutils literal notranslate"><span class="pre">bucket</span></code>: source bucket name
+- <code class="docutils literal notranslate"><span class="pre">owner</span></code>: source bucket owner ID</p>
+<p>For example: <code class="docutils literal notranslate"><span class="pre">target_path</span> <span class="pre">=</span> <span class="pre">rgwx-${zone}-${sid}/${owner}/${bucket}</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acl_profiles</span></code> (array)</p></li>
+</ul>
+<p>An array of of <code class="docutils literal notranslate"><span class="pre">acl_profile</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">acl_profile</span></code> (container)</p></li>
+</ul>
+<p>Each profile contains <code class="docutils literal notranslate"><span class="pre">acls_id</span></code> (string) that represents the profile, and <code class="docutils literal notranslate"><span class="pre">acls</span></code> array that
+holds a list of <code class="docutils literal notranslate"><span class="pre">acl_mappings</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">profiles</span></code> (array)</p></li>
+</ul>
+<p>A list of profiles. Each profile contains the following:
+- <code class="docutils literal notranslate"><span class="pre">source_bucket</span></code>: either a bucket name, or a bucket prefix (if ends with <code class="docutils literal notranslate"><span class="pre">*</span></code>) that defines the source bucket(s) for this profile
+- <code class="docutils literal notranslate"><span class="pre">target_path</span></code>: as defined above
+- <code class="docutils literal notranslate"><span class="pre">connection_id</span></code>: ID of the connection that will be used for this profile
+- <code class="docutils literal notranslate"><span class="pre">acls_id</span></code>: ID of ACLs profile that will be used for this profile</p>
+</div>
+<div class="section" id="s3">
+<h3>S3 特有的可配置项<a class="headerlink" href="#s3" title="Permalink to this headline">¶</a></h3>
+<p>Currently cloud sync will only work with backends that are compatible with AWS S3. There are
+a few configurables that can be used to tweak its behavior when accessing these cloud services:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;multipart_sync_threshold&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">object_size</span><span class="p">},</span>
+  <span class="s2">&quot;multipart_min_part_size&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">part_size</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">multipart_sync_threshold</span></code> (integer)</p></li>
+</ul>
+<p>Objects this size or larger will be synced to the cloud using multipart upload.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">multipart_min_part_size</span></code> (integer)</p></li>
+</ul>
+<p>Minimum parts size to use when syncing objects using multipart upload.</p>
+</div>
+<div class="section" id="id2">
+<h3>如何配置<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>关于多站配置请看<a class="reference external" href="./multisite">多站配置</a>。云同步模块要求新建一个域，其
+tier type 必须是 <code class="docutils literal notranslate"><span class="pre">cloud</span></code> ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin zone create --rgw-zonegroup={zone-group-name} \</span>
+                            <span class="o">--</span><span class="n">rgw</span><span class="o">-</span><span class="n">zone</span><span class="o">=</span><span class="p">{</span><span class="n">zone</span><span class="o">-</span><span class="n">name</span><span class="p">}</span> \
+                            <span class="o">--</span><span class="n">endpoints</span><span class="o">=</span><span class="p">{</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">fqdn</span><span class="p">}[,{</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">fqdn</span><span class="p">}]</span>
+                            <span class="o">--</span><span class="n">tier</span><span class="o">-</span><span class="nb">type</span><span class="o">=</span><span class="n">cloud</span>
+</pre></div>
+</div>
+<p>The tier configuration can be then done using the following command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin zone modify --rgw-zonegroup={zone-group-name} \</span>
+                            <span class="o">--</span><span class="n">rgw</span><span class="o">-</span><span class="n">zone</span><span class="o">=</span><span class="p">{</span><span class="n">zone</span><span class="o">-</span><span class="n">name</span><span class="p">}</span> \
+                            <span class="o">--</span><span class="n">tier</span><span class="o">-</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">}</span><span class="o">=</span><span class="p">{</span><span class="n">val</span><span class="p">}[,{</span><span class="n">key</span><span class="p">}</span><span class="o">=</span><span class="p">{</span><span class="n">val</span><span class="p">}]</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">key</span></code> in the configuration specifies the config variable that needs to be updated, and
+the <code class="docutils literal notranslate"><span class="pre">val</span></code> specifies its new value. Nested values can be accessed using period. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin zone modify --rgw-zonegroup={zone-group-name} \</span>
+                            <span class="o">--</span><span class="n">rgw</span><span class="o">-</span><span class="n">zone</span><span class="o">=</span><span class="p">{</span><span class="n">zone</span><span class="o">-</span><span class="n">name</span><span class="p">}</span> \
+                            <span class="o">--</span><span class="n">tier</span><span class="o">-</span><span class="n">config</span><span class="o">=</span><span class="n">connection</span><span class="o">.</span><span class="n">access_key</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">},</span><span class="n">connection</span><span class="o">.</span><span class="n">secret</span><span class="o">=</span><span class="p">{</span><span class="n">secret</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Configuration array entries can be accessed by specifying the specific entry to be referenced enclosed
+in square brackets, and adding new array entry can be done by using <cite>[]</cite>. Index value of <cite>-1</cite> references
+the last entry in the array. At the moment it is not possible to create a new entry and reference it
+again at the same command.
+For example, creating a new profile for buckets starting with {prefix}:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin zone modify --rgw-zonegroup={zone-group-name} \</span>
+                            <span class="o">--</span><span class="n">rgw</span><span class="o">-</span><span class="n">zone</span><span class="o">=</span><span class="p">{</span><span class="n">zone</span><span class="o">-</span><span class="n">name</span><span class="p">}</span> \
+                            <span class="o">--</span><span class="n">tier</span><span class="o">-</span><span class="n">config</span><span class="o">=</span><span class="n">profiles</span><span class="p">[]</span><span class="o">.</span><span class="n">source_bucket</span><span class="o">=</span><span class="p">{</span><span class="n">prefix</span><span class="p">}</span><span class="s1">&#39;*&#39;</span>
+
+<span class="c1"># radosgw-admin zone modify --rgw-zonegroup={zone-group-name} \</span>
+                            <span class="o">--</span><span class="n">rgw</span><span class="o">-</span><span class="n">zone</span><span class="o">=</span><span class="p">{</span><span class="n">zone</span><span class="o">-</span><span class="n">name</span><span class="p">}</span> \
+                            <span class="o">--</span><span class="n">tier</span><span class="o">-</span><span class="n">config</span><span class="o">=</span><span class="n">profiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">connection_id</span><span class="o">=</span><span class="p">{</span><span class="n">conn_id</span><span class="p">},</span><span class="n">profiles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">acls_id</span><span class="o">=</span><span class="p">{</span><span class="n">acls_id</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>An entry can be removed by using <code class="docutils literal notranslate"><span class="pre">--tier-config-rm={key}</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frontends/">HTTP 前端</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement/">Pool Placement and Storage Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pools/">存储池的配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../opa/">与 Open Policy Agent 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">LDAP 认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamicresharding/">动态的桶索引重分片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mfa/">多因子认证</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../sync-modules/">同步模块</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../elastic-sync-module/">ElasticSearch 同步模块</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Cloud 同步模块</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cloud-sync-tier-type-configuration">Cloud Sync Tier Type Configuration</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#trivial-configuration">Trivial Configuration:</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#non-trivial-configuration">Non Trivial Configuration:</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#s3">S3 特有的可配置项</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">如何配置</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../pubsub-module/">PubSub 模块</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../archive-sync-module/">Archive 同步模块</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../sync-modules/#id2">需求和假设</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../sync-modules/#id3">同步模块的配置</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STSLite/">STS Lite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../role/">Role</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../pubsub-module/" title="PubSub 同步模块"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../elastic-sync-module/" title="ElasticSearch 同步模块"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 对象网关</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../sync-modules/" >同步模块</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

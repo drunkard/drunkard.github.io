@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>ceph-volume – Ceph OSD 部署和检查工具 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="ceph-volume-systemd – systemd ceph-volume 辅助工具" href="../ceph-volume-systemd/" />
+    <link rel="prev" title="对象存储手册页" href="../../../rados/man/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ceph-volume-systemd/" title="ceph-volume-systemd – systemd ceph-volume 辅助工具"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../../rados/man/" title="对象存储手册页"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" accesskey="U">对象存储手册页</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/man/8/ceph-volume.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="ceph-volume-ceph-osd">
+<h1>ceph-volume – Ceph OSD 部署和检查工具<a class="headerlink" href="#ceph-volume-ceph-osd" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>提纲<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><strong>ceph-volume</strong> [-h] [–cluster CLUSTER] [–log-level LOG_LEVEL]</div>
+<div class="line-block">
+<div class="line">[–log-path LOG_PATH]</div>
+</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>ceph-volume</strong> <strong>inventory</strong></div>
+</div>
+<div class="line-block">
+<div class="line"><strong>ceph-volume</strong> <strong>lvm</strong> [ <em>trigger</em> | <em>create</em> | <em>activate</em> | <em>prepare</em></div>
+<div class="line"><em>zap</em> | <em>list</em> | <em>batch</em>]</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>ceph-volume</strong> <strong>simple</strong> [ <em>trigger</em> | <em>scan</em> | <em>activate</em> ]</div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>描述<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p><strong class="program">ceph-volume</strong> 是一个单用途命令行工具，用于把逻辑卷部署为 OSD ，其准备、激活和创建 OSD 的 API 和 <code class="docutils literal notranslate"><span class="pre">ceph-disk</span></code>
+相似。</p>
+<p>它与  <code class="docutils literal notranslate"><span class="pre">ceph-disk</span></code> 不同的地方是，它不支持交互、或依赖于随同
+Ceph 一起安装的 udev 规则。通过这些规则，系统可以自动探测之前配置好的各个设备，随后传入 <code class="docutils literal notranslate"><span class="pre">ceph-disk</span></code> 以激活它们。</p>
+</div>
+<div class="section" id="id3">
+<h2>子命令<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="inventory">
+<h3>inventory<a class="headerlink" href="#inventory" title="Permalink to this headline">¶</a></h3>
+<p>这个子命令可搜集到主机的物理磁盘清单，并报告它们的元数据。在这些元数据中，有与磁盘相关的数据（像型号、尺寸、是机械磁盘还是固态的）；还有与 Ceph 相关的，像是否可用于 Ceph 、或是否有逻辑卷。</p>
+<p>实例：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">inventory</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">inventory</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">inventory</span> <span class="o">--</span><span class="nb">format</span> <span class="n">json</span><span class="o">-</span><span class="n">pretty</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]       打印帮助消息、然后退出</p></li>
+<li><dl class="simple">
+<dt>[–format]         输出格式，可用值有 <code class="docutils literal notranslate"><span class="pre">plain</span></code> （默认的）、</dt><dd><p><code class="docutils literal notranslate"><span class="pre">json</span></code> 和 <code class="docutils literal notranslate"><span class="pre">json-pretty</span></code></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="lvm">
+<h3>lvm<a class="headerlink" href="#lvm" title="Permalink to this headline">¶</a></h3>
+<p>通过 LVM 标签， <code class="docutils literal notranslate"><span class="pre">lvm</span></code> 子命令可以存储标记，且在稍后重新发现并查询与 OSD 有关的各个设备，以便稍后激活它们。</p>
+<p>可用子命令：</p>
+<p><strong>batch</strong>
+用一串设备创建基于 <code class="docutils literal notranslate"><span class="pre">filestore</span></code> 或 <code class="docutils literal notranslate"><span class="pre">bluestore</span></code> （默认的）的
+OSD 。它会创建 OSD 正常运行所必需的卷组和逻辑卷。</p>
+<p>加三个设备的用法实例：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">batch</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]          打印帮助消息、然后退出</p></li>
+<li><p>[–bluestore]         使用 bluestore 对象存储器（默认）</p></li>
+<li><p>[–filestore]         使用 filestore 对象存储器</p></li>
+<li><p>[–yes]               跳过报告和提示，径直开通服务</p></li>
+<li><p>[–prepare]           仅仅准备 OSD ，不激活</p></li>
+<li><p>[–dmcrypt]           为底层 OSD 设备启用加密功能</p></li>
+<li><p>[–crush-device-class] 指定分配给这个 OSD 的 CRUSH 设备类</p></li>
+<li><p>[–no-systemd]        不要启用或创建任何 systemd 单元</p></li>
+<li><dl class="simple">
+<dt>[–report]            报告当前输入可能产生的潜在结果（需要</dt><dd><p>传入设备）</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[–format]            报告时（和 –report 一起使用）的输出格</dt><dd><p>式，可以是 pretty 或 json 之一</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[–block-db-size]     设置（或覆盖） bluestore_block_db_size</dt><dd><p>的值，单位是字节</p>
+</dd>
+</dl>
+</li>
+<li><p>[–journal-size]      覆盖 osd_journal_size 的值，单位是 MB</p></li>
+</ul>
+<p>必需的位置参数：</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>&lt;DEVICE&gt;    原始设备的完整路径，如 <code class="docutils literal notranslate"><span class="pre">/dev/sda</span></code> 。可以指定</dt><dd><p>多个 <code class="docutils literal notranslate"><span class="pre">&lt;DEVICE&gt;</span></code> 设备路径。</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>activate</strong>
+启用写死了 OSD ID 及其 UUID （在 Ceph CLI 工具里也叫 <code class="docutils literal notranslate"><span class="pre">fsid</span></code>
+）的 systemd 单元，这样，在引导时它就能知道哪个 OSD 被启用、且需挂载。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">activate</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">&lt;</span><span class="n">osd</span> <span class="nb">id</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">osd</span> <span class="n">fsid</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]    打印帮助消息、然后退出</p></li>
+<li><p>[–auto-detect-objectstore]    通过检查 OSD 来自动探测对象存储器</p></li>
+<li><p>[–bluestore]   对象存储器是 bluestore （默认的）</p></li>
+<li><p>[–filestore]   对象存储器是 filestore</p></li>
+<li><p>[–all]         激活系统内找到的所有 OSD</p></li>
+<li><p>[–no-systemd]  不要创建、启用 systemd 单元、和启动 OSD 服务</p></li>
+</ul>
+<p>用（ idempotent ） <code class="docutils literal notranslate"><span class="pre">--all</span></code> 标记可以一次激活多个 OSD ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">activate</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+<p><strong>prepare</strong>
+准备一个用作 OSD 及其日志（配置为 <code class="docutils literal notranslate"><span class="pre">filestore</span></code> 或默认的
+<code class="docutils literal notranslate"><span class="pre">bluestore</span></code> ）的逻辑卷。除了额外增加元数据之外，它不会创建或修改逻辑卷。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">prepare</span> <span class="o">--</span><span class="n">filestore</span> <span class="o">--</span><span class="n">data</span> <span class="o">&lt;</span><span class="n">data</span> <span class="n">lv</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">journal</span> <span class="o">&lt;</span><span class="n">journal</span> <span class="n">device</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]          打印帮助消息、然后退出</p></li>
+<li><p>[–journal JOURNAL]   一个逻辑组名字、逻辑卷路径、或设备路径</p></li>
+<li><p>[–bluestore]         使用 bluestore 对象存储器（默认的）</p></li>
+<li><p>[–block.wal]         bluestore block.wal 的逻辑卷或分区路径</p></li>
+<li><p>[–block.db]          bluestore block.db 的逻辑卷或分区路径</p></li>
+<li><p>[–filestore]         使用 filestore 对象存储器</p></li>
+<li><p>[–dmcrypt]           为底层 OSD 设备启用加密功能</p></li>
+<li><p>[–osd-id OSD_ID]     重用已有的 OSD id</p></li>
+<li><p>[–osd-fsid OSD_FSID] 重用已有的 OSD fsid</p></li>
+<li><p>[–crush-device-class] 指定分配给这个 OSD 的 CRUSH 设备类</p></li>
+</ul>
+<p>必需参数：</p>
+<ul>
+<li><dl class="option-list">
+<dt><kbd><span class="option">--data</span></kbd></dt>
+<dd><p>一个逻辑组名字、或一个逻辑卷路径</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>要加密 OSD 的话，在准备时必须加上 <code class="docutils literal notranslate"><span class="pre">--dmcrypt</span></code> 标志（
+<code class="docutils literal notranslate"><span class="pre">create</span></code> 子命令里也支持）。</p>
+<p><strong>create</strong>
+把开通新 OSD 的两步过程（先调用 <code class="docutils literal notranslate"><span class="pre">prepare</span></code> 之后 <code class="docutils literal notranslate"><span class="pre">activate</span></code>
+）包装成一步。倾向于使用 <code class="docutils literal notranslate"><span class="pre">prepare</span></code> 再 <code class="docutils literal notranslate"><span class="pre">activate</span></code> 的原因是为了把新 OSD 们缓慢地加入集群，以避免大量数据被重新均衡。</p>
+<p>这个单步调用过程统一了 <code class="docutils literal notranslate"><span class="pre">prepare</span></code> 和 <code class="docutils literal notranslate"><span class="pre">activate</span></code> 所做的事情，为简便起见，它一次完成。选项和常规用法与 <code class="docutils literal notranslate"><span class="pre">prepare</span></code> 和
+<code class="docutils literal notranslate"><span class="pre">activate</span></code> 子命令的基本一样。</p>
+<p><strong>trigger</strong>
+这个子命令不是给用户直接使用的，是给 systemd 用的，它会分析
+systemd 发来的输入、探测与 OSD 关联的 UUID 和 ID ，然后代理给
+<code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">lvm</span> <span class="pre">activate</span></code> 。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">trigger</span> <span class="o">&lt;</span><span class="n">SYSTEMD</span><span class="o">-</span><span class="n">DATA</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>systemd “数据”应该按如下格式：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">OSD</span> <span class="n">ID</span><span class="o">&gt;-&lt;</span><span class="n">OSD</span> <span class="n">UUID</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>与 OSD 关联过的逻辑卷应该预先准备好，也就是所需的标签和元数据必须已备好。</p>
+<p>位置参数：</p>
+<ul class="simple">
+<li><p>&lt;SYSTEMD_DATA&gt;  来自 systemd 单元的数据包含 OSD 的 ID 和 UUID 。</p></li>
+</ul>
+<p><strong>list</strong>
+罗列与 Ceph 关联的设备或逻辑卷，即设备是否有与 OSD 相关的信息。通过查询 LVM 的元数据，建立 OSD 与设备的关系。</p>
+<p>与 OSD 关联的逻辑卷必须是经过 ceph-volume 准备过的，这样它才会有所需的标签和元数据。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="nb">list</span>
+</pre></div>
+</div>
+<p>罗列一个特定的设备，报告与之相关的所有元数据：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="nb">list</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span>
+</pre></div>
+</div>
+<p>罗列一个逻辑卷、以及它的所有元数据（ vg 是卷组、 lv 是逻辑卷名字）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="nb">list</span> <span class="p">{</span><span class="n">vg</span><span class="o">/</span><span class="n">lv</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>位置参数：</p>
+<ul class="simple">
+<li><p>&lt;DEVICE&gt;  逻辑卷的话要按格式 <code class="docutils literal notranslate"><span class="pre">vg/lv</span></code> ；常规设备为路径
+<code class="docutils literal notranslate"><span class="pre">/path/to/sda1</span></code> 或 <code class="docutils literal notranslate"><span class="pre">/path/to/sda</span></code> 。</p></li>
+</ul>
+<p><strong>zap</strong>
+删除指定的逻辑卷或分区。如果指定的是逻辑卷路径，必须按 vg/lv
+格式。指定逻辑卷或分区上的文件系统会被删除、所有数据都会被清除。</p>
+<p>不过，逻辑卷或分区还会保持原样。</p>
+<p>对于逻辑卷，用法是：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">zap</span> <span class="p">{</span><span class="n">vg</span><span class="o">/</span><span class="n">lv</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>对于分区，用法是：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">zap</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>
+</pre></div>
+</div>
+<p>要完全删除设备，需加 <code class="docutils literal notranslate"><span class="pre">--destroy</span></code> 选项（适用于所有设备类型）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">zap</span> <span class="o">--</span><span class="n">destroy</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdc1</span>
+</pre></div>
+</div>
+<p>要删除多个设备，可指定 OSD ID 和/或 OSD FSID ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">zap</span> <span class="o">--</span><span class="n">destroy</span> <span class="o">--</span><span class="n">osd</span><span class="o">-</span><span class="nb">id</span> <span class="mi">1</span>
+<span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">lvm</span> <span class="n">zap</span> <span class="o">--</span><span class="n">destroy</span> <span class="o">--</span><span class="n">osd</span><span class="o">-</span><span class="nb">id</span> <span class="mi">1</span> <span class="o">--</span><span class="n">osd</span><span class="o">-</span><span class="n">fsid</span> <span class="n">C9605912</span><span class="o">-</span><span class="mi">8395</span><span class="o">-</span><span class="mi">4</span><span class="n">D76</span><span class="o">-</span><span class="n">AFC0</span><span class="o">-</span><span class="mi">7</span><span class="n">DFDAC315D59</span>
+</pre></div>
+</div>
+<p>位置参数：</p>
+<ul class="simple">
+<li><p>&lt;DEVICE&gt;  逻辑卷的话要按格式 <code class="docutils literal notranslate"><span class="pre">vg/lv</span></code> ；常规设备为路径
+<code class="docutils literal notranslate"><span class="pre">/path/to/sda1</span></code> 或 <code class="docutils literal notranslate"><span class="pre">/path/to/sda</span></code> 。</p></li>
+</ul>
+</div>
+<div class="section" id="simple">
+<h3>simple<a class="headerlink" href="#simple" title="Permalink to this headline">¶</a></h3>
+<p>扫描旧 OSD 目录或数据设备，它们可能是由 ceph-disk 创建、或手动创建的。</p>
+<p>子命令：</p>
+<p><strong>activate</strong>
+启用写死了 OSD ID 及其 UUID （在 Ceph CLI 工具里也叫 <code class="docutils literal notranslate"><span class="pre">fsid</span></code>
+）的 systemd 单元，这样，在系统引导时，通过读取之前创建并保存在
+<code class="docutils literal notranslate"><span class="pre">/etc/ceph/osd/</span></code> 内的 JSON 数据，它就能知道哪个 OSD 被启用了、且需挂载。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">simple</span> <span class="n">activate</span> <span class="o">--</span><span class="n">bluestore</span> <span class="o">&lt;</span><span class="n">osd</span> <span class="nb">id</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">osd</span> <span class="n">fsid</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]  打印帮助消息，然后退出</p></li>
+<li><p>[–bluestore] 使用 bluestore 对象存储器（默认）</p></li>
+<li><p>[–filestore] 使用 filestore 对象存储器</p></li>
+</ul>
+<p>注意： JSON 文件名格式必须是下面这样：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">osd</span><span class="o">/&lt;</span><span class="n">osd</span> <span class="nb">id</span><span class="o">&gt;-&lt;</span><span class="n">osd</span> <span class="n">fsid</span><span class="o">&gt;.</span><span class="n">json</span>
+</pre></div>
+</div>
+<p><strong>scan</strong>
+扫描一个运行着的 OSD 或数据设备，以收集其元数据，稍后可用于
+ceph-volume 激活和管理这个 OSD 。这个扫描命令会创建一个 JSON
+文件，其内是必需的信息、还有在 OSD 目录内搜集到的其它信息。</p>
+<p>另外， JSON 数据块也可以发到标准输出，以便进一步检查。</p>
+<p>扫描所有运行着的 OSD ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">voume</span> <span class="n">simple</span> <span class="n">scan</span>
+</pre></div>
+</div>
+<p>扫描数据设备：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">simple</span> <span class="n">scan</span> <span class="o">&lt;</span><span class="n">data</span> <span class="n">device</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>扫描运行着的 OSD 的目录：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">simple</span> <span class="n">scan</span> <span class="o">&lt;</span><span class="n">path</span> <span class="n">to</span> <span class="n">osd</span> <span class="nb">dir</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>可选参数：</p>
+<ul class="simple">
+<li><p>[-h, –help]          打印帮助消息，然后退出</p></li>
+<li><p>[–stdout]            把 JSON 数据块发到标准输出</p></li>
+<li><p>[–force]             如果目标 JSON 文件已存在，直接覆盖它</p></li>
+</ul>
+<p>必需的位置参数：</p>
+<ul class="simple">
+<li><p>&lt;DATA DEVICE or OSD DIR&gt;  实际的数据分区或指向在运行 OSD 的路径</p></li>
+</ul>
+<p><strong>trigger</strong>
+这个子命令不是给用户直接使用的，是给 systemd 用的，它会分析
+systemd 发来的输入、探测与 OSD 关联的 UUID 和 ID ，然后代理给
+<code class="docutils literal notranslate"><span class="pre">ceph-volume</span> <span class="pre">simple</span> <span class="pre">activate</span></code> 。</p>
+<p>用法：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span><span class="o">-</span><span class="n">volume</span> <span class="n">simple</span> <span class="n">trigger</span> <span class="o">&lt;</span><span class="n">SYSTEMD</span><span class="o">-</span><span class="n">DATA</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>systemd “数据”应该按如下格式：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">OSD</span> <span class="n">ID</span><span class="o">&gt;-&lt;</span><span class="n">OSD</span> <span class="n">UUID</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>与 OSD 关联的 JSON 文件应该提前保存到位，通过扫描（或手写），以使所需元数据随时可用。</p>
+<p>位置参数：</p>
+<ul class="simple">
+<li><p>&lt;SYSTEMD_DATA&gt;  systemd 单元发来的数据，内含 OSD 的 ID 和 UUID</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>使用范围<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p><strong class="program">ceph-volume</strong> 是 Ceph 的一部分，这是个伸缩力强、开源、分布式的存储系统，更多信息参见 <a class="reference external" href="http://ceph.com/docs">http://ceph.com/docs</a> 。</p>
+</div>
+<div class="section" id="id5">
+<h2>参考<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../ceph-osd/"><span class="doc">ceph-osd</span></a>(8),</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../rados/configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rados/deployment/">部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rados/operations/">运维</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../rados/man/">手册页</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ceph-volume – Ceph OSD 部署和检查工具</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">提纲</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">描述</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">子命令</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#inventory">inventory</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#lvm">lvm</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#simple">simple</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">使用范围</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">参考</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-volume-systemd/">ceph-volume-systemd – systemd ceph-volume 辅助工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph/">ceph – Ceph 管理工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">ceph-deploy – Ceph 部署工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-authtool/">ceph-authtool – ceph 密钥环操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-clsinfo/">ceph-clsinfo – 查看类对象信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">ceph-conf – ceph 配置文件工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-debugpack/">ceph-debugpack – ceph 调试信息打包工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-dencoder/">ceph-dencoder – ceph 编码器/解码器工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-mon/">ceph-mon – ceph 监视器守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-osd/">ceph-osd – ceph 对象存储守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-kvstore-tool/">ceph-kvstore-tool – ceph 的 kvstore 操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-run/">ceph-run – 发生核心转储后重启守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-syn/">ceph-syn – ceph 的人造负载生成器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crushtool/">crushtool – CRUSH 图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../librados-config/">librados-config – 显示关于 librados 的信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monmaptool/">monmaptool – ceph 监视器运行图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../osdmaptool/">osdmaptool – ceph osd 运行图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rados/">rados – rados 对象存储工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-post-file/">ceph-post-file – 把文件上传给 ceph 开发者</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rados/troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rados/api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ceph-volume-systemd/" title="ceph-volume-systemd – systemd ceph-volume 辅助工具"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../../rados/man/" title="对象存储手册页"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" >对象存储手册页</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

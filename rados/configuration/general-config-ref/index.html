@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>常规配置参考 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>常规配置参考 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="配置" href="../" />
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="Ceph 部署" href="../../deployment/" />
-    <link rel="prev" title="消息传递" href="../ms-ref/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="消息传递" href="../ms-ref/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -48,114 +36,129 @@
         <li class="right" >
           <a href="../ms-ref/" title="消息传递"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" accesskey="U">配置</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">配置</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/configuration/general-config-ref.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>常规配置参考<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<p><tt class="docutils literal"><span class="pre">fsid</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">文件系统 ID ，每集群一个。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">UUID</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body">无。通常由部署工具生成。</td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">admin</span> <span class="pre">socket</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">在某个守护进程上执行管理命令的套接字，不管 Ceph 监视器团体是否已建立。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">/var/run/ceph/$cluster-$name.asok</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">pid</span> <span class="pre">file</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">mon 、 osd 、 mds 将把它们的 PID 写入此文件，其名为 <tt class="docutils literal"><span class="pre">/var/run/$cluster/$type.$id.pid</span></tt> 。如名为 Ceph 的集群，其 ID 为 <tt class="docutils literal"><span class="pre">a</span></tt> 的 <tt class="docutils literal"><span class="pre">mon</span></tt> 进程将创建 <tt class="docutils literal"><span class="pre">/var/run/ceph/mon.a.pid</span></tt> 。如果是正常停止的， <tt class="docutils literal"><span class="pre">pid</span> <span class="pre">file</span></tt> 就会被守护进程删除；如果进程未进入后台运行（即启动时加了 <tt class="docutils literal"><span class="pre">-f</span></tt> 或 <tt class="docutils literal"><span class="pre">-d</span></tt> 选项），它就不会创建 <tt class="docutils literal"><span class="pre">pid</span> <span class="pre">file</span></tt> 。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body">No</td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">chdir</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">Ceph 进程一旦启动、运行就进入这个目录，默认推荐 <tt class="docutils literal"><span class="pre">/</span></tt> 。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">/</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">max</span> <span class="pre">open</span> <span class="pre">files</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果设置了， <a class="reference internal" href="../../../glossary/#term-21"><em class="xref std std-term">Ceph 存储集群</em></a>启动时会设置操作系统级的 <tt class="docutils literal"><span class="pre">max</span> <span class="pre">open</span> <span class="pre">fds</span></tt> （即文件描述符最大允许值），这有助于防止耗尽文件描述符。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">0</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">fatal</span> <span class="pre">signal</span> <span class="pre">handlers</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果设置了，将安装 SEGV 、 ABRT 、 BUS 、 ILL 、 FPE 、 XCPU 、 XFSZ 、 SYS 信号处理器，用于产生有用的日志信息。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt></td>
-</tr>
-</tbody>
-</table>
+<p><code class="docutils literal notranslate"><span class="pre">fsid</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>文件系统 ID ，每集群一个。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>UUID</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No.</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p>无。通常由部署工具生成。</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">admin</span> <span class="pre">socket</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>在某个守护进程上执行管理命令的套接字，不管 Ceph 监视器团体是否已建立。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">/var/run/ceph/$cluster-$name.asok</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">pid</span> <span class="pre">file</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>mon 、 osd 、 mds 将把它们的 PID 写入此文件，其名为 <code class="docutils literal notranslate"><span class="pre">/var/run/$cluster/$type.$id.pid</span></code> 。如名为 Ceph 的集群，其 ID 为 <code class="docutils literal notranslate"><span class="pre">a</span></code> 的 <code class="docutils literal notranslate"><span class="pre">mon</span></code> 进程将创建 <code class="docutils literal notranslate"><span class="pre">/var/run/ceph/mon.a.pid</span></code> 。如果是正常停止的， <code class="docutils literal notranslate"><span class="pre">pid</span> <span class="pre">file</span></code> 就会被守护进程删除；如果进程未进入后台运行（即启动时加了 <code class="docutils literal notranslate"><span class="pre">-f</span></code> 或 <code class="docutils literal notranslate"><span class="pre">-d</span></code> 选项），它就不会创建 <code class="docutils literal notranslate"><span class="pre">pid</span> <span class="pre">file</span></code> 。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p>No</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">chdir</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>Ceph 进程一旦启动、运行就进入这个目录，默认推荐 <code class="docutils literal notranslate"><span class="pre">/</span></code> 。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">open</span> <span class="pre">files</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>如果设置了， <a class="reference internal" href="../../../glossary/#term-7"><span class="xref std std-term">Ceph 存储集群</span></a>启动时会设置操作系统级的 <code class="docutils literal notranslate"><span class="pre">max</span> <span class="pre">open</span> <span class="pre">fds</span></code> （即文件描述符最大允许值），这有助于防止耗尽文件描述符。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">fatal</span> <span class="pre">signal</span> <span class="pre">handlers</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>如果设置了，将安装 SEGV 、 ABRT 、 BUS 、 ILL 、 FPE 、 XCPU 、 XFSZ 、 SYS 信号处理器，用于产生有用的日志信息。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p>
+</dd>
+</dl>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -163,23 +166,34 @@
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../">配置</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../filesystem-recommendations/">硬盘和文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage-devices/">存储设备</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">配置 Ceph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/">通用选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-network-config">网络</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id3">监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-osd-config">认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#osds">OSDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id5">心跳</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-logging-and-debugging">日志记录、调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-conf">ceph.conf 实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id7">跑多个集群</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../network-config-ref/">网络选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../msgr2/">信使协议 v2</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auth-config-ref/">认证选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-config-ref/">监视器选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-lookup-dns/">Looking op Monitors through DNS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-osd-interaction/">心跳选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../osd-config-ref/">OSD 选项</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../filestore-config-ref/">filestore 选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-config-ref/">BlueStore 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../filestore-config-ref/">FileStore 配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../journal-ref/">日志选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pool-pg-config-ref/">存储池、归置组和 CRUSH 选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../ms-ref/">消息传递选项</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">常规选项</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">常规选项</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
@@ -190,40 +204,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -238,13 +253,13 @@
         <li class="right" >
           <a href="../ms-ref/" title="消息传递"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" >配置</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >配置</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

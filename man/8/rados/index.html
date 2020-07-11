@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>rados – rados 对象存储工具 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>rados – rados 对象存储工具 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="对象存储手册页" href="../../../rados/man/" />
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="ceph-post-file – 把文件上传给 ceph 开发者" href="../ceph-post-file/" />
-    <link rel="prev" title="osdmaptool – ceph osd 运行图操作工具" href="../osdmaptool/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="osdmaptool – ceph osd 运行图操作工具" href="../osdmaptool/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -48,190 +36,247 @@
         <li class="right" >
           <a href="../osdmaptool/" title="osdmaptool – ceph osd 运行图操作工具"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rados/" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../../../rados/man/" accesskey="U">对象存储手册页</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" accesskey="U">对象存储手册页</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/man/8/rados.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="rados-rados">
-<h1>rados &#8211; rados 对象存储工具<a class="headerlink" href="#rados-rados" title="Permalink to this headline">¶</a></h1>
+<h1>rados – rados 对象存储工具<a class="headerlink" href="#rados-rados" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>提纲<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
-<div class="line"><strong>rados</strong> [ -m <em>monaddr</em> ] [ mkpool | rmpool <em>foo</em> ] [ -p | &#8211;pool
-<em>pool</em> ] [ -s | &#8211;snap <em>snap</em> ] [ -i <em>infile</em> ] [ -o <em>outfile</em> ]
-<em>command</em> ...</div>
+<div class="line"><strong>rados</strong> [ <em>options</em> ] [ <em>command</em> ]</div>
 </div>
 </div>
 <div class="section" id="id2">
 <h2>描述<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p><strong>rados</strong> 工具可操作 Ceph 对象存储集群（ RADOS ），是 Ceph 分布式存储系统的一部分。</p>
+<p><strong>rados</strong> 工具可操纵 Ceph 对象存储集群（ RADOS ），是 Ceph
+分布式存储系统的一部分。</p>
 </div>
 <div class="section" id="id3">
 <h2>选项<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <dl class="option">
 <dt id="cmdoption-rados-p">
-<tt class="descname">-p</tt><tt class="descclassname"> pool</tt><tt class="descclassname">, </tt><tt class="descname">--pool</tt><tt class="descclassname"> pool</tt><a class="headerlink" href="#cmdoption-rados-p" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-p</code><code class="sig-prename descclassname"> pool</code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--pool</code><code class="sig-prename descclassname"> pool</code><a class="headerlink" href="#cmdoption-rados-p" title="Permalink to this definition">¶</a></dt>
 <dd><p>操作指定的存储池。大多数命令都得指定此参数。</p>
 </dd></dl>
 
 <dl class="option">
+<dt id="cmdoption-rados-pgid">
+<code class="sig-name descname">--pgid</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-rados-pgid" title="Permalink to this definition">¶</a></dt>
+<dd><p>作为 <code class="docutils literal notranslate"><span class="pre">--pool</span></code> 的外加参数， <code class="docutils literal notranslate"><span class="pre">--pgid</span></code> 是让用户指定 PG id
+的，然后命令就径直导向此 PG 。加上这个选项，用户就可以把某些命令（如 <code class="docutils literal notranslate"><span class="pre">ls</span></code> ）的范围限定于指定 PG 。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-rados-n">
+<code class="sig-name descname">-N</code><code class="sig-prename descclassname"> namespace</code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--namespace</code><code class="sig-prename descclassname"> namespace</code><a class="headerlink" href="#cmdoption-rados-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定要给对象用的 rados 命名空间。</p>
+</dd></dl>
+
+<dl class="option">
 <dt id="cmdoption-rados-s">
-<tt class="descname">-s</tt><tt class="descclassname"> snap</tt><tt class="descclassname">, </tt><tt class="descname">--snap</tt><tt class="descclassname"> snap</tt><a class="headerlink" href="#cmdoption-rados-s" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-s</code><code class="sig-prename descclassname"> snap</code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--snap</code><code class="sig-prename descclassname"> snap</code><a class="headerlink" href="#cmdoption-rados-s" title="Permalink to this definition">¶</a></dt>
 <dd><p>从指定的存储池快照读出。适用于所有与存储池相关的读操作。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-rados-i">
-<tt class="descname">-i</tt><tt class="descclassname"> infile</tt><a class="headerlink" href="#cmdoption-rados-i" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-i</code><code class="sig-prename descclassname"> infile</code><a class="headerlink" href="#cmdoption-rados-i" title="Permalink to this definition">¶</a></dt>
 <dd><p>指定输入文件，其内容将作为此命令的载荷发送给监视器集群。仅适用于部分监视器命令。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-rados-o">
-<tt class="descname">-o</tt><tt class="descclassname"> outfile</tt><a class="headerlink" href="#cmdoption-rados-o" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-o</code><code class="sig-prename descclassname"> outfile</code><a class="headerlink" href="#cmdoption-rados-o" title="Permalink to this definition">¶</a></dt>
 <dd><p>把监视器集群返回的载荷写入 outfile 。仅适用于某些会返回载荷的监视器命令（如 osd getmap ）。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-rados-c">
-<tt class="descname">-c</tt><tt class="descclassname"> ceph.conf</tt><tt class="descclassname">, </tt><tt class="descname">--conf</tt><tt class="descclassname">=ceph.conf</tt><a class="headerlink" href="#cmdoption-rados-c" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-c</code><code class="sig-prename descclassname"> ceph.conf</code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--conf</code><code class="sig-prename descclassname">=ceph.conf</code><a class="headerlink" href="#cmdoption-rados-c" title="Permalink to this definition">¶</a></dt>
 <dd><p>用指定的 ceph.conf 配置文件而非默认的 /etc/ceph/ceph.conf
 来确定监视器的初始地址。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-rados-m">
-<tt class="descname">-m</tt><tt class="descclassname"> monaddress[:port]</tt><a class="headerlink" href="#cmdoption-rados-m" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-m</code><code class="sig-prename descclassname"> monaddress[:port]</code><a class="headerlink" href="#cmdoption-rados-m" title="Permalink to this definition">¶</a></dt>
 <dd><p>连接指定监视器（而非通过 ceph.conf 查找）。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-rados-b">
-<tt class="descname">-b</tt><tt class="descclassname"> block_size</tt><a class="headerlink" href="#cmdoption-rados-b" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-b</code><code class="sig-prename descclassname"> block_size</code><a class="headerlink" href="#cmdoption-rados-b" title="Permalink to this definition">¶</a></dt>
 <dd><p>设置块尺寸，适用于 put/get/append 操作、及写入压力测试。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-rados--striper">
-<tt class="descname">--striper</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-rados--striper" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-rados-striper">
+<code class="sig-name descname">--striper</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-rados-striper" title="Permalink to this definition">¶</a></dt>
 <dd><p>使用 rados 的条带化 API 而非默认的，支持的操作有 stat 、
 get 、 put 、 append 、 truncate 、 rm 、 ls 以及所有与
 xattr 相关的操作。</p>
 </dd></dl>
 
-</div>
-<div class="section" id="id4">
-<h2>全局命令<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong class="command">lspools</strong></dt>
-<dd>罗列对象存储池</dd>
-<dt><strong class="command">df</strong></dt>
-<dd>显示利用率统计信息，显示整个系统以及各存储池的磁盘空间（字节数）、对象数量。</dd>
-<dt><strong class="command">mkpool</strong> <em>foo</em></dt>
-<dd>创建名为 foo 的存储池。</dd>
-<dt><strong class="command">rmpool</strong> <em>foo</em> [ <em>foo</em> &#8211;yes-i-really-really-mean-it ]</dt>
-<dd>删除存储池 foo （以及其内的所有数据）</dd>
-<dt><strong class="command">list-inconsistent-pg</strong> <em>pool</em></dt>
-<dd>罗列指定存储池内不一致的归置组。</dd>
-<dt><strong class="command">list-inconsistent-obj</strong> <em>pgid</em></dt>
-<dd>罗列指定 PG 内不一致的对象。</dd>
-<dt><strong class="command">list-inconsistent-snapset</strong> <em>pgid</em></dt>
-<dd>罗列指定 PG 内不一致的 snapset 。</dd>
-</dl>
+<dl class="option">
+<dt id="id4">
+<code class="sig-name descname">-O</code><code class="sig-prename descclassname"> object_size</code><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd><p>在做写入压力测试的时候，设置 put/get 操作的对象尺寸。</p>
+</dd></dl>
+
 </div>
 <div class="section" id="id5">
-<h2>特定于存储池的命令<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt><strong class="command">get</strong> <em>name</em> <em>outfile</em></dt>
-<dd>从集群读出名为 name 的对象、并把它写入 outfile 。</dd>
-<dt><strong class="command">put</strong> <em>name</em> <em>infile</em></dt>
-<dd>把 infile 的内容写入成集群内名为 name 的对象。</dd>
-<dt><strong class="command">append</strong> <em>name</em> <em>infile</em></dt>
-<dd>把 infile 的内容追加给集群内名为 name 的对象。</dd>
-<dt><strong class="command">rm</strong> <em>name</em></dt>
-<dd>删除名为 name 的对象。</dd>
-<dt><strong class="command">listwatchers</strong> <em>name</em></dt>
-<dd>罗列此对象名的关注者。</dd>
-<dt><strong class="command">ls</strong> <em>outfile</em></dt>
-<dd>List objects in given pool and write to outfile.</dd>
-<dt><strong class="command">lssnap</strong></dt>
-<dd>List snapshots for given pool.</dd>
-<dt><strong class="command">clonedata</strong> <em>srcname</em> <em>dstname</em> &#8211;object-locator <em>key</em></dt>
-<dd>Clone object byte data from <em>srcname</em> to <em>dstname</em>.  Both objects must be stored with the locator key <em>key</em> (usually either <em>srcname</em> or <em>dstname</em>).  Object attributes and omap keys are not copied or cloned.</dd>
-<dt><strong class="command">mksnap</strong> <em>foo</em></dt>
-<dd>Create pool snapshot named <em>foo</em>.</dd>
-<dt><strong class="command">rmsnap</strong> <em>foo</em></dt>
-<dd>Remove pool snapshot named <em>foo</em>.</dd>
-<dt><strong class="command">bench</strong> <em>seconds</em> <em>mode</em> [ -b <em>objsize</em> ] [ -t <em>threads</em> ]</dt>
-<dd>压力测试 <em>seconds</em> 秒。 <em>mode</em> 可以是 <em>write</em> 、 <em>seq</em> 或 <em>rand</em> 。 <em>seq</em> 和 <em>rand</em> 分别是顺序读、随机读压力测试，要想做读压力测试，先得加 <em>&#8211;no-cleanup</em> 选项做一次写压力测试。默认对象尺寸是 4 MB ，默认的模拟线程数（并行写操作）为 16 。<em>&#8211;run-name &lt;label&gt;</em> 选项适用于多个客户端并行测试以评估最大载荷。 <em>&lt;label&gt;</em> 表示任意对象名，默认为 &#8220;benchmark_last_metadata&#8221; ，且作为“读”和“写”操作的底层对象名。
-注： -b <em>objsize</em> 仅适用于 <em>write</em> 模式。
-注： <em>write</em> 和 <em>seq</em> 必须运行在相同的主机上，否则 <em>write</em> 所创建对象的名字不能被 <em>seq</em> 所接受。</dd>
-</dl>
-<p><strong class="command">cleanup</strong></p>
-<dl class="docutils">
-<dt><strong class="command">listomapkeys</strong> <em>name</em></dt>
-<dd>罗列 name 对象的对象映射图内存储的所有键。</dd>
-<dt><strong class="command">listomapvals</strong> <em>name</em></dt>
-<dd>罗列 name 对象的对象映射图内存储的所有键值对。值会被转储为十六进制。</dd>
-<dt><strong class="command">getomapval</strong> [ &#8211;omap-key-file <em>file</em> ] <em>name</em> <em>key</em> [ <em>out-file</em> ]</dt>
-<dd>把 name 对象的对象映射图内 key 的值转储为十六进制。如果没有提供可选参数 <em>out-file</em> ，这个值就会写到标准输出。</dd>
-<dt><strong class="command">setomapval</strong> [ &#8211;omap-key-file <em>file</em> ] <em>name</em> <em>key</em> [ <em>value</em> ]</dt>
-<dd>设置 name 对象的对象映射图内 key 的值。如果没加可选的 <em>value</em>
-参数，就从标准输入读取。</dd>
-<dt><strong class="command">rmomapkey</strong> [ &#8211;omap-key-file <em>file</em> ] <em>name</em> <em>key</em></dt>
-<dd>从 name 对象的对象映射图内删除 key 。</dd>
-<dt><strong class="command">getomapheader</strong> <em>name</em></dt>
-<dd>把 name 对象的对象映射图头部转储为十六进制。</dd>
-<dt><strong class="command">setomapheader</strong> <em>name</em> <em>value</em></dt>
-<dd>设置 name 对象的对象映射图头部的值。</dd>
+<h2>全局命令<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt><strong class="command">lspools</strong></dt><dd><p>罗列对象存储池</p>
+</dd>
+<dt><strong class="command">df</strong></dt><dd><p>显示利用率统计信息，显示整个系统以及各存储池的磁盘空间（字节数）、对象数量。</p>
+</dd>
+<dt><strong class="command">list-inconsistent-pg</strong> <em>pool</em></dt><dd><p>罗列指定存储池内不一致的归置组。</p>
+</dd>
+<dt><strong class="command">list-inconsistent-obj</strong> <em>pgid</em></dt><dd><p>罗列指定 PG 内不一致的对象。</p>
+</dd>
+<dt><strong class="command">list-inconsistent-snapset</strong> <em>pgid</em></dt><dd><p>罗列指定 PG 内不一致的 snapset 。</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="id6">
-<h2>实例<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<p>查看集群使用情况：</p>
-<div class="highlight-python"><pre>rados df</pre>
-</div>
-<p>获取存储池 foo 内的对象列表，并显示在标准输出：</p>
-<div class="highlight-python"><pre>rados -p foo ls -</pre>
-</div>
-<p>写入一个对象：</p>
-<div class="highlight-python"><pre>rados -p foo put myobject blah.txt</pre>
-</div>
-<p>创建一个快照：</p>
-<div class="highlight-python"><pre>rados -p foo mksnap mysnap</pre>
-</div>
-<p>删除对象：</p>
-<div class="highlight-python"><pre>rados -p foo rm myobject</pre>
-</div>
-<p>读取对象的快照内容：</p>
-<div class="highlight-python"><pre>rados -p foo -s mysnap get myobject blah.txt.old</pre>
-</div>
-<p>罗列 PG 0.6 内不一致的对象：</p>
-<div class="highlight-python"><pre>rados list-inconsistent-obj 0.6 --format=json-pretty</pre>
-</div>
+<h2>特定于存储池的命令<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt><strong class="command">get</strong> <em>name</em> <em>outfile</em></dt><dd><p>从集群读出名为 name 的对象、并把它写入 outfile 。</p>
+</dd>
+<dt><strong class="command">put</strong> <em>name</em> <em>infile</em> [–offset offset]</dt><dd><p>把 infile 的内容写入集群内名为 name 的对象、从偏移量 <em>offset</em>
+（默认为 0 ）处写起。
+<strong>警告：</strong>put 命令创建的是单个 RADOS 对象，尺寸和你的输入文件完全一样。你如果不能保证对象的尺寸合理且一致，最好改用
+RGW/S3 、 CephFS 或 RBD ，否则实际运行情况和你期望的会有出入。</p>
+</dd>
+<dt><strong class="command">append</strong> <em>name</em> <em>infile</em></dt><dd><p>把 infile 的内容追加给集群内名为 name 的对象。</p>
+</dd>
+<dt><strong class="command">rm</strong> <em>name</em></dt><dd><p>删除名为 name 的对象。</p>
+</dd>
+<dt><strong class="command">listwatchers</strong> <em>name</em></dt><dd><p>罗列此对象名的关注者。</p>
+</dd>
+<dt><strong class="command">ls</strong> <em>outfile</em></dt><dd><p>罗列指定存储池内的对象，并把名单写入 outfile 文件。</p>
+</dd>
+<dt><strong class="command">lssnap</strong></dt><dd><p>罗列指定存储池的快照。</p>
+</dd>
+<dt><strong class="command">clonedata</strong> <em>srcname</em> <em>dstname</em> –object-locator <em>key</em></dt><dd><p>Clone object byte data from <em>srcname</em> to <em>dstname</em>.  Both objects must be stored with the locator key <em>key</em> (usually either <em>srcname</em> or <em>dstname</em>).  Object attributes and omap keys are not copied or cloned.</p>
+</dd>
+<dt><strong class="command">mksnap</strong> <em>foo</em></dt><dd><p>Create pool snapshot named <em>foo</em>.</p>
+</dd>
+<dt><strong class="command">rmsnap</strong> <em>foo</em></dt><dd><p>Remove pool snapshot named <em>foo</em>.</p>
+</dd>
+<dt><strong class="command">bench</strong> <em>seconds</em> <em>mode</em> [ -b <em>objsize</em> ] [ -t <em>threads</em> ]</dt><dd><p>压力测试 <em>seconds</em> 秒。 <em>mode</em> 可以是 <em>write</em> 、 <em>seq</em> 或 <em>rand</em> 。 <em>seq</em> 和 <em>rand</em> 分别是顺序读、随机读压力测试，要想做读压力测试，先得加 <em>–no-cleanup</em> 选项做一次写压力测试。默认对象尺寸是 4 MB ，默认的模拟线程数（并行写操作）为 16 。<em>–run-name &lt;label&gt;</em> 选项适用于多个客户端并行测试以评估最大载荷。 <em>&lt;label&gt;</em> 表示任意对象名，默认为 “benchmark_last_metadata” ，且作为“读”和“写”操作的底层对象名。
+注： -b <em>objsize</em> 仅适用于 <em>write</em> 模式。
+注： <em>write</em> 和 <em>seq</em> 必须运行在相同的主机上，否则 <em>write</em> 所创建对象的名字不能被 <em>seq</em> 所接受。</p>
+</dd>
+<dt><strong class="command">cleanup</strong> [ –run-name <em>run_name</em> ] [ –prefix <em>prefix</em> ]</dt><dd><p>清理先前的基准测试操作。
+注意：默认的 run-name 是 <code class="docutils literal notranslate"><span class="pre">benchmark_last_metadata</span></code></p>
+</dd>
+<dt><strong class="command">listxattr</strong> <em>name</em></dt><dd><p>罗列一个对象的所有扩展属性。</p>
+</dd>
+<dt><strong class="command">getxattr</strong> <em>name</em> <em>attr</em></dt><dd><p>获取某一对象的扩展属性 <em>attr</em> 的值。</p>
+</dd>
+<dt><strong class="command">setxattr</strong> <em>name</em> <em>attr</em> <em>value</em></dt><dd><p>设置某一对象的扩展属性，把扩展属性 <em>attr</em> 的值设置为
+<em>value</em> 。</p>
+</dd>
+<dt><strong class="command">rmxattr</strong> <em>name</em> <em>attr</em></dt><dd><p>删除某一对象的扩展属性 <em>attr</em> 。</p>
+</dd>
+<dt><strong class="command">stat</strong> <em>name</em></dt><dd><p>获取指定对象的 stat 信息（即 mtime 、 size ）。</p>
+</dd>
+<dt><strong class="command">stat2</strong> <em>name</em></dt><dd><p>获取指定对象的 stat 信息（与 stat 类似，但是时间精度更高）。</p>
+</dd>
+<dt><strong class="command">listomapkeys</strong> <em>name</em></dt><dd><p>罗列 name 对象的对象映射图内存储的所有键。</p>
+</dd>
+<dt><strong class="command">listomapvals</strong> <em>name</em></dt><dd><p>罗列 name 对象的对象映射图内存储的所有键值对。值会被转储为十六进制。</p>
+</dd>
+<dt><strong class="command">getomapval</strong> [ –omap-key-file <em>file</em> ] <em>name</em> <em>key</em> [ <em>out-file</em> ]</dt><dd><p>把 name 对象的对象映射图内 key 的值转储为十六进制。如果没有提供可选参数 <em>out-file</em> ，这个值就会写到标准输出。</p>
+</dd>
+<dt><strong class="command">setomapval</strong> [ –omap-key-file <em>file</em> ] <em>name</em> <em>key</em> [ <em>value</em> ]</dt><dd><p>设置 name 对象的对象映射图内 key 的值。如果没加可选的 <em>value</em>
+参数，就从标准输入读取。</p>
+</dd>
+<dt><strong class="command">rmomapkey</strong> [ –omap-key-file <em>file</em> ] <em>name</em> <em>key</em></dt><dd><p>从 name 对象的对象映射图内删除 key 。</p>
+</dd>
+<dt><strong class="command">getomapheader</strong> <em>name</em></dt><dd><p>把 name 对象的对象映射图头部转储为十六进制。</p>
+</dd>
+<dt><strong class="command">setomapheader</strong> <em>name</em> <em>value</em></dt><dd><p>设置 name 对象的对象映射图头部的值。</p>
+</dd>
+<dt><strong class="command">export</strong> <em>filename</em></dt><dd><p>把存储池内容序列化为一个文件或标准输出。</p>
+</dd>
+<dt><strong class="command">import</strong> [–dry-run] [–no-overwrite] &lt; filename | - &gt;</dt><dd><p>把一个文件或标准输入的内容载入存储池。</p>
+</dd>
+</dl>
 </div>
 <div class="section" id="id7">
-<h2>使用范围<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
-<p><strong>rados</strong> 是 Ceph 的一部分，这是个伸缩力强、开源、分布式的存储系统，更多信息参见 <a class="reference external" href="http://ceph.com/docs">http://ceph.com/docs</a> 。</p>
+<h2>实例<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>查看集群使用情况：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="n">df</span>
+</pre></div>
+</div>
+<p>获取存储池 foo 内的对象列表，并显示在标准输出：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">foo</span> <span class="n">ls</span> <span class="o">-</span>
+</pre></div>
+</div>
+<p>写入一个对象：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">foo</span> <span class="n">put</span> <span class="n">myobject</span> <span class="n">blah</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>创建一个快照：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">foo</span> <span class="n">mksnap</span> <span class="n">mysnap</span>
+</pre></div>
+</div>
+<p>删除对象：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">foo</span> <span class="n">rm</span> <span class="n">myobject</span>
+</pre></div>
+</div>
+<p>读取对象的快照内容：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="o">-</span><span class="n">p</span> <span class="n">foo</span> <span class="o">-</span><span class="n">s</span> <span class="n">mysnap</span> <span class="n">get</span> <span class="n">myobject</span> <span class="n">blah</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span><span class="n">old</span>
+</pre></div>
+</div>
+<p>罗列 PG 0.6 内不一致的对象：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rados</span> <span class="nb">list</span><span class="o">-</span><span class="n">inconsistent</span><span class="o">-</span><span class="n">obj</span> <span class="mf">0.6</span> <span class="o">--</span><span class="nb">format</span><span class="o">=</span><span class="n">json</span><span class="o">-</span><span class="n">pretty</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="id8">
-<h2>参考<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="../ceph/"><em>ceph</em></a>(8)</p>
+<h2>使用范围<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p><strong>rados</strong> 是 Ceph 的一部分，这是个伸缩力强、开源、分布式的存储系统，更多信息参见 <a class="reference external" href="http://ceph.com/docs">http://ceph.com/docs</a> 。</p>
+</div>
+<div class="section" id="id9">
+<h2>参考<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../ceph/"><span class="doc">ceph</span></a>(8)</p>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -239,42 +284,43 @@ xattr 相关的操作。</p>
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/configuration/">配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/deployment/">部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/operations/">运维</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../../rados/man/">手册页</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../ceph-disk/">ceph-disk &#8211; Ceph 的磁盘工具，适用于 OSD</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph/">ceph &#8211; Ceph 管理工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">ceph-deploy &#8211; Ceph 部署工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-rest-api/">ceph-rest-api &#8211; ceph 的 REST 风格管理服务器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-authtool/">ceph-authtool &#8211; ceph 密钥环操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-clsinfo/">ceph-clsinfo &#8211; 查看类对象信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">ceph-conf &#8211; ceph 配置文件工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-debugpack/">ceph-debugpack &#8211; ceph 调试信息打包工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-dencoder/">ceph-dencoder &#8211; ceph 编码器/解码器工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-mon/">ceph-mon &#8211; ceph 监视器守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-osd/">ceph-osd &#8211; ceph 对象存储守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-run/">ceph-run &#8211; 发生核心转储后重启守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-syn/">ceph-syn &#8211; ceph 的人造负载生成器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../crushtool/">crushtool &#8211; CRUSH 图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../librados-config/">librados-config &#8211; 显示关于 librados 的信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../monmaptool/">monmaptool &#8211; ceph 监视器运行图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../osdmaptool/">osdmaptool &#8211; ceph osd 运行图操作工具</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">rados &#8211; rados 对象存储工具</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-volume/">ceph-volume – Ceph OSD 部署和检查工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-volume-systemd/">ceph-volume-systemd – systemd ceph-volume 辅助工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph/">ceph – Ceph 管理工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">ceph-deploy – Ceph 部署工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-authtool/">ceph-authtool – ceph 密钥环操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-clsinfo/">ceph-clsinfo – 查看类对象信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">ceph-conf – ceph 配置文件工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-debugpack/">ceph-debugpack – ceph 调试信息打包工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-dencoder/">ceph-dencoder – ceph 编码器/解码器工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-mon/">ceph-mon – ceph 监视器守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-osd/">ceph-osd – ceph 对象存储守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-kvstore-tool/">ceph-kvstore-tool – ceph 的 kvstore 操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-run/">ceph-run – 发生核心转储后重启守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-syn/">ceph-syn – ceph 的人造负载生成器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crushtool/">crushtool – CRUSH 图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../librados-config/">librados-config – 显示关于 librados 的信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monmaptool/">monmaptool – ceph 监视器运行图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../osdmaptool/">osdmaptool – ceph osd 运行图操作工具</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">rados – rados 对象存储工具</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">提纲</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">描述</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">选项</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">全局命令</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">特定于存储池的命令</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id6">实例</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id7">使用范围</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id8">参考</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">全局命令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">特定于存储池的命令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">实例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">使用范围</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">参考</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-post-file/">ceph-post-file &#8211; 把文件上传给 ceph 开发者</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-post-file/">ceph-post-file – 把文件上传给 ceph 开发者</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/troubleshooting/">故障排除</a></li>
@@ -282,40 +328,41 @@ xattr 相关的操作。</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -330,13 +377,13 @@ xattr 相关的操作。</p>
         <li class="right" >
           <a href="../osdmaptool/" title="osdmaptool – ceph osd 运行图操作工具"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rados/" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../../../rados/man/" >对象存储手册页</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" >对象存储手册页</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

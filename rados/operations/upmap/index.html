@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>使用 pg-upmap &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="CRUSH 图" href="../crush-map/" />
+    <link rel="prev" title="均衡器" href="../balancer/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../crush-map/" title="CRUSH 图"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../balancer/" title="均衡器"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">集群运维</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/operations/upmap.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="pg-upmap">
+<h1>使用 pg-upmap<a class="headerlink" href="#pg-upmap" title="Permalink to this headline">¶</a></h1>
+<p>从 Luminous v12.2.z 版起， OSDMap 里有一张新的 <em>pg-upmap</em> 例外表，以支持指定 PG 映射到指定的 OSD 。这样可以让集群可以更好地调整数据分布，在多数情况下，可以把 PG 完美地散布到各 OSD 上。</p>
+<p>这个新机制的关键点是，它需要所有客户端都能理解 OSDMap 里新增的
+<em>pg-upmap</em> 数据结构。</p>
+<div class="section" id="id1">
+<h2>启用此功能<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>To allow use of the feature, you must tell the cluster that it only
+needs to support luminous (and newer) clients with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">require</span><span class="o">-</span><span class="nb">min</span><span class="o">-</span><span class="n">compat</span><span class="o">-</span><span class="n">client</span> <span class="n">luminous</span>
+</pre></div>
+</div>
+<p>This command will fail if any pre-luminous clients or daemons are
+connected to the monitors.  You can see what client versions are in
+use with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">features</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>一句忠告<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>这是一个新功能，而且不太友好。写下此文档时，我们正致力于
+ceph-mgr 的 <cite>balancer</cite> 新模块，它有可能让这一切实现自动化。</p>
+<p>到那时，</p>
+</div>
+<div class="section" id="id3">
+<h2>离线优化<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>Upmap entries are updated with an offline optimizer built into <code class="docutils literal notranslate"><span class="pre">osdmaptool</span></code>.</p>
+<ol class="arabic">
+<li><p>Grab the latest copy of your osdmap:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">getmap</span> <span class="o">-</span><span class="n">o</span> <span class="n">om</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run the optimizer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osdmaptool</span> <span class="n">om</span> <span class="o">--</span><span class="n">upmap</span> <span class="n">out</span><span class="o">.</span><span class="n">txt</span> <span class="p">[</span><span class="o">--</span><span class="n">upmap</span><span class="o">-</span><span class="n">pool</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">upmap</span><span class="o">-</span><span class="nb">max</span> <span class="o">&lt;</span><span class="nb">max</span><span class="o">-</span><span class="n">count</span><span class="o">&gt;</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">upmap</span><span class="o">-</span><span class="n">deviation</span> <span class="o">&lt;</span><span class="nb">max</span><span class="o">-</span><span class="n">deviation</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>It is highly recommended that optimization be done for each pool
+individually, or for sets of similarly-utilized pools.  You can
+specify the <code class="docutils literal notranslate"><span class="pre">--upmap-pool</span></code> option multiple times.  “Similar pools”
+means pools that are mapped to the same devices and store the same
+kind of data (e.g., RBD image pools, yes; RGW index pool and RGW
+data pool, no).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">max-count</span></code> value is the maximum number of upmap entries to
+identify in the run.  The default is 100, but you may want to make
+this a smaller number so that the tool completes more quickly (but
+does less work).  If it cannot find any additional changes to make
+it will stop early (i.e., when the pool distribution is perfect).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">max-deviation</span></code> value defaults to <cite>.01</cite> (i.e., 1%).  If an OSD
+utilization varies from the average by less than this amount it
+will be considered perfect.</p>
+</li>
+<li><p>The proposed changes are written to the output file <code class="docutils literal notranslate"><span class="pre">out.txt</span></code> in
+the example above.  These are normal ceph CLI commands that can be
+run to apply the changes to the cluster.  This can be done with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">out</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>The above steps can be repeated as many times as necessary to achieve
+a perfect distribution of PGs for each set of pools.</p>
+<p>You can see some (gory) details about what the tool is doing by
+passing <code class="docutils literal notranslate"><span class="pre">--debug-osd</span> <span class="pre">10</span></code> to <code class="docutils literal notranslate"><span class="pre">osdmaptool</span></code>.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-checks/">健康检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg-repair/">修复 PG 不一致状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../balancer/">均衡器</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">使用 pg-upmap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">启用此功能</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">一句忠告</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">离线优化</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map-edits/">手动编辑一个 CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devices/">设备管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-migration/">迁移到 BlueStore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../crush-map/" title="CRUSH 图"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../balancer/" title="均衡器"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

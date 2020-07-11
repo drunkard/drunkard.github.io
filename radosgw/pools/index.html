@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>存储池 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Ceph 对象网关配置参考" href="../config-ref/" />
+    <link rel="prev" title="多站" href="../multisite/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../config-ref/" title="Ceph 对象网关配置参考"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../multisite/" title="多站"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 对象网关</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/radosgw/pools.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="id1">
+<h1>存储池<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>Ceph 对象网关要用多个存储池来满足多种存储需求，它们罗列在 Zone
+对象内（见 <code class="docutils literal notranslate"><span class="pre">radosgw-admin</span> <span class="pre">zone</span> <span class="pre">get</span></code> ）。系统会自动创建名为
+<code class="docutils literal notranslate"><span class="pre">default</span></code> 的单个域，相应地存储池名字以 <code class="docutils literal notranslate"><span class="pre">default.rgw.</span></code> 打头；然而<a class="reference external" href="../multisite">多站配置</a>会有多个域。</p>
+<div class="section" id="id2">
+<h2>调整<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">radosgw</span></code> 的首次操作涉及一个不存在的域存储池时，它会用
+<code class="docutils literal notranslate"><span class="pre">osd</span> <span class="pre">pool</span> <span class="pre">default</span> <span class="pre">pg</span> <span class="pre">num</span></code> 和 <code class="docutils literal notranslate"><span class="pre">osd</span> <span class="pre">pool</span> <span class="pre">default</span> <span class="pre">pgp</span> <span class="pre">num</span></code> 的默认值创建那个存储池。这些默认值对于某些存储池来说足够了，但是其它的（特别是 <code class="docutils literal notranslate"><span class="pre">placement_pools</span></code> 内罗列的、用于桶索引和数据的存储池）就需要额外调整了。我们建议用
+<a class="reference external" href="http://ceph.com/pgcalc/">Ceph 归置组的单存储池计算器</a>给这些存储池计算个合适的归置组数量。存储池创建细节请参考<a class="reference external" href="http://docs.ceph.com/docs/master/rados/operations/pools/#pools">存储池</a>。</p>
+</div>
+<div class="section" id="id3">
+<h2>存储池命名空间<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version Luminous.</span></p>
+</div>
+<p>一个域的存储池名字应该遵循命名惯例 <code class="docutils literal notranslate"><span class="pre">{zone-name}.pool-name</span></code> ，例如，名为 <code class="docutils literal notranslate"><span class="pre">us-east</span></code> 的域需要创建如下存储池：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.rgw.root</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">us-east.rgw.control</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">us-east.rgw.meta</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">us-east.rgw.log</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">us-east.rgw.buckets.index</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">us-east.rgw.buckets.data</span></code></p></li>
+</ul>
+<p>域定义还多罗列了几个存储池，但是其中很多通过 rados 命名空间功能合并了。例如，下面所有的存储池条目共用了 <code class="docutils literal notranslate"><span class="pre">us-east.rgw.meta</span></code>
+存储池的命名空间：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;user_keys_pool&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east.rgw.meta:users.keys&quot;</span><span class="p">,</span>
+<span class="s2">&quot;user_email_pool&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east.rgw.meta:users.email&quot;</span><span class="p">,</span>
+<span class="s2">&quot;user_swift_pool&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east.rgw.meta:users.swift&quot;</span><span class="p">,</span>
+<span class="s2">&quot;user_uid_pool&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east.rgw.meta:users.uid&quot;</span><span class="p">,</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frontends/">HTTP 前端</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement/">Pool Placement and Storage Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">存储池的配置</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">调整</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">存储池命名空间</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../opa/">与 Open Policy Agent 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">LDAP 认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamicresharding/">动态的桶索引重分片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mfa/">多因子认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sync-modules/">同步模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STSLite/">STS Lite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../role/">Role</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../config-ref/" title="Ceph 对象网关配置参考"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../multisite/" title="多站"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 对象网关</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

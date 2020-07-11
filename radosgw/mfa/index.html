@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>RGW 对多因子认证的支持情况 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="同步模块" href="../sync-modules/" />
+    <link rel="prev" title="RGW 动态的桶索引重分片" href="../dynamicresharding/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../sync-modules/" title="同步模块"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../dynamicresharding/" title="RGW 动态的桶索引重分片"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 对象网关</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/radosgw/mfa.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="rgw">
+<span id="rgw-mfa"></span><h1>RGW 对多因子认证的支持情况<a class="headerlink" href="#rgw" title="Permalink to this headline">¶</a></h1>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version Mimic.</span></p>
+</div>
+<p>The S3 multifactor authentication (MFA) feature allows
+users to require the use of one-time password when removing
+objects on certain buckets. The buckets need to be configured
+with versioning and MFA enabled which can be done through
+the S3 api.</p>
+<p>Time-based one time password tokens can be assigned to a user
+through radosgw-admin. Each token has a secret seed, and a serial
+id that is assigned to it. Tokens are added to the user, can
+be listedm removed, and can also be re-synchronized.</p>
+<div class="section" id="id1">
+<h2>多站点<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>While the MFA IDs are set on the user’s metadata, the
+actual MFA one time password configuration resides in the local zone’s
+osds. Therefore, in a multi-site environment it is advisable to use
+different tokens for different zones.</p>
+</div>
+<div class="section" id="id2">
+<h2>术语<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>-<code class="docutils literal notranslate"><span class="pre">TOTP</span></code>: Time-based One Time Password</p>
+<p>-<code class="docutils literal notranslate"><span class="pre">token</span> <span class="pre">serial</span></code>: a string that represents the ID of a TOTP token</p>
+<p>-<code class="docutils literal notranslate"><span class="pre">token</span> <span class="pre">seed</span></code>: the secret seed that is used to calculate the TOTP</p>
+<p>-<code class="docutils literal notranslate"><span class="pre">totp</span> <span class="pre">seconds</span></code>: the time resolution that is being used for TOTP generation</p>
+<p>-<code class="docutils literal notranslate"><span class="pre">totp</span> <span class="pre">window</span></code>: the number of TOTP tokens that are checked before and after the current token when validating token</p>
+<p>-<code class="docutils literal notranslate"><span class="pre">totp</span> <span class="pre">pin</span></code>: the valid value of a TOTP token at a certain time</p>
+</div>
+<div class="section" id="id3">
+<h2>管理命令<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="mfa-totp">
+<h3>创建 MFA TOTP 新令牌<a class="headerlink" href="#mfa-totp" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa create --uid=&lt;user-id&gt; \</span>
+                           <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">serial</span><span class="o">=&lt;</span><span class="n">serial</span><span class="o">&gt;</span> \
+                           <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">seed</span><span class="o">=&lt;</span><span class="n">seed</span><span class="o">&gt;</span> \
+                           <span class="p">[</span> <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">seed</span><span class="o">-</span><span class="nb">type</span><span class="o">=&lt;</span><span class="nb">hex</span><span class="o">|</span><span class="n">base32</span><span class="o">&gt;</span> <span class="p">]</span> \
+                           <span class="p">[</span> <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">seconds</span><span class="o">=&lt;</span><span class="n">num</span><span class="o">-</span><span class="n">seconds</span><span class="o">&gt;</span> <span class="p">]</span> \
+                           <span class="p">[</span> <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">window</span><span class="o">=&lt;</span><span class="n">twindow</span><span class="o">&gt;</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>罗列 MFA TOTP 令牌<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa list --uid=&lt;user-id&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>查看 MFA TOTP 令牌<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa get --uid=&lt;user-id&gt; --totp-serial=&lt;serial&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>删除 MFA TOTP 令牌<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa remove --uid=&lt;user-id&gt; --totp-serial=&lt;serial&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>检查 MFA TOTP 令牌<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>Test a TOTP token pin, needed for validating that TOTP functions correctly.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa check --uid=&lt;user-id&gt; --totp-serial=&lt;serial&gt; \</span>
+                          <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">pin</span><span class="o">=&lt;</span><span class="n">pin</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>重新同步 MFA TOTP 令牌<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>In order to re-sync the TOTP token (in case of time skew). This requires
+feeding two consecutive pins: the previous pin, and the current pin.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># radosgw-admin mfa resync --uid=&lt;user-id&gt; --totp-serial=&lt;serial&gt; \</span>
+                           <span class="o">--</span><span class="n">totp</span><span class="o">-</span><span class="n">pin</span><span class="o">=&lt;</span><span class="n">prev</span><span class="o">-</span><span class="n">pin</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">totp</span><span class="o">=</span><span class="n">pin</span><span class="o">=&lt;</span><span class="n">current</span><span class="o">-</span><span class="n">pin</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frontends/">HTTP 前端</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement/">Pool Placement and Storage Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pools/">存储池的配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../keystone/">与 OpenStack Keystone 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../opa/">与 Open Policy Agent 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../compression/">压缩</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">LDAP 认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamicresharding/">动态的桶索引重分片</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">多因子认证</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">多站点</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">术语</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">管理命令</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mfa-totp">创建 MFA TOTP 新令牌</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">罗列 MFA TOTP 令牌</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">查看 MFA TOTP 令牌</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">删除 MFA TOTP 令牌</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">检查 MFA TOTP 令牌</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">重新同步 MFA TOTP 令牌</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sync-modules/">同步模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STSLite/">STS Lite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../role/">Role</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../sync-modules/" title="同步模块"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../dynamicresharding/" title="RGW 动态的桶索引重分片"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 对象网关</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

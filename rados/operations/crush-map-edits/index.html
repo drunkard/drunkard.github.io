@@ -1,0 +1,776 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>手动编辑一个 CRUSH 图 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="增加/删除 OSD" href="../add-or-rm-osds/" />
+    <link rel="prev" title="CRUSH 图" href="../crush-map/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../add-or-rm-osds/" title="增加/删除 OSD"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../crush-map/" title="CRUSH 图"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">集群运维</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/operations/crush-map-edits.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="crush">
+<h1>手动编辑一个 CRUSH 图<a class="headerlink" href="#crush" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Manually editing the CRUSH map is considered an advanced
+administrator operation.  All CRUSH changes that are
+necessary for the overwhelming majority of installations are
+possible via the standard ceph CLI and do not require manual
+CRUSH map edits.  If you have identified a use case where
+manual edits <em>are</em> necessary, consider contacting the Ceph
+developers so that future versions of Ceph can make this
+unnecessary.</p>
+</div>
+<p>要编辑现有的 CRUSH 图：</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="#getcrushmap">获取 CRUSH 图</a>；</p></li>
+<li><p><a class="reference external" href="#decompilecrushmap">反编译</a> CRUSH 图；</p></li>
+<li><p>至少编辑一个<a class="reference external" href="#crushmapdevices">设备</a>、<a class="reference external" href="#crushmapbuckets">桶</a>、<a class="reference external" href="#crushmaprules">规则</a>；</p></li>
+<li><p><a class="reference external" href="#compilecrushmap">重编译</a> CRUSH 图；</p></li>
+<li><p><a class="reference external" href="#setcrushmap">注入 CRUSH 图</a>。</p></li>
+</ol>
+<p>关于为指定存储池设置 CRUSH 图规则的细节，见<a class="reference external" href="../pools#setpoolvalues">调整存储池</a>。</p>
+<div class="section" id="getcrushmap">
+<span id="id9"></span><h2>获取 CRUSH 图<a class="headerlink" href="#getcrushmap" title="Permalink to this headline">¶</a></h2>
+<p>要获取集群的 CRUSH 图，执行命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">getcrushmap</span> <span class="o">-</span><span class="n">o</span> <span class="p">{</span><span class="n">compiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Ceph 将把 CRUSH 输出（ -o ）到你指定的文件，由于 CRUSH 图是已编译的，所以编辑前必须先反编译。</p>
+</div>
+<div class="section" id="decompilecrushmap">
+<span id="id10"></span><h2>反编译 CRUSH 图<a class="headerlink" href="#decompilecrushmap" title="Permalink to this headline">¶</a></h2>
+<p>要反编译 CRUSH 图，执行命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crushtool</span> <span class="o">-</span><span class="n">d</span> <span class="p">{</span><span class="n">compiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span> <span class="o">-</span><span class="n">o</span> <span class="p">{</span><span class="n">decompiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="compilecrushmap">
+<span id="id11"></span><h2>重编译 CRUSH 图<a class="headerlink" href="#compilecrushmap" title="Permalink to this headline">¶</a></h2>
+<p>To compile a CRUSH map, execute the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crushtool</span> <span class="o">-</span><span class="n">c</span> <span class="p">{</span><span class="n">decompiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span> <span class="o">-</span><span class="n">o</span> <span class="p">{</span><span class="n">compiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setcrushmap">
+<span id="id12"></span><h2>设置 CRUSH 图<a class="headerlink" href="#setcrushmap" title="Permalink to this headline">¶</a></h2>
+<p>To set the CRUSH map for your cluster, execute the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">setcrushmap</span> <span class="o">-</span><span class="n">i</span> <span class="p">{</span><span class="n">compiled</span><span class="o">-</span><span class="n">crushmap</span><span class="o">-</span><span class="n">filename</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Ceph will load (-i) a compiled CRUSH map from the filename you specified.</p>
+</div>
+<div class="section" id="id13">
+<h2>分段<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<p>CRUSH 图有 6 个主要段落。</p>
+<ol class="arabic simple">
+<li><p><strong>tunables:</strong> The preamble at the top of the map described any <em>tunables</em>
+for CRUSH behavior that vary from the historical/legacy CRUSH behavior. These
+correct for old bugs, optimizations, or other changes in behavior that have
+been made over the years to improve CRUSH’s behavior.</p></li>
+<li><p><strong>devices:</strong> Devices are individual <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> daemons that can
+store data.</p></li>
+<li><p><strong>types</strong>: 定义了 CRUSH 分级结构里要用的桶类型（
+<code class="docutils literal notranslate"><span class="pre">types</span></code> ），桶由逐级汇聚的存储位置（如行、机柜、机箱、主机等等）及其权重组成。</p></li>
+<li><p><strong>buckets:</strong> Once you define bucket types, you must define each node
+in the hierarchy, its type, and which devices or other nodes it
+contains.</p></li>
+<li><p><strong>rules:</strong> Rules define policy about how data is distributed across
+devices in the hierarchy.</p></li>
+<li><p><strong>choose_args:</strong> Choose_args are alternative weights associated with
+the hierarchy that have been adjusted to optimize data placement.  A single
+choose_args map can be used for the entire cluster, or one can be
+created for each individual pool.</p></li>
+</ol>
+</div>
+<div class="section" id="crushmapdevices">
+<span id="id14"></span><h2>CRUSH 图之设备<a class="headerlink" href="#crushmapdevices" title="Permalink to this headline">¶</a></h2>
+<p>Devices are individual <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> daemons that can store data.  You
+will normally have one defined here for each OSD daemon in your
+cluster.  Devices are identified by an id (a non-negative integer) and
+a name, normally <code class="docutils literal notranslate"><span class="pre">osd.N</span></code> where <code class="docutils literal notranslate"><span class="pre">N</span></code> is the device id.</p>
+<p>设备也可以与一个 <em>device class</em> （如 <code class="docutils literal notranslate"><span class="pre">hdd</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">ssd</span></code> ）关联，这样就可以让 crush 规则方便地引用。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># devices
+device {num} {osd.name} [class {class}]
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># devices</span>
+<span class="n">device</span> <span class="mi">0</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="k">class</span> <span class="nc">ssd</span>
+<span class="n">device</span> <span class="mi">1</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span> <span class="k">class</span> <span class="nc">hdd</span>
+<span class="n">device</span> <span class="mi">2</span> <span class="n">osd</span><span class="o">.</span><span class="mi">2</span>
+<span class="n">device</span> <span class="mi">3</span> <span class="n">osd</span><span class="o">.</span><span class="mi">3</span>
+</pre></div>
+</div>
+<p>绝大多数情况下，各设备都映射到单个 <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> 守护进程。它通常是单个存储设备、一对设备（例如，一个用于数据、一个用于日志或元数据）、或者某些情况下一个小的 RAID 设备。</p>
+</div>
+<div class="section" id="id15">
+<h2>CRUSH 图之桶类型<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<p>CRUSH 图里的第二个列表定义了 bucket （桶）类型，桶简化了节点和叶子层次。节点（或非叶子）桶在分级结构里一般表示物理位置，节点汇聚了其它节点或叶子，叶桶表示 <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> 守护进程及其对应的存储媒体。</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>CRUSH 中用到的 bucket 意思是分级结构中的一个节点，也就是一个位置或一部分硬件。但是在 RADOS 网关接口的术语中，它又是不同的概念。</p>
+</div>
+<p>要往 CRUSH 图中增加一种 bucket 类型，在现有桶类型列表下方新增一行，输入 <code class="docutils literal notranslate"><span class="pre">type</span></code> 、之后是惟一数字 ID 和一个桶名。按惯例，会有一个叶子桶为 <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">0</span></code> ，然而你可以指定任何名字（如 osd 、
+disk 、 drive 、 storage 等等）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#types</span>
+<span class="nb">type</span> <span class="p">{</span><span class="n">num</span><span class="p">}</span> <span class="p">{</span><span class="n">bucket</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># types</span>
+<span class="nb">type</span> <span class="mi">0</span> <span class="n">osd</span>
+<span class="nb">type</span> <span class="mi">1</span> <span class="n">host</span>
+<span class="nb">type</span> <span class="mi">2</span> <span class="n">chassis</span>
+<span class="nb">type</span> <span class="mi">3</span> <span class="n">rack</span>
+<span class="nb">type</span> <span class="mi">4</span> <span class="n">row</span>
+<span class="nb">type</span> <span class="mi">5</span> <span class="n">pdu</span>
+<span class="nb">type</span> <span class="mi">6</span> <span class="n">pod</span>
+<span class="nb">type</span> <span class="mi">7</span> <span class="n">room</span>
+<span class="nb">type</span> <span class="mi">8</span> <span class="n">datacenter</span>
+<span class="nb">type</span> <span class="mi">9</span> <span class="n">region</span>
+<span class="nb">type</span> <span class="mi">10</span> <span class="n">root</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="crushmapbuckets">
+<span id="id16"></span><h2>CRUSH 图之桶层次<a class="headerlink" href="#crushmapbuckets" title="Permalink to this headline">¶</a></h2>
+<p>CRUSH 算法根据各设备的权重、大致统一的概率把数据对象分布到存储设备中。 CRUSH 根据你定义的集群运行图分布对象及其副本， CRUSH 图表达了可用存储设备以及包含它们的逻辑单元。</p>
+<p>要把归置组映射到跨故障域的 OSD ，一个 CRUSH 图需定义一系列分级桶类型（即现有 CRUSH 图的 <code class="docutils literal notranslate"><span class="pre">#type</span></code> 下）。创建桶分级结构的目的是按故障域隔离叶节点，像主机、机箱、机柜、电力分配单元、机群、行、房间、和数据中心。除了表示叶节点的 OSD ，其它分级结构都是任意的，你可以按需定义。</p>
+<p>我们建议 CRUSH 图内的命名符合贵公司的硬件命名规则，并且采用反映物理硬件的例程名。良好的命名可简化集群管理和故障排除，当 OSD 和/或其它硬件出问题时，管理员可轻易找到对应物理硬件。</p>
+<p>在下例中，桶分级结构有一个名为 <code class="docutils literal notranslate"><span class="pre">osd</span></code> 的分支、和两个节点分别名为 <code class="docutils literal notranslate"><span class="pre">host</span></code> 和 <code class="docutils literal notranslate"><span class="pre">rack</span></code> 。</p>
+<p class="ditaa">
+<img src="../../../_images/ditaa-9005238c27ea4a780e052c9cfc1b78c5cef85e83.png"/>
+</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>编号较高的 <code class="docutils literal notranslate"><span class="pre">rack</span></code> 桶类型汇聚编号较低的 <code class="docutils literal notranslate"><span class="pre">host</span></code> 桶类型。</p>
+</div>
+<p>位于 CRUSH 图起始部分、 <code class="docutils literal notranslate"><span class="pre">#devices</span></code> 列表内是表示叶节点的存储设备，没必要声明为桶例程。位于分级结构第二低层的桶一般用于汇聚设备（即它通常是包含存储媒体的计算机，你可以用自己喜欢的名字描述，如节点、计算机、服务器、主机、机器等等）。在高密度环境下，经常出现一机框内安装多个主机/节点的情况，因此还要考虑机框故障——比如，某一节点故障后需要拉出机框维修，这会影响多个主机/节点和其内的 OSD 。</p>
+<p>声明一个桶例程时，你必须指定其类型、惟一名称（字符串）、惟一负整数 ID （可选）、指定和各条目总容量/能力相关的权重、指定桶算法（通常是 <code class="docutils literal notranslate"><span class="pre">straw</span></code> ）、和哈希（通常为 <code class="docutils literal notranslate"><span class="pre">0</span></code> ，表示散列算法 <code class="docutils literal notranslate"><span class="pre">rjenkins1</span></code> ）。一个桶可以包含一到多条，这些条目可以由节点桶或叶子组成，它们可以有个权重用来反映条目的相对权重。</p>
+<p>你可以按下列语法声明一个节点桶：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">bucket</span><span class="o">-</span><span class="nb">type</span><span class="p">]</span> <span class="p">[</span><span class="n">bucket</span><span class="o">-</span><span class="n">name</span><span class="p">]</span> <span class="p">{</span>
+        <span class="nb">id</span> <span class="p">[</span><span class="n">a</span> <span class="n">unique</span> <span class="n">negative</span> <span class="n">numeric</span> <span class="n">ID</span><span class="p">]</span>
+        <span class="n">weight</span> <span class="p">[</span><span class="n">the</span> <span class="n">relative</span> <span class="n">capacity</span><span class="o">/</span><span class="n">capability</span> <span class="n">of</span> <span class="n">the</span> <span class="n">item</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span>
+        <span class="n">alg</span> <span class="p">[</span><span class="n">the</span> <span class="n">bucket</span> <span class="nb">type</span><span class="p">:</span> <span class="n">uniform</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">tree</span> <span class="o">|</span> <span class="n">straw</span> <span class="p">]</span>
+        <span class="nb">hash</span> <span class="p">[</span><span class="n">the</span> <span class="nb">hash</span> <span class="nb">type</span><span class="p">:</span> <span class="mi">0</span> <span class="n">by</span> <span class="n">default</span><span class="p">]</span>
+        <span class="n">item</span> <span class="p">[</span><span class="n">item</span><span class="o">-</span><span class="n">name</span><span class="p">]</span> <span class="n">weight</span> <span class="p">[</span><span class="n">weight</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>例如，用上面的图表，我们可以定义两个主机桶和一个机柜桶，
+OSD 被声明为主机桶内的条目：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">host</span> <span class="n">node1</span> <span class="p">{</span>
+        <span class="nb">id</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">alg</span> <span class="n">straw</span>
+        <span class="nb">hash</span> <span class="mi">0</span>
+        <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="n">weight</span> <span class="mf">1.00</span>
+        <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span> <span class="n">weight</span> <span class="mf">1.00</span>
+<span class="p">}</span>
+
+<span class="n">host</span> <span class="n">node2</span> <span class="p">{</span>
+        <span class="nb">id</span> <span class="o">-</span><span class="mi">2</span>
+        <span class="n">alg</span> <span class="n">straw</span>
+        <span class="nb">hash</span> <span class="mi">0</span>
+        <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">2</span> <span class="n">weight</span> <span class="mf">1.00</span>
+        <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">3</span> <span class="n">weight</span> <span class="mf">1.00</span>
+<span class="p">}</span>
+
+<span class="n">rack</span> <span class="n">rack1</span> <span class="p">{</span>
+        <span class="nb">id</span> <span class="o">-</span><span class="mi">3</span>
+        <span class="n">alg</span> <span class="n">straw</span>
+        <span class="nb">hash</span> <span class="mi">0</span>
+        <span class="n">item</span> <span class="n">node1</span> <span class="n">weight</span> <span class="mf">2.00</span>
+        <span class="n">item</span> <span class="n">node2</span> <span class="n">weight</span> <span class="mf">2.00</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>在前述示例中，机柜桶不包含任何 OSD ，它只包含低一级的主机桶、以及其内条目的权重之和。</p>
+</div>
+<div class="topic">
+<p class="topic-title">桶类型</p>
+<p>Ceph 支持四种桶，每种都是性能和组织简易间的折衷。如果你不确定用哪种桶，我们建议 <code class="docutils literal notranslate"><span class="pre">straw</span></code> ，关于桶类型的详细讨论见 <a class="reference external" href="https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf">CRUSH - 可控、可伸缩、分布式地归置多副本数据</a>，特别是 <strong>Section 3.4</strong> 。支持的桶类型有：</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p><strong>Uniform</strong>: 这种桶用<strong>完全</strong>相同的权重汇聚设备。例如，公司采购或淘汰硬件时，一般都有相同的物理配置（如批发）。当存储设备权重都相同时，你可以用 <code class="docutils literal notranslate"><span class="pre">uniform</span></code> 桶类型，它允许 CRUSH 按常数把副本映射到 uniform 桶。权重不统一时，你应该采用其它算法。</p></li>
+<li><p><strong>List</strong>: 这种桶把它们的内容汇聚为链表。它基于 <abbr title="Replication Under Scalable Hashing">RUSH</abbr> <sub>P</sub> 算法，一个列表就是一个自然、直观的<strong>扩展集群</strong>：对象会按一定概率被重定位到最新的设备、或者像从前一样仍保留在较老的设备上。结果是优化了新条目加入桶时的数据迁移。然而，如果从链表的中间或末尾删除了一些条目，将会导致大量没必要的挪动。所以这种桶适合<strong>永不或极少缩减</strong>的场景。</p></li>
+<li><p><strong>Tree</strong>: 它用一种二进制搜索树，在桶包含大量条目时比 list 桶更高效。它基于 <abbr title="Replication Under Scalable Hashing">RUSH</abbr> <sub>R</sub> 算法， tree 桶把归置时间减少到了 O(log <sub>n</sub>) ，这使得它们更适合管理更大规模的设备或嵌套桶。</p></li>
+<li><p><strong>Straw</strong>: list 和 tree 桶用分而治之策略，给特定条目一定优先级（如位于链表开头的条目）、或避开对整个子树上所有条目的考虑。这样提升了副本归置进程的性能，但是也导致了重新组织时的次优结果，如增加、拆除、或重设某条目的权重。 straw 桶类型允许所有条目模拟拉稻草的过程公平地相互“竞争”副本归置。</p></li>
+<li><p><strong>Straw2</strong>: Straw2 桶是对 straw 的改进，在邻居权重改变时可正确地避免条目间的数据迁移。</p>
+<p>例如，条目 A 的权重再次增大或完全删除，都仅会有数据迁移进或移出条目 A 。</p>
+</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="topic">
+<p class="topic-title">Hash</p>
+<p>各个桶都用了一种散列算法，当前 Ceph 仅支持 <code class="docutils literal notranslate"><span class="pre">rjenkins1</span></code> ，输入 <code class="docutils literal notranslate"><span class="pre">0</span></code> 表示散列算法设置为 <code class="docutils literal notranslate"><span class="pre">rjenkins1</span></code> 。</p>
+</div>
+<div class="topic" id="weightingbucketitems">
+<p class="topic-title">调整桶的权重</p>
+<p>Ceph 用双整形表示桶权重。权重和设备容量不同，我们建议用
+<code class="docutils literal notranslate"><span class="pre">1.00</span></code> 作为 1TB 存储设备的相对权重，这样 <code class="docutils literal notranslate"><span class="pre">0.5</span></code> 的权重大概代表 500GB 、 <code class="docutils literal notranslate"><span class="pre">3.00</span></code> 大概代表 3TB 。较高级桶的权重是所有枝叶桶的权重之和。</p>
+<p>一个桶的权重是一维的，你也可以计算条目权重来反映存储设备性能。例如，如果你有很多 1TB 的硬盘，其中一些数据传输速率相对低、其他的数据传输率相对高，即使它们容量相同，也应该设置不同的权重（如给吞吐量较低的硬盘设置权重 0.8 ，较高的设置 1.20 ）。</p>
+</div>
+</div>
+<div class="section" id="crushmaprules">
+<span id="id17"></span><h2>CRUSH 图之规则<a class="headerlink" href="#crushmaprules" title="Permalink to this headline">¶</a></h2>
+<p>CRUSH 图支持“ CRUSH 规则”概念，用以决定一个存储池里的数据如何归置。默认的 CRUSH 图有一条规则适用于各存储池。对大型集群来说，你可能创建很多存储池，且每个存储池都有它自己的、非默认的
+CRUSH 规则。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>大多数情况下，你都不需要修改默认规则。默认情况下，新创建的存储池其规则会设置为 <code class="docutils literal notranslate"><span class="pre">0</span></code> 。</p>
+</div>
+<p>CRUSH 规则定义了归置和复制策略、或分布策略，用它可以规定
+CRUSH 如何放置对象副本。例如，你也许想创建一条规则用以选择一对目的地做双路镜像；另一条规则用以选择位于两个数据中心的三个目的地做三路镜像；又一条规则用 6 个设备做纠删编码。关于
+CRUSH 规则的详细研究见
+<a class="reference external" href="https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf">CRUSH - 可控、可伸缩、分布式地归置多副本数据</a>，主要是 <strong>Section 3.2</strong> 。</p>
+<p>规则格式如下：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>rule &lt;rulename&gt; {
+
+        id [a unique whole numeric ID]
+        type [ replicated | erasure ]
+        min_size &lt;min-size&gt;
+        max_size &lt;max-size&gt;
+        step take &lt;bucket-name&gt; [class &lt;device-class&gt;]
+        step [choose|chooseleaf] [firstn|indep] &lt;N&gt; type &lt;bucket-type&gt;
+        step emit
+}
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>全局唯一的数字，用于标识此规则。</p>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则掩码的一个组件。</p>
+</dd>
+<dt class="field-odd">类型</dt>
+<dd class="field-odd"><p>Integer</p>
+</dd>
+<dt class="field-even">是否必需</dt>
+<dd class="field-even"><p>Yes</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p>0</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">type</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>为一个驱动器（多副本的）或 RAID 确定一条规则。</p>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则掩码的一个组件。</p>
+</dd>
+<dt class="field-odd">类型</dt>
+<dd class="field-odd"><p>String</p>
+</dd>
+<dt class="field-even">是否必需</dt>
+<dd class="field-even"><p>Yes</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">replicated</span></code></p>
+</dd>
+<dt class="field-even">有效值</dt>
+<dd class="field-even"><p>当前仅支持 <code class="docutils literal notranslate"><span class="pre">replicated</span></code> 和 <code class="docutils literal notranslate"><span class="pre">erasure</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">min_size</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>如果一个归置组副本数小于此数， CRUSH 将<strong>不</strong>应用此规则。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Integer</p>
+</dd>
+<dt class="field-odd">目的</dt>
+<dd class="field-odd"><p>规则掩码的一个组件。</p>
+</dd>
+<dt class="field-even">是否必需</dt>
+<dd class="field-even"><p>Yes</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">max_size</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>如果一个归置组副本数大于此数， CRUSH 将<strong>不</strong>应用此规则。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Integer</p>
+</dd>
+<dt class="field-odd">目的</dt>
+<dd class="field-odd"><p>规则掩码的一个组件。</p>
+</dd>
+<dt class="field-even">是否必需</dt>
+<dd class="field-even"><p>Yes</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p>10</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">take</span> <span class="pre">&lt;bucket-name&gt;</span> <span class="pre">[class</span> <span class="pre">&lt;device-class&gt;]</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>选取一个桶名，并沿树往下迭代。如果指定了
+<code class="docutils literal notranslate"><span class="pre">device-class</span></code> ，它必须与前面定义设备时的分类名一致，不属于此类的设备都会被排除在外。</p>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则的一个组件。</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>Yes</p>
+</dd>
+<dt class="field-even">实例</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">take</span> <span class="pre">data</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">choose</span> <span class="pre">firstn</span> <span class="pre">{num}</span> <span class="pre">type</span> <span class="pre">{bucket-type}</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>在当前可用桶中选取指定类型桶的数量，这个数字通常是所在存储池的副本数（即 pool size ）。</p>
+<ul class="simple">
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">==</span> <span class="pre">0</span></code> 选择 <code class="docutils literal notranslate"><span class="pre">pool-num-replicas</span></code> 个桶（所有可用的）；</p></li>
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">&gt;</span> <span class="pre">0</span> <span class="pre">&amp;&amp;</span> <span class="pre">&lt;</span> <span class="pre">pool-num-replicas</span></code> 就选择那么多的桶；</p></li>
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> 它意为 <code class="docutils literal notranslate"><span class="pre">pool-num-replicas</span> <span class="pre">-</span> <span class="pre">{num}</span></code> 。</p></li>
+</ul>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则的一个组件。</p>
+</dd>
+<dt class="field-odd">先决条件</dt>
+<dd class="field-odd"><p>跟在 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">take</span></code> 或 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">choose</span></code> 之后。</p>
+</dd>
+<dt class="field-even">实例</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">choose</span> <span class="pre">firstn</span> <span class="pre">1</span> <span class="pre">type</span> <span class="pre">row</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">chooseleaf</span> <span class="pre">firstn</span> <span class="pre">{num}</span> <span class="pre">type</span> <span class="pre">{bucket-type}</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>选择 <code class="docutils literal notranslate"><span class="pre">{bucket-type}</span></code> 类型的一堆桶，并从各桶的子树里选择一个叶子节点（即一个 OSD ）。集合内桶的数量通常是所在存储池的副本数（即 pool size ）。</p>
+<ul class="simple">
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">==</span> <span class="pre">0</span></code> 选择 <code class="docutils literal notranslate"><span class="pre">pool-num-replicas</span></code> 个桶（所有可用的）；</p></li>
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">&gt;</span> <span class="pre">0</span> <span class="pre">&amp;&amp;</span> <span class="pre">&lt;</span> <span class="pre">pool-num-replicas</span></code> 就选择那么多的桶；</p></li>
+<li><p>如果 <code class="docutils literal notranslate"><span class="pre">{num}</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> 意为 <code class="docutils literal notranslate"><span class="pre">pool-num-replicas</span> <span class="pre">-</span> <span class="pre">{num}</span></code> 。</p></li>
+</ul>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则的一个组件。使用它之后就没必要分两步来选择一设备。</p>
+</dd>
+<dt class="field-odd">先决条件</dt>
+<dd class="field-odd"><p>跟在 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">take</span></code> 或 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">choose</span></code> 之后。</p>
+</dd>
+<dt class="field-even">实例</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">chooseleaf</span> <span class="pre">firstn</span> <span class="pre">0</span> <span class="pre">type</span> <span class="pre">row</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">emit</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>输出当前值并清空堆栈。通常用于规则末尾，但也能用于在同一规则内选取别的树。</p>
+</dd>
+<dt class="field-even">目的</dt>
+<dd class="field-even"><p>规则的一个组件。</p>
+</dd>
+<dt class="field-odd">先决条件</dt>
+<dd class="field-odd"><p>在 <code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">choose</span></code> 之后。</p>
+</dd>
+<dt class="field-even">实例</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">step</span> <span class="pre">emit</span></code></p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>一条 CRUSH 规则可以分配给多个存储池使用，但是一个存储池不能同时配置多条 CRUSH 规则。</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">firstn</span></code> versus <code class="docutils literal notranslate"><span class="pre">indep</span></code></p>
+<dl class="field-list">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>Controls the replacement strategy CRUSH uses when items (OSDs)
+are marked down in the CRUSH map. If this rule is to be used with
+replicated pools it should be <code class="docutils literal notranslate"><span class="pre">firstn</span></code> and if it’s for
+erasure-coded pools it should be <code class="docutils literal notranslate"><span class="pre">indep</span></code>.</p>
+<p>The reason has to do with how they behave when a
+previously-selected device fails. Let’s say you have a PG stored
+on OSDs 1, 2, 3, 4, 5. Then 3 goes down.</p>
+<p>With the “firstn” mode, CRUSH simply adjusts its calculation to
+select 1 and 2, then selects 3 but discovers it’s down, so it
+retries and selects 4 and 5, and then goes on to select a new
+OSD 6. So the final CRUSH mapping change is
+1, 2, 3, 4, 5 -&gt; 1, 2, 4, 5, 6.</p>
+<p>But if you’re storing an EC pool, that means you just changed the
+data mapped to OSDs 4, 5, and 6! So the “indep” mode attempts to
+not do that. You can instead expect it, when it selects the failed
+OSD 3, to try again and pick out 6, for a final transformation of:
+1, 2, 3, 4, 5 -&gt; 1, 2, 6, 4, 5</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="ssd">
+<span id="crush-reclassify"></span><h2>从老式的 SSD 规则迁移到设备类<a class="headerlink" href="#ssd" title="Permalink to this headline">¶</a></h2>
+<p>It used to be necessary to manually edit your CRUSH map and maintain a
+parallel hierarchy for each specialized device type (e.g., SSD) in order to
+write rules that apply to those devices.  Since the Luminous release,
+the <em>device class</em> feature has enabled this transparently.</p>
+<p>However, migrating from an existing, manually customized per-device map to
+the new device class rules in the trivial way will cause all data in the
+system to be reshuffled.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">crushtool</span></code> has a few commands that can transform a legacy rule
+and hierarchy so that you can start using the new class-based rules.
+There are three types of transformations possible:</p>
+<ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">--reclassify-root</span> <span class="pre">&lt;root-name&gt;</span> <span class="pre">&lt;device-class&gt;</span></code></p>
+<p>This will take everything in the hierarchy beneath root-name and
+adjust any rules that reference that root via a <code class="docutils literal notranslate"><span class="pre">take</span>
+<span class="pre">&lt;root-name&gt;</span></code> to instead <code class="docutils literal notranslate"><span class="pre">take</span> <span class="pre">&lt;root-name&gt;</span> <span class="pre">class</span> <span class="pre">&lt;device-class&gt;</span></code>.
+It renumbers the buckets in such a way that the old IDs are instead
+used for the specified class’s “shadow tree” so that no data
+movement takes place.</p>
+<p>For example, imagine you have an existing rule like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rule</span> <span class="n">replicated_ruleset</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="mi">0</span>
+   <span class="nb">type</span> <span class="n">replicated</span>
+   <span class="n">min_size</span> <span class="mi">1</span>
+   <span class="n">max_size</span> <span class="mi">10</span>
+   <span class="n">step</span> <span class="n">take</span> <span class="n">default</span>
+   <span class="n">step</span> <span class="n">chooseleaf</span> <span class="n">firstn</span> <span class="mi">0</span> <span class="nb">type</span> <span class="n">rack</span>
+   <span class="n">step</span> <span class="n">emit</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you reclassify the root <cite>default</cite> as class <cite>hdd</cite>, the rule will
+become:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rule</span> <span class="n">replicated_ruleset</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="mi">0</span>
+   <span class="nb">type</span> <span class="n">replicated</span>
+   <span class="n">min_size</span> <span class="mi">1</span>
+   <span class="n">max_size</span> <span class="mi">10</span>
+   <span class="n">step</span> <span class="n">take</span> <span class="n">default</span> <span class="k">class</span> <span class="nc">hdd</span>
+   <span class="n">step</span> <span class="n">chooseleaf</span> <span class="n">firstn</span> <span class="mi">0</span> <span class="nb">type</span> <span class="n">rack</span>
+   <span class="n">step</span> <span class="n">emit</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--set-subtree-class</span> <span class="pre">&lt;bucket-name&gt;</span> <span class="pre">&lt;device-class&gt;</span></code></p>
+<p>This will mark every device in the subtree rooted at <em>bucket-name</em>
+with the specified device class.</p>
+<p>This is normally used in conjunction with the <code class="docutils literal notranslate"><span class="pre">--reclassify-root</span></code>
+option to ensure that all devices in that root are labeled with the
+correct class.  In some situations, however, some of those devices
+(correctly) have a different class and we do not want to relabel
+them.  In such cases, one can exclude the <code class="docutils literal notranslate"><span class="pre">--set-subtree-class</span></code>
+option.  This means that the remapping process will not be perfect,
+since the previous rule distributed across devices of multiple
+classes but the adjusted rules will only map to devices of the
+specified <em>device-class</em>, but that often is an accepted level of
+data movement when the nubmer of outlier devices is small.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--reclassify-bucket</span> <span class="pre">&lt;match-pattern&gt;</span> <span class="pre">&lt;device-class&gt;</span> <span class="pre">&lt;default-parent&gt;</span></code></p>
+<p>This will allow you to merge a parallel type-specific hiearchy with the normal hierarchy.  For example, many users have maps like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">host</span> <span class="n">node1</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="o">-</span><span class="mi">2</span>           <span class="c1"># do not change unnecessarily</span>
+   <span class="c1"># weight 109.152</span>
+   <span class="n">alg</span> <span class="n">straw</span>
+   <span class="nb">hash</span> <span class="mi">0</span>  <span class="c1"># rjenkins1</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">2</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">3</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">4</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">5</span> <span class="n">weight</span> <span class="mf">9.096</span>
+   <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="n">host</span> <span class="n">node1</span><span class="o">-</span><span class="n">ssd</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="o">-</span><span class="mi">10</span>          <span class="c1"># do not change unnecessarily</span>
+   <span class="c1"># weight 2.000</span>
+   <span class="n">alg</span> <span class="n">straw</span>
+   <span class="nb">hash</span> <span class="mi">0</span>  <span class="c1"># rjenkins1</span>
+   <span class="n">item</span> <span class="n">osd</span><span class="o">.</span><span class="mi">80</span> <span class="n">weight</span> <span class="mf">2.000</span>
+   <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="n">root</span> <span class="n">default</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="o">-</span><span class="mi">1</span>           <span class="c1"># do not change unnecessarily</span>
+   <span class="n">alg</span> <span class="n">straw</span>
+   <span class="nb">hash</span> <span class="mi">0</span>  <span class="c1"># rjenkins1</span>
+   <span class="n">item</span> <span class="n">node1</span> <span class="n">weight</span> <span class="mf">110.967</span>
+   <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="n">root</span> <span class="n">ssd</span> <span class="p">{</span>
+   <span class="nb">id</span> <span class="o">-</span><span class="mi">18</span>          <span class="c1"># do not change unnecessarily</span>
+   <span class="c1"># weight 16.000</span>
+   <span class="n">alg</span> <span class="n">straw</span>
+   <span class="nb">hash</span> <span class="mi">0</span>  <span class="c1"># rjenkins1</span>
+   <span class="n">item</span> <span class="n">node1</span><span class="o">-</span><span class="n">ssd</span> <span class="n">weight</span> <span class="mf">2.000</span>
+   <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This function will reclassify each bucket that matches a
+pattern.  The pattern can look like <code class="docutils literal notranslate"><span class="pre">%suffix</span></code> or <code class="docutils literal notranslate"><span class="pre">prefix%</span></code>.
+For example, in the above example, we would use the pattern
+<code class="docutils literal notranslate"><span class="pre">%-ssd</span></code>.  For each matched bucket, the remaining portion of the
+name (that matches the <code class="docutils literal notranslate"><span class="pre">%</span></code> wildcard) specifies the <em>base bucket</em>.
+All devices in the matched bucket are labeled with the specified
+device class and then moved to the base bucket.  If the base bucket
+does not exist (e.g., <code class="docutils literal notranslate"><span class="pre">node12-ssd</span></code> exists but <code class="docutils literal notranslate"><span class="pre">node12</span></code> does
+not), then it is created and linked underneath the specified
+<em>default parent</em> bucket.  In each case, we are careful to preserve
+the old bucket IDs for the new shadow buckets to prevent data
+movement.  Any rules with <code class="docutils literal notranslate"><span class="pre">take</span></code> steps referencing the old
+buckets are adjusted.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--reclassify-bucket</span> <span class="pre">&lt;bucket-name&gt;</span> <span class="pre">&lt;device-class&gt;</span> <span class="pre">&lt;base-bucket&gt;</span></code></p>
+<p>The same command can also be used without a wildcard to map a
+single bucket.  For example, in the previous example, we want the
+<code class="docutils literal notranslate"><span class="pre">ssd</span></code> bucket to be mapped to the <code class="docutils literal notranslate"><span class="pre">default</span></code> bucket.</p>
+</li>
+</ol>
+<p>The final command to convert the map comprised of the above fragments would be something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ceph osd getcrushmap -o original
+$ crushtool -i original --reclassify \
+    --set-subtree-class default hdd \
+    --reclassify-root default hdd \
+    --reclassify-bucket %-ssd ssd default \
+    --reclassify-bucket ssd ssd default \
+    -o adjusted
+</pre></div>
+</div>
+<p>In order to ensure that the conversion is correct, there is a <code class="docutils literal notranslate"><span class="pre">--compare</span></code> command that will test a large sample of inputs to the CRUSH map and ensure that the same result comes back out.  These inputs are controlled by the same options that apply to the <code class="docutils literal notranslate"><span class="pre">--test</span></code> command.  For the above example,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ crushtool -i original --compare adjusted
+rule 0 had 0/10240 mismatched mappings (0)
+rule 1 had 0/10240 mismatched mappings (0)
+maps appear equivalent
+</pre></div>
+</div>
+<p>If there were difference, you’d see what ratio of inputs are remapped
+in the parentheses.</p>
+<p>If you are satisfied with the adjusted map, you can apply it to the cluster with something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">setcrushmap</span> <span class="o">-</span><span class="n">i</span> <span class="n">adjusted</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id18">
+<h2>调整 CRUSH ，强硬方法<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
+<p>如果你能保证所有客户端都运行最新代码，你可以这样调整可调值：从集群抽取 CRUSH 图、修改值、重注入。</p>
+<blockquote>
+<div><ul>
+<li><p>提抽取最新 CRUSH 图：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">getcrushmap</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span>
+</pre></div>
+</div>
+</li>
+<li><p>调整可调参数。这些值在我们测试过的大、小型集群上都有最佳表现。在极端情况下，你需要给 <code class="docutils literal notranslate"><span class="pre">crushtool</span></code> 额外指定 <code class="docutils literal notranslate"><span class="pre">--enable-unsafe-tunables</span></code> 参数才行：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crushtool</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">tries</span> <span class="mi">0</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">fallback</span><span class="o">-</span><span class="n">tries</span> <span class="mi">0</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">total</span><span class="o">-</span><span class="n">tries</span> <span class="mi">50</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span><span class="o">.</span><span class="n">new</span>
+</pre></div>
+</div>
+</li>
+<li><p>重注入修改的图。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">setcrushmap</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span><span class="o">.</span><span class="n">new</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id19">
+<h2>遗留值<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
+<p>供参考，CRUSH 可调参数的遗留值可以用下面命令设置：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crushtool</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">tries</span> <span class="mi">2</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">local</span><span class="o">-</span><span class="n">fallback</span><span class="o">-</span><span class="n">tries</span> <span class="mi">5</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">choose</span><span class="o">-</span><span class="n">total</span><span class="o">-</span><span class="n">tries</span> <span class="mi">19</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">chooseleaf</span><span class="o">-</span><span class="n">descend</span><span class="o">-</span><span class="n">once</span> <span class="mi">0</span> <span class="o">--</span><span class="nb">set</span><span class="o">-</span><span class="n">chooseleaf</span><span class="o">-</span><span class="n">vary</span><span class="o">-</span><span class="n">r</span> <span class="mi">0</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">crush</span><span class="o">.</span><span class="n">legacy</span>
+</pre></div>
+</div>
+<p>再次申明， <code class="docutils literal notranslate"><span class="pre">--enable-unsafe-tunables</span></code> 是必需的，而且前面也提到了，回退到遗留值后慎用旧版 <code class="docutils literal notranslate"><span class="pre">ceph-osd</span></code> 进程，因为此功能位不是完全强制的。</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-checks/">健康检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg-repair/">修复 PG 不一致状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../balancer/">均衡器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upmap/">使用 pg-upmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">手动编辑一个 CRUSH 图</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getcrushmap">获取 CRUSH 图</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#decompilecrushmap">反编译 CRUSH 图</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compilecrushmap">重编译 CRUSH 图</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setcrushmap">设置 CRUSH 图</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">分段</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crushmapdevices">CRUSH 图之设备</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">CRUSH 图之桶类型</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crushmapbuckets">CRUSH 图之桶层次</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#crushmaprules">CRUSH 图之规则</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ssd">从老式的 SSD 规则迁移到设备类</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">调整 CRUSH ，强硬方法</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19">遗留值</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devices/">设备管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-migration/">迁移到 BlueStore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../add-or-rm-osds/" title="增加/删除 OSD"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../crush-map/" title="CRUSH 图"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

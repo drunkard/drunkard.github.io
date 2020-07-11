@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ceph-mgr 管理员指南 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ceph-mgr 管理员指南 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 管理器守护进程" href="../" />
-    <link rel="next" title="ceph-mgr 插件编程指南" href="../plugins/" />
-    <link rel="prev" title="Ceph 管理器守护进程" href="../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="ceph-mgr 模块开发指南" href="../modules/" />
+    <link rel="prev" title="Ceph 管理器守护进程" href="../" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,132 +31,200 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../plugins/" title="ceph-mgr 插件编程指南"
+          <a href="../modules/" title="ceph-mgr 模块开发指南"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../" title="Ceph 管理器守护进程"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">Ceph 管理器守护进程</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 管理器守护进程</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/mgr/administrator.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="ceph-mgr">
-<span id="ceph-mgr-administrator-s-guide"></span><h1>ceph-mgr 管理员指南<a class="headerlink" href="#ceph-mgr" title="Permalink to this headline">¶</a></h1>
+<span id="mgr-administrator-guide"></span><h1>ceph-mgr 管理员指南<a class="headerlink" href="#ceph-mgr" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>设置<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>给守护进程创建认证密钥：</p>
-<div class="highlight-python"><pre>ceph auth get-or-create mgr.$name mon 'allow *'</pre>
+<h2>手动设置<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>平时，你可以用 ceph-ansible 之类的工具配置 ceph-mgr 守护进程。下面说明了如何手动配置好一个 ceph-mgr 守护进程。</p>
+<p>首先，给守护进程创建认证密钥：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph auth get-or-create mgr.$name mon &#39;allow profile mgr&#39; osd &#39;allow *&#39; mds &#39;allow *&#39;
+</pre></div>
 </div>
-<p>把创建的密钥放入 <tt class="docutils literal"><span class="pre">mgr</span> <span class="pre">data</span></tt> 所指向的路径，对于名为 ceph 的集群、 mgr 的 $name 为 foo 的路径可能是 <tt class="docutils literal"><span class="pre">/var/lib/ceph/mgr/ceph-foo</span></tt> 。</p>
+<p>把创建的密钥放入 <code class="docutils literal notranslate"><span class="pre">mgr</span> <span class="pre">data</span></code> 所指向的路径，对于名为 ceph 的集群、 mgr 的 $name 为 foo 的路径可能是
+<code class="docutils literal notranslate"><span class="pre">/var/lib/ceph/mgr/ceph-foo</span></code> 。</p>
 <p>启动 ceph-mgr 守护进程：</p>
-<div class="highlight-python"><pre>ceph-mgr -i $name</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph-mgr -i $name
+</pre></div>
 </div>
-<p>通过 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">status</span></tt> 的输出可检查 mgr 是否起来了，起来的话应该会包含一行 mgr 状态：</p>
-<div class="highlight-python"><pre>mgr active: $name</pre>
+<p>通过 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">status</span></code> 的输出可检查 mgr 是否起来了，起来的话应该会包含一行 mgr 状态：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mgr active: $name
+</pre></div>
 </div>
 </div>
 <div class="section" id="id2">
-<h2>高可用性<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>客户端认证<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>管理器是一种新的守护进程，需要新的 CephX 能力。如果你是从旧版
+Ceph 升级集群、或者使用默认的安装/部署工具，那么管理客户端应该可以自动获取到这个能力。如果你用了非标准工具，在调用某些 ceph
+集群命令时可能会遇到 EACCES 错误。要修正此问题，需<a class="reference external" href="../../rados/operations/user-management/#modify-user-capabilities">更改用户能力</a>，在客户端的 cephx 能力里加上 <code class="docutils literal notranslate"><span class="pre">mgr</span> <span class="pre">allow</span> <span class="pre">\*</span></code>
+声明。</p>
+</div>
+<div class="section" id="id3">
+<h2>高可用性<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>通常来说，你应该在每台运行 ceph-mon 守护进程的主机上都配置一个
 ceph-mgr ，以实现相同级别的可用性。</p>
 <p>默认情况下，监视器会把任意一个最先启动的 ceph-mgr 例程当作活跃的，其它的作为备用。 ceph-mgr 守护进程无需形成法定人数。</p>
-<p>如果活跃的守护进程在 <tt class="docutils literal"><span class="pre">mon</span> <span class="pre">mgr</span> <span class="pre">beacon</span> <span class="pre">grace</span></tt> （默认 30s ）这么长的时间内都没向监视器们发送信标，那它就会被备用顶替。</p>
-<p>如果你想提前做故障切换，可以用 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">fail</span> <span class="pre">&lt;mgr</span> <span class="pre">name&gt;</span></tt> 把
+<p>如果活跃的守护进程在 <code class="docutils literal notranslate"><span class="pre">mon</span> <span class="pre">mgr</span> <span class="pre">beacon</span> <span class="pre">grace</span></code> （默认 30s ）这么长的时间内都没向监视器们发送信标，那它就会被备用顶替。</p>
+<p>如果你想提前做故障切换，可以用 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">fail</span> <span class="pre">&lt;mgr</span> <span class="pre">name&gt;</span></code> 把
 ceph-mgr 明确地标记为已失效。</p>
 </div>
-<div class="section" id="calling-module-commands">
-<span id="id3"></span><h2>调用模块命令<a class="headerlink" href="#calling-module-commands" title="Permalink to this headline">¶</a></h2>
-<p>Where a module implements command line hooks, using the Ceph CLI&#8217;s
-<tt class="docutils literal"><span class="pre">tell</span></tt> command to call them like this:</p>
-<div class="highlight-python"><pre>ceph tell mgr &lt;command | help&gt;</pre>
-</div>
-<p>Note that it is not necessary to address a particular mgr instance,
-simply <tt class="docutils literal"><span class="pre">mgr</span></tt> will pick the current active daemon.</p>
-<p>Use the <tt class="docutils literal"><span class="pre">help</span></tt> command to get a list of available commands from all
-modules.</p>
-</div>
 <div class="section" id="id4">
-<h2>配置选项<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<p>OPTION(mgr_module_path, OPT_STR, CEPH_PKGLIBDIR &#8220;/mgr&#8221;) // 从哪里载入 python 模块</p>
-<p><tt class="docutils literal"><span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">path</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">从这个路径载人模块</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">&quot;&lt;library</span> <span class="pre">dir&gt;/mgr&quot;</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">mgr</span> <span class="pre">modules</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">要载入的 python 模块列表</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">&quot;rest&quot;</span></tt> (Load the REST API module only)</td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">mgr</span> <span class="pre">data</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">从这个路径载人守护进程数据（如密钥环）</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">&quot;/var/lib/ceph/mgr/$cluster-$id&quot;</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">mgr</span> <span class="pre">beacon</span> <span class="pre">period</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">mgr 向监视器发送信标的时间间隔，单位为秒。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">5</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">mon</span> <span class="pre">mgr</span> <span class="pre">beacon</span> <span class="pre">grace</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">上一个信标收到后过多久没反应就当它失败了。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">30</span></tt></td>
-</tr>
-</tbody>
-</table>
+<h2>模块的使用<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>用 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">ls</span></code> 命令可查看有哪些模块可用、哪些是当前已经启用的。启用或禁用模块分别使用命令 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">enable</span> <span class="pre">&lt;module&gt;</span></code>
+和 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">disable</span> <span class="pre">&lt;module&gt;</span></code> 。</p>
+<p>If a module is <em>enabled</em> then the active ceph-mgr daemon will load
+and execute it.  In the case of modules that provide a service,
+such as an HTTP server, the module may publish its address when it
+is loaded.  To see the addresses of such modules, use the command
+<code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">mgr</span> <span class="pre">services</span></code>.</p>
+<p>Some modules may also implement a special standby mode which runs on
+standby ceph-mgr daemons as well as the active daemon.  This enables
+modules that provide services to redirect their clients to the active
+daemon, if the client tries to connect to a standby.</p>
+<p>Consult the documentation pages for individual manager modules for more
+information about what functionality each module provides.</p>
+<p>Here is an example of enabling the <a class="reference internal" href="../../glossary/#term-dashboard"><span class="xref std std-term">Dashboard</span></a> module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ceph mgr module ls
+{
+        &quot;enabled_modules&quot;: [
+                &quot;restful&quot;,
+                &quot;status&quot;
+        ],
+        &quot;disabled_modules&quot;: [
+                &quot;dashboard&quot;
+        ]
+}
+
+$ ceph mgr module enable dashboard
+$ ceph mgr module ls
+{
+        &quot;enabled_modules&quot;: [
+                &quot;restful&quot;,
+                &quot;status&quot;,
+                &quot;dashboard&quot;
+        ],
+        &quot;disabled_modules&quot;: [
+        ]
+}
+
+$ ceph mgr services
+{
+        &quot;dashboard&quot;: &quot;http://myserver.com:7789/&quot;,
+        &quot;restful&quot;: &quot;https://myserver.com:8789/&quot;
+}
+</pre></div>
+</div>
+<p>The first time the cluster starts, it uses the <code class="docutils literal notranslate"><span class="pre">mgr_initial_modules</span></code>
+setting to override which modules to enable.  However, this setting
+is ignored through the rest of the lifetime of the cluster: only
+use it for bootstrapping.  For example, before starting your
+monitor daemons for the first time, you might add a section like
+this to your <code class="docutils literal notranslate"><span class="pre">ceph.conf</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mon</span><span class="p">]</span>
+    <span class="n">mgr</span> <span class="n">initial</span> <span class="n">modules</span> <span class="o">=</span> <span class="n">dashboard</span> <span class="n">balancer</span>
+</pre></div>
 </div>
 </div>
+<div class="section" id="id5">
+<h2>调用模块命令<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>对于实现了命令行钩子的模块，其实现的命令可以像一般的 Ceph 命令那样调用：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="o">&lt;</span><span class="n">command</span> <span class="o">|</span> <span class="n">help</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>如果你想查看管理器可以处理的命令列表（通常 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">help</span></code> 会显示所有 mon 和 mgr 命令），你可以直接向管理器守护进程发命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="n">mgr</span> <span class="n">help</span>
+</pre></div>
+</div>
+<p>注意，没必要盯住具体的 mgr 例程，用 <code class="docutils literal notranslate"><span class="pre">mgr</span></code> 会自动选当前活跃的守护进程。</p>
+</div>
+<div class="section" id="id6">
+<h2>配置选项<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">mgr</span> <span class="pre">module</span> <span class="pre">path</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>从这个路径载人模块</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">&quot;&lt;library</span> <span class="pre">dir&gt;/mgr&quot;</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">mgr</span> <span class="pre">data</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>从这个路径载人守护进程数据（如密钥环）</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">&quot;/var/lib/ceph/mgr/$cluster-$id&quot;</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">mgr</span> <span class="pre">tick</span> <span class="pre">period</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>mgr 向监视器发送信标、以及其它周期性检查的时间间隔，单位为秒。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Integer</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">mon</span> <span class="pre">mgr</span> <span class="pre">beacon</span> <span class="pre">grace</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>上一个信标收到后过多久没反应就当它失败了。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Integer</p>
+</dd>
+<dt class="field-odd">默认值</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">30</span></code></p>
+</dd>
+</dl>
+</div>
+</div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -176,54 +232,75 @@ modules.</p>
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 管理器守护进程</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="">安装和配置</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">设置</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">高可用性</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#calling-module-commands">调用模块命令</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">配置选项</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">安装和配置</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">手动设置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">客户端认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">高可用性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">模块的使用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">调用模块命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">配置选项</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../plugins/">插件编程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/">模块编程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator_modules/">编写 orchestrator 插件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dashboard/">仪表盘模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../alerts/">Alerts 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../diskprediction/">DiskPrediction 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../localpool/">localpool 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../restful/">REST 风格模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../zabbix/">Zabbix 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prometheus/">Prometheus 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../influx/">Influx 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../hello/">Hello 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telegraf/">Telegraf 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telemetry/">Telemetry 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iostat/">Iostat 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_support/">OSD Support 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crash/">Crash 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../insights/">Insights 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator/">Orchestrator 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rook/">Rook 模块</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -233,17 +310,17 @@ modules.</p>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../plugins/" title="ceph-mgr 插件编程指南"
+          <a href="../modules/" title="ceph-mgr 模块开发指南"
              >next</a> |</li>
         <li class="right" >
           <a href="../" title="Ceph 管理器守护进程"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >Ceph 管理器守护进程</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 管理器守护进程</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

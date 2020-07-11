@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>项目管理 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Ceph 基金会" href="../foundation/" />
+    <link rel="prev" title="systemd" href="../dev/ceph-volume/systemd/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../foundation/" title="Ceph 基金会"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../dev/ceph-volume/systemd/" title="systemd"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../">Ceph Documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/governance.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="governance">
+<span id="id1"></span><h1>项目管理<a class="headerlink" href="#governance" title="Permalink to this headline">¶</a></h1>
+<p>Ceph 开源社区由几个不同的团体引导着。</p>
+<div class="section" id="id2">
+<h2>项目负责人<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>The Ceph project is currently led by Sage Weil &lt;<a class="reference external" href="mailto:sage&#37;&#52;&#48;redhat&#46;com">sage<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;.  The
+project leader is responsible for guiding the overall direction of the
+project and ensuring that the developer and user communities are
+healthy.</p>
+</div>
+<div class="section" id="id3">
+<h2>提交者<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>Committers are project contributors who have write access to the central
+Ceph code repositories, currently hosted on GitHub.  This group of developers
+is collectively empowered to make changes to the Ceph source code.</p>
+<p>Generally speaking, no individual should make a change in isolation:
+all code contributions go through a collaborative review process (and
+undergo testing) before being merged.  The specifics of this process
+are dynamic and evolving over time.</p>
+<p>New committers are added to the project (or committers removed from
+the project) at the discretion of the Ceph Leadership Team (below).
+The criteria for becoming a contributor include a consistent level of
+quality and engagement in the project over time.</p>
+</div>
+<div class="section" id="ceph">
+<span id="clt"></span><h2>Ceph 领导团队<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h2>
+<p>The Ceph Leadership Team (CLT) is a collection of component leads and
+other core developers who collectively make technical decisions for
+the project.  These decisions are generally made by consensus,
+although voting may be used if necessary.</p>
+<p>The CLT meets weekly via video chat to discuss any pending issues or
+decisions.  Minutes for the CLT meetings are published at
+<a class="reference external" href="https://pad.ceph.com/p/clt-weekly-minutes">https://pad.ceph.com/p/clt-weekly-minutes</a>.</p>
+<p>Committers are added to or removed from the CLT at the discretion of
+the CLT itself.</p>
+<p>Current CLT members are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Abhishek Lekshmanan &lt;<a class="reference external" href="mailto:abhishek&#37;&#52;&#48;suse&#46;com">abhishek<span>&#64;</span>suse<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Alfredo Deza &lt;<a class="reference external" href="mailto:adeza&#37;&#52;&#48;redhat&#46;com">adeza<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Casey Bodley &lt;<a class="reference external" href="mailto:cbodley&#37;&#52;&#48;redhat&#46;com">cbodley<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Gregory Farnum &lt;<a class="reference external" href="mailto:gfarnum&#37;&#52;&#48;redhat&#46;com">gfarnum<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Haomai Wang &lt;<a class="reference external" href="mailto:haomai&#37;&#52;&#48;xsky&#46;com">haomai<span>&#64;</span>xsky<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Jason Dillaman &lt;<a class="reference external" href="mailto:dillaman&#37;&#52;&#48;redhat&#46;com">dillaman<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Josh Durgin &lt;<a class="reference external" href="mailto:jdurgin&#37;&#52;&#48;redhat&#46;com">jdurgin<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Joao Eduardo Luis &lt;<a class="reference external" href="mailto:joao&#37;&#52;&#48;suse&#46;de">joao<span>&#64;</span>suse<span>&#46;</span>de</a>&gt;</p></li>
+<li><p>Ken Dreyer &lt;<a class="reference external" href="mailto:kdreyer&#37;&#52;&#48;redhat&#46;com">kdreyer<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Lenz Grimmer &lt;<a class="reference external" href="mailto:lgrimmer&#37;&#52;&#48;suse&#46;com">lgrimmer<span>&#64;</span>suse<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Matt Benjamin &lt;<a class="reference external" href="mailto:mbenjami&#37;&#52;&#48;redhat&#46;com">mbenjami<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Myoungwon Oh &lt;<a class="reference external" href="mailto:omwmw&#37;&#52;&#48;sk&#46;com">omwmw<span>&#64;</span>sk<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Neha Ojha &lt;<a class="reference external" href="mailto:nojha&#37;&#52;&#48;redhat&#46;com">nojha<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Sage Weil &lt;<a class="reference external" href="mailto:sage&#37;&#52;&#48;redhat&#46;com">sage<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Sebastian Wagner &lt;<a class="reference external" href="mailto:swagner&#37;&#52;&#48;suse&#46;com">swagner<span>&#64;</span>suse<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Xie Xingguo &lt;<a class="reference external" href="mailto:xie&#46;xingguo&#37;&#52;&#48;zte&#46;com&#46;cn">xie<span>&#46;</span>xingguo<span>&#64;</span>zte<span>&#46;</span>com<span>&#46;</span>cn</a>&gt;</p></li>
+<li><p>Yehuda Sadeh &lt;<a class="reference external" href="mailto:yehuda&#37;&#52;&#48;redhat&#46;com">yehuda<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Zack Cerza &lt;<a class="reference external" href="mailto:zcerza&#37;&#52;&#48;redhat&#46;com">zcerza<span>&#64;</span>redhat<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id4">
+<h2>组件负责人<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>Each major subcomponent of the Ceph project has a lead engineer who is
+responsible for guiding and coordinating development.  The leads are
+nominated or appointed at the discretion of the project leader or the
+CLT.  Leads responsibilities include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>guiding the (usually) daily “stand-up” coordination calls over video chat</p></li>
+<li><p>building the development roadmap for each release cycle</p></li>
+<li><p>coordinating development activity between contributors</p></li>
+<li><p>ensuring that contributions are reviewed</p></li>
+<li><p>ensuring that different proposed changes do not conflict</p></li>
+<li><p>ensuring that testing remains robust (new features include tests, changes do not break tests, etc.)</p></li>
+</ul>
+</div></blockquote>
+<p>All component leads are included on the CLT.  They are expected to
+report progress and status updates to the rest of the leadership team
+and to help facilitate any cross-component coordination of
+development.</p>
+</div>
+<div class="section" id="id5">
+<h2>Ceph 基金会<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>The Ceph Foundation is organized as a directed fund under the Linux
+Foundation and is tasked with supporting the Ceph project community
+and ecosystem.  It has no direct control over the technical direction
+of the Ceph open source project beyond offering feedback and input
+into the collaborative development process.</p>
+<p>For more information, see <a class="reference external" href="https://ceph.com/foundation">https://ceph.com/foundation</a>.</p>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../">
+              <img class="logo" src="../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">项目管理</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">项目负责人</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">提交者</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ceph">Ceph 领导团队</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">组件负责人</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">Ceph 基金会</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../foundation/" title="Ceph 基金会"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../dev/ceph-volume/systemd/" title="systemd"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../">Ceph Documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

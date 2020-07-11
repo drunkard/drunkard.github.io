@@ -1,38 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Ceph 存储集群 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Ceph 存储集群 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../" />
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
     <link rel="next" title="配置" href="configuration/" />
-    <link rel="prev" title="升级 Ceph" href="../install/upgrading-ceph/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="Cephadm 概念" href="../cephadm/concepts/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -45,35 +34,63 @@
           <a href="configuration/" title="配置"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../install/upgrading-ceph/" title="升级 Ceph"
+          <a href="../cephadm/concepts/" title="Cephadm 概念"
              accesskey="P">previous</a> |</li>
-        <li><a href="../">Ceph Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../">Ceph Documentation</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/index.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="ceph">
 <h1>Ceph 存储集群<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h1>
-<p>所有 Ceph 部署都始于 <a class="reference internal" href="../glossary/#term-21"><em class="xref std std-term">Ceph 存储集群</em></a>。基于 <abbr title="Reliable Autonomic Distributed Object Store ，可靠自主的分布式对象存储">RADOS</abbr> 的 Ceph 对象存储集群包括两类守护进程：term:<cite>对象存储守护进程</cite>（ OSD ）把存储节点上的数据存储为对象； term:<cite>Ceph 监视器</cite>（ MON ）维护集群运行图的主拷贝。一个 Ceph 集群可以包含数千个存储节点，最简系统至少需要一个监视器和两个 OSD 才能做到数据复制。</p>
+<p>所有 Ceph 部署都始于 <a class="reference internal" href="../glossary/#term-7"><span class="xref std std-term">Ceph 存储集群</span></a>。基于
+<abbr title="Reliable Autonomic Distributed Object Store ，可靠自主的分布式对象存储">RADOS</abbr> 的 Ceph 对象存储集群包括两类守护进程：term:<cite>对象存储守护进程</cite>（ OSD ）把存储节点上的数据存储为对象； term:<cite>Ceph 监视器</cite>（ MON ）维护集群运行图i的主拷贝。一个 Ceph 集群可以包含数千个存储节点，最简系统至少需要一个监视器和两个 OSD 才能做到数据复制。</p>
 <p>Ceph 文件系统、 Ceph 对象存储、和 Ceph 块设备从 Ceph 存储集群读出和写入数据。</p>
 <style type="text/css">div.body h3{margin:5px 0px 0px 0px;}</style>
-<table cellpadding="10"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><tbody valign="top"><tr><td><h3>配置和部署</h3><p>Ceph 存储集群的某些配置选项是必要的，但大多数都有默认值。典型部署是通过部署工具定义集群、并启动监视器的，关于 <tt class="docutils literal"><span class="pre">ceph-deploy</span></tt> 的详情见<a class="reference external" href="../rados/deployment/">部署</a>。</p>
+<table cellpadding="10"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><tbody valign="top"><tr><td><h3>配置和部署</h3><p>Ceph 存储集群的某些配置选项是必要的，但大多数都有默认值。典型部署是通过部署工具定义集群、并启动监视器的，关于
+<code class="docutils literal notranslate"><span class="pre">ceph-deploy</span></code> 的详情见<a class="reference external" href="../rados/deployment/">部署</a>。</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="configuration/">配置</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configuration/filesystem-recommendations/">硬盘和文件系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/storage-devices/">存储设备</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/ceph-conf/">配置 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/">通用选项</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#ceph-network-config">网络</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#id3">监视器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#ceph-osd-config">认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#osds">OSDs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#id5">心跳</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#ceph-logging-and-debugging">日志记录、调试</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#ceph-conf">ceph.conf 实例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/common/#id7">跑多个集群</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/network-config-ref/">网络选项</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/msgr2/">信使协议 v2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/auth-config-ref/">认证选项</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/mon-config-ref/">监视器选项</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/mon-lookup-dns/">Looking op Monitors through DNS</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/mon-osd-interaction/">心跳选项</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/osd-config-ref/">OSD 选项</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration/filestore-config-ref/">filestore 选项</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/bluestore-config-ref/">BlueStore 配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/filestore-config-ref/">FileStore 配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/journal-ref/">日志选项</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/pool-pg-config-ref/">存储池、归置组和 CRUSH 选项</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration/ms-ref/">消息传递选项</a></li>
@@ -99,17 +116,24 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="operations/">运维</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="operations/operating/">操纵集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/health-checks/">健康检查</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/monitoring/">监控集群</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/monitoring-osd-pg/">监控 OSD 和归置组</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/user-management/">用户管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/pg-repair/">修复 PG 不一致状态</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/data-placement/">数据归置概览</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/pools/">存储池</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/erasure-code/">纠删码</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/cache-tiering/">分级缓存</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/placement-groups/">归置组</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/balancer/">均衡器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/upmap/">使用 pg-upmap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/crush-map/">CRUSH 图</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/crush-map-edits/">手动编辑一个 CRUSH 图</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/add-or-rm-osds/">增加/删除 OSD</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/devices/">设备管理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operations/bluestore-migration/">迁移到 BlueStore</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/control/">命令参考</a></li>
 <li class="toctree-l2"><a class="reference internal" href="troubleshooting/community/">Ceph 社区</a></li>
 <li class="toctree-l2"><a class="reference internal" href="troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
@@ -129,7 +153,7 @@
 </div>
 <div class="toctree-wrapper compound">
 </div>
-</td><td><h3>应用编程接口（ API ）</h3><p>大多数 Ceph 部署都使用了 <a class="reference external" href="../rbd/rbd">Ceph 块设备</a>、 <a class="reference external" href="../radosgw/">Ceph 对象存储</a>和/或 <a class="reference external" href="../cephfs/">Ceph 文件系统</a>。也可以开发程序直接与 Ceph 对象存储对接。</p>
+</td><td><h3>应用编程接口（ API ）</h3><p>大多数 Ceph 部署都使用了 <a class="reference external" href="../rbd/">Ceph 块设备</a>、 <a class="reference external" href="../radosgw/">Ceph 对象存储</a>和/或 <a class="reference external" href="../cephfs/">Ceph 文件系统</a>。也可以开发程序直接与 Ceph 对象存储对接。</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/">APIs</a><ul>
@@ -145,10 +169,11 @@
 </td></tr></tbody></table></div>
 
 
+
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../">
               <img class="logo" src="../_static/logo.png" alt="Logo"/>
@@ -156,9 +181,9 @@
 <h3><a href="../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../install/">安装（手动）</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Ceph 存储集群</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ceph 存储集群</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="configuration/">配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deployment/">部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operations/">运维</a></li>
@@ -168,40 +193,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -214,13 +240,13 @@
           <a href="configuration/" title="配置"
              >next</a> |</li>
         <li class="right" >
-          <a href="../install/upgrading-ceph/" title="升级 Ceph"
+          <a href="../cephadm/concepts/" title="Cephadm 概念"
              >previous</a> |</li>
-        <li><a href="../">Ceph Documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../">Ceph Documentation</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

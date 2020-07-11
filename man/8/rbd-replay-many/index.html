@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>rbd-replay-many – 在几个客户端上重放 RBD 工作负荷 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>rbd-replay-many – 在几个客户端上重放 RBD 工作负荷 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="Ceph 块设备" href="../../../rbd/rbd/" />
-    <link rel="next" title="rbdmap – 在引导时映射 RBD 设备" href="../rbdmap/" />
-    <link rel="prev" title="rbd-replay – 重放 RBD 工作负荷" href="../rbd-replay/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="Ceph 块设备 API" href="../../../rbd/api/" />
+    <link rel="prev" title="rbd-replay – 重放 RBD 工作负荷" href="../rbd-replay/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,27 +31,43 @@
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../rbdmap/" title="rbdmap – 在引导时映射 RBD 设备"
+          <a href="../../../rbd/api/" title="Ceph 块设备 API"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../rbd-replay/" title="rbd-replay – 重放 RBD 工作负荷"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rbd/rbd/" accesskey="U">Ceph 块设备</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rbd/" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rbd/man/" accesskey="U">Ceph 块设备手册页</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/man/8/rbd-replay-many.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="rbd-replay-many-rbd">
-<h1>rbd-replay-many &#8211; 在几个客户端上重放 RBD 工作负荷<a class="headerlink" href="#rbd-replay-many-rbd" title="Permalink to this headline">¶</a></h1>
+<h1>rbd-replay-many – 在几个客户端上重放 RBD 工作负荷<a class="headerlink" href="#rbd-replay-many-rbd" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>提纲<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
-<div class="line"><strong>rbd-replay-many</strong> [ <em>options</em> ] &#8211;original-image <em>name</em> <em>host1</em> [ <em>host2</em> [ ... ] ] &#8211; <em>rbd_replay_args</em></div>
+<div class="line"><strong>rbd-replay-many</strong> [ <em>options</em> ] –original-image <em>name</em> <em>host1</em> [ <em>host2</em> [ … ] ] – <em>rbd_replay_args</em></div>
 </div>
 </div>
 <div class="section" id="id2">
@@ -74,26 +78,26 @@
 <div class="section" id="id3">
 <h2>选项<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <dl class="option">
-<dt id="cmdoption-rbd-replay-many--original-image">
-<tt class="descname">--original-image</tt><tt class="descclassname"> name</tt><a class="headerlink" href="#cmdoption-rbd-replay-many--original-image" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-rbd-replay-many-original-image">
+<code class="sig-name descname">--original-image</code><code class="sig-prename descclassname"> name</code><a class="headerlink" href="#cmdoption-rbd-replay-many-original-image" title="Permalink to this definition">¶</a></dt>
 <dd><p>指定最初被追踪映像的名字（和快照），对正确地映射名字是必要的。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-rbd-replay-many--image-prefix">
-<tt class="descname">--image-prefix</tt><tt class="descclassname"> prefix</tt><a class="headerlink" href="#cmdoption-rbd-replay-many--image-prefix" title="Permalink to this definition">¶</a></dt>
-<dd><p>要进行重放的映像名前缀。指定 &#8211;image-prefix=foo 可使客户端重放 foo-0 、 foo-1 等等。默认为最初映像名。</p>
+<dt id="cmdoption-rbd-replay-many-image-prefix">
+<code class="sig-name descname">--image-prefix</code><code class="sig-prename descclassname"> prefix</code><a class="headerlink" href="#cmdoption-rbd-replay-many-image-prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>要进行重放的映像名前缀。指定 –image-prefix=foo 可使客户端重放 foo-0 、 foo-1 等等。默认为最初映像名。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-rbd-replay-many--exec">
-<tt class="descname">--exec</tt><tt class="descclassname"> program</tt><a class="headerlink" href="#cmdoption-rbd-replay-many--exec" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-rbd-replay-many-exec">
+<code class="sig-name descname">--exec</code><code class="sig-prename descclassname"> program</code><a class="headerlink" href="#cmdoption-rbd-replay-many-exec" title="Permalink to this definition">¶</a></dt>
 <dd><p>rbd-replay 可执行文件的路径。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-rbd-replay-many--delay">
-<tt class="descname">--delay</tt><tt class="descclassname"> seconds</tt><a class="headerlink" href="#cmdoption-rbd-replay-many--delay" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-rbd-replay-many-delay">
+<code class="sig-name descname">--delay</code><code class="sig-prename descclassname"> seconds</code><a class="headerlink" href="#cmdoption-rbd-replay-many-delay" title="Permalink to this definition">¶</a></dt>
 <dd><p>启动各客户端的延时，默认为 0 。</p>
 </dd></dl>
 
@@ -101,11 +105,13 @@
 <div class="section" id="id4">
 <h2>实例<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>典型用法：</p>
-<div class="highlight-python"><pre>rbd-replay-many host-0 host-1 --original-image=image -- -c ceph.conf replay.bin</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span><span class="o">-</span><span class="n">replay</span><span class="o">-</span><span class="n">many</span> <span class="n">host</span><span class="o">-</span><span class="mi">0</span> <span class="n">host</span><span class="o">-</span><span class="mi">1</span> <span class="o">--</span><span class="n">original</span><span class="o">-</span><span class="n">image</span><span class="o">=</span><span class="n">image</span> <span class="o">--</span> <span class="o">-</span><span class="n">c</span> <span class="n">ceph</span><span class="o">.</span><span class="n">conf</span> <span class="n">replay</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
 </div>
 <p>实际上将执行下列的命令：</p>
-<div class="highlight-python"><pre>ssh host-0 'rbd-replay' --map-image 'image=image-0' -c ceph.conf replay.bin
-ssh host-1 'rbd-replay' --map-image 'image=image-1' -c ceph.conf replay.bin</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">host</span><span class="o">-</span><span class="mi">0</span> <span class="s1">&#39;rbd-replay&#39;</span> <span class="o">--</span><span class="nb">map</span><span class="o">-</span><span class="n">image</span> <span class="s1">&#39;image=image-0&#39;</span> <span class="o">-</span><span class="n">c</span> <span class="n">ceph</span><span class="o">.</span><span class="n">conf</span> <span class="n">replay</span><span class="o">.</span><span class="n">bin</span>
+<span class="n">ssh</span> <span class="n">host</span><span class="o">-</span><span class="mi">1</span> <span class="s1">&#39;rbd-replay&#39;</span> <span class="o">--</span><span class="nb">map</span><span class="o">-</span><span class="n">image</span> <span class="s1">&#39;image=image-1&#39;</span> <span class="o">-</span><span class="n">c</span> <span class="n">ceph</span><span class="o">.</span><span class="n">conf</span> <span class="n">replay</span><span class="o">.</span><span class="n">bin</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id5">
@@ -114,16 +120,17 @@ ssh host-1 'rbd-replay' --map-image 'image=image-1' -c ceph.conf replay.bin</pre
 </div>
 <div class="section" id="id6">
 <h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="../rbd-replay/"><em>rbd-replay</em></a>(8),
-<a class="reference internal" href="../rbd/"><em>rbd</em></a>(8)</p>
+<p><a class="reference internal" href="../rbd-replay/"><span class="doc">rbd-replay</span></a>(8),
+<a class="reference internal" href="../rbd/"><span class="doc">rbd</span></a>(8)</p>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -131,73 +138,71 @@ ssh host-1 'rbd-replay' --map-image 'image=image-1' -c ceph.conf replay.bin</pre
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rados-rbd-cmds/">命令</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-ko/">内核模块</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-snapshot/">快照</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-mirroring/">RBD 镜像</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/qemu-rbd/">QEMU</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/libvirt/">libvirt</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-config-ref/">缓存选项</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-openstack/">OpenStack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-cloudstack/">CloudStack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd/">rbd 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-fuse/">rbd-fuse 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-nbd/">rbd-nbd 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../ceph-rbdnamer/">ceph-rbdnamer 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-replay/">RBD 重放</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-replay-prep/">rbd-replay-prep 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-replay/">rbd-replay 手册页</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">rbd-replay-many 手册页</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">提纲</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">描述</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">选项</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">实例</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">使用范围</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">参考</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rados-rbd-cmds/">基本命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-operations/">运维</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd/rbd-integrations/">对接</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../rbd/man/">手册页</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../rbd/">rbd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-fuse/">rbd-fuse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-nbd/">rbd-nbd</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-ggate/">rbd-ggate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbdmap/">rbd-map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-rbdnamer/">ceph-rbdnamer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-replay-prep/">rbd-replay-prep</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-replay/">rbd-replay</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">rbd-replay-many</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">提纲</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">描述</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">选项</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">实例</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">使用范围</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../rbdmap/">rbdmap 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../rbd/librbdpy/">librbd 的 Python 接口</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd/api/">APIs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -207,17 +212,18 @@ ssh host-1 'rbd-replay' --map-image 'image=image-1' -c ceph.conf replay.bin</pre
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../rbdmap/" title="rbdmap – 在引导时映射 RBD 设备"
+          <a href="../../../rbd/api/" title="Ceph 块设备 API"
              >next</a> |</li>
         <li class="right" >
           <a href="../rbd-replay/" title="rbd-replay – 重放 RBD 工作负荷"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rbd/rbd/" >Ceph 块设备</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rbd/" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rbd/man/" >Ceph 块设备手册页</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

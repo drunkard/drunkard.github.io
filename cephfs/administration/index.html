@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>CephFS 管理命令 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>CephFS 管理命令 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 文件系统" href="../" />
-    <link rel="next" title="与 POSIX 标准的差异" href="../posix/" />
-    <link rel="prev" title="CephFS 最佳实践" href="../best-practices/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="深入理解 MDS 的缓存尺寸限制" href="../cache-size-limits/" />
+    <link rel="prev" title="CephFS 最佳实践" href="../best-practices/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,105 +31,229 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../posix/" title="与 POSIX 标准的差异"
+          <a href="../cache-size-limits/" title="深入理解 MDS 的缓存尺寸限制"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../best-practices/" title="CephFS 最佳实践"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">Ceph 文件系统</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 文件系统</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/cephfs/administration.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="cephfs">
-<span id="cephfs-administrative-commands"></span><h1>CephFS 管理命令<a class="headerlink" href="#cephfs" title="Permalink to this headline">¶</a></h1>
+<span id="cephfs-administration"></span><h1>CephFS 管理命令<a class="headerlink" href="#cephfs" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>文件系统管理<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>这些命令适用于 Ceph 集群的 CephFS 文件系统。注意，默认情况下，只允许一个文件系统；执行 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">fs</span> <span class="pre">flag</span> <span class="pre">set</span> <span class="pre">enable_multiple</span> <span class="pre">true</span></tt>
+<p>这些命令适用于 Ceph 集群的 CephFS 文件系统。注意，默认情况下，只允许一个文件系统；执行 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">fs</span> <span class="pre">flag</span> <span class="pre">set</span> <span class="pre">enable_multiple</span> <span class="pre">true</span></code>
 后才允许创建多个文件系统。</p>
-<div class="highlight-python"><pre>fs new &lt;filesystem name&gt; &lt;metadata pool name&gt; &lt;data pool name&gt;</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">new</span> <span class="o">&lt;</span><span class="n">filesystem</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">metadata</span> <span class="n">pool</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">data</span> <span class="n">pool</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs ls</pre>
+<p>This command creates a new file system. The file system name and metadata pool
+name are self-explanatory. The specified data pool is the default data pool and
+cannot be changed once set. Each file system has its own set of MDS daemons
+assigned to ranks so ensure that you have sufficient standby daemons available
+to accommodate the new file system.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">ls</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs rm &lt;filesystem name&gt; [--yes-i-really-mean-it]</pre>
+<p>List all file systems by name.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">dump</span> <span class="p">[</span><span class="n">epoch</span><span class="p">]</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs reset &lt;filesystem name&gt;</pre>
+<p>This dumps the FSMap at the given epoch (default: current) which includes all
+file system settings, MDS daemons and the ranks they hold, and the list of
+standby MDS daemons.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">rm</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">--</span><span class="n">yes</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">really</span><span class="o">-</span><span class="n">mean</span><span class="o">-</span><span class="n">it</span><span class="p">]</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs get &lt;filesystem name&gt;</pre>
+<p>Destroy a CephFS file system. This wipes information about the state of the
+file system from the FSMap. The metadata pool and data pools are untouched and
+must be destroyed separately.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">get</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs set &lt;filesystem name&gt; &lt;var&gt; &lt;val&gt;</pre>
+<p>Get information about the named file system, including settings and ranks. This
+is a subset of the same information from the <code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">dump</span></code> command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">var</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">val</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs add_data_pool &lt;filesystem name&gt; &lt;pool name/id&gt;</pre>
+<p>Change a setting on a file system. These settings are specific to the named
+file system and do not affect other file systems.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">add_data_pool</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">pool</span> <span class="n">name</span><span class="o">/</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>fs rm_data_pool &lt;filesystem name&gt; &lt;pool name/id&gt;</pre>
+<p>Add a data pool to the file system. This pool can be used for file layouts
+as an alternate location to store file data.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">rm_data_pool</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">pool</span> <span class="n">name</span><span class="o">/</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
 </div>
+<p>This command removes the specified pool from the list of data pools for the
+file system.  If any files have layouts for the removed data pool, the file
+data will become unavailable. The default data pool (when creating the file
+system) cannot be removed.</p>
 </div>
 <div class="section" id="id2">
-<h2>守护进程管理<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>以下命令适用于指定的 mds 守护进程或 rank 。</p>
-<div class="highlight-python"><pre>mds fail &lt;gid/name/role</pre>
+<h2>可配置选项<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs</span> <span class="n">name</span><span class="o">&gt;</span> <span class="n">max_file_size</span> <span class="o">&lt;</span><span class="n">size</span> <span class="ow">in</span> <span class="nb">bytes</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<p>下面的命令用于停用一个 MDS ，让它把所有日志刷回后端的 RADOS 对象、并关闭所有打开的客户端会话。 MDS 的停用功能主要是用于减少活跃 MDS （ max_mds ）后、拆除 rank 。</p>
-<div class="highlight-python"><pre>mds deactivate &lt;role&gt;</pre>
-</div>
-<div class="highlight-python"><pre>tell mds.&lt;daemon name&gt;</pre>
-</div>
-<div class="highlight-python"><pre>mds metadata &lt;gid/name/role&gt;</pre>
-</div>
-<div class="highlight-python"><pre>mds repaired &lt;role&gt;</pre>
-</div>
+<p>CephFS 允许的最大文件尺寸是可以配置的，默认是 1TB 。如果你想在
+CephFS 里存储大文件，也许得把这个限量设置得高些。它是个 64 位的字段。</p>
+<p>把 <code class="docutils literal notranslate"><span class="pre">max_file_size</span></code> 设置为 0 并不意味着取消这个限量，而是阻止客户端创建空文件。</p>
 </div>
 <div class="section" id="id3">
-<h2>全局配置选项<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>fs dump</pre>
-</div>
-<div class="highlight-python"><pre>fs flag set &lt;flag name&gt; &lt;flag val&gt; [&lt;confirmation string&gt;]</pre>
-</div>
-<p>&lt;flag name&gt; 必须是 [&#8216;enable_multiple&#8217;] 之一</p>
-<p>有些标志会强迫你用 <tt class="docutils literal"><span class="pre">--yes-i-really-mean-it</span></tt> 或者类似的语句（执行时会提示）来确认你的意图。运行这类命令时要三思而后行，它们通常用于提示非常危险的动作。</p>
+<h2>最大文件尺寸以及性能<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>在追加到文件、或设置其尺寸时， CephFS 将确保不会超过最大文件尺寸限量；但不会影响（数据）是怎样存储的。</p>
+<p>有用户创建了一个硕大的文件时（未必要写入什么数据），某些操作（像删除）会让 MDS 不得不做大量操作，去检查此文件的尺寸范围内是否有本应存在（据文件尺寸计算出的）、实际上却不存在的 RADOS 对象。</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_file_size</span></code> 选项可防止用户创建巨型文件，如 EB 级的文件，导致在遇到类似查询状态或删除操作时产生无谓的 MDS 负载。</p>
 </div>
 <div class="section" id="id4">
-<h2>高级选项<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<p>以下这些命令在常规操作中用不到，在遇到异常时才需要。这些命令若使用不当会产生严重问题，甚至会导致文件系统无法访问。</p>
-<div class="highlight-python"><pre>mds compat rm_compat</pre>
+<h2>关闭集群<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>Taking a CephFS cluster down is done by setting the down flag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">down</span> <span class="n">true</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>mds compat rm_incompat</pre>
+<p>To bring the cluster back online:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">down</span> <span class="n">false</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>mds compat show</pre>
-</div>
-<div class="highlight-python"><pre>mds getmap</pre>
-</div>
-<div class="highlight-python"><pre>mds set_state</pre>
-</div>
-<div class="highlight-python"><pre>mds rmfailed</pre>
-</div>
+<p>This will also restore the previous value of max_mds. MDS daemons are brought
+down in a way such that journals are flushed to the metadata pool and all
+client I/O is stopped.</p>
 </div>
 <div class="section" id="id5">
-<h2>旧命令<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>mds stat
-mds dump  # replaced by "fs get"
-mds stop  # replaced by "mds deactivate"
-mds set_max_mds  # replaced by "fs set max_mds"
-mds set  # replaced by "fs set"
-mds cluster_down  # replaced by "fs set cluster_down"
-mds cluster_up  # replaced by "fs set cluster_up"
-mds newfs  # replaced by "fs new"
-mds add_data_pool  # replaced by "fs add_data_pool"
-mds remove_data_pool # replaced by "fs remove_data_pool"</pre>
+<h2>快速关闭集群以进行反删除或灾难恢复<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>To allow rapidly deleting a file system (for testing) or to quickly bring the
+file system and MDS daemons down, use the <code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">fail</span></code> command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">fail</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>This command sets a file system flag to prevent standbys from
+activating on the file system (the <code class="docutils literal notranslate"><span class="pre">joinable</span></code> flag).</p>
+<p>This process can also be done manually by doing the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">joinable</span> <span class="n">false</span>
+</pre></div>
+</div>
+<p>Then the operator can fail all of the ranks which causes the MDS daemons to
+respawn as standbys. The file system will be left in a degraded state.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># For all ranks, 0-N:</span>
+<span class="n">mds</span> <span class="n">fail</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">n</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Once all ranks are inactive, the file system may also be deleted or left in
+this state for other purposes (perhaps disaster recovery).</p>
+<p>To bring the cluster back up, simply set the joinable flag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">joinable</span> <span class="n">true</span>
+</pre></div>
 </div>
 </div>
+<div class="section" id="id6">
+<h2>守护进程管理<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>大多数可操纵 MDS 的命令都需要一个 <code class="docutils literal notranslate"><span class="pre">&lt;role&gt;</span></code> 参数，它必须是以下三种格式之一：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">rank</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">fs_id</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">rank</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">rank</span><span class="o">&gt;</span>
+</pre></div>
 </div>
+<p>可操纵 MDS 守护进程的命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">fail</span> <span class="o">&lt;</span><span class="n">gid</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="n">role</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>把一个 MDS 守护进程标记为已失效。假如一个 MDS 守护进程在
+<code class="docutils literal notranslate"><span class="pre">mds_beacon_grace</span></code> 秒内都没向监视器发送一条消息，这个操作就等价于集群自己的操作。如果此守护进程之前是活跃的，而且有可用的备机，用命令 <code class="docutils literal notranslate"><span class="pre">mds</span> <span class="pre">fail</span></code> 将迫使业务转移到备机。</p>
+<p>如果此 MDS 守护进程事实上仍在运行，那么执行 <code class="docutils literal notranslate"><span class="pre">mds</span> <span class="pre">fail</span></code> 将使之重启；如果它之前是活跃的、并且还有可用的备机，那么这个“已失效”的守护进程回来后将作为备机。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tell</span> <span class="n">mds</span><span class="o">.&lt;</span><span class="n">daemon</span> <span class="n">name</span><span class="o">&gt;</span> <span class="n">command</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>向 MDS 守护进程发出一个命令，指定 <code class="docutils literal notranslate"><span class="pre">mds.*</span></code> 可向所有守护进程发送命令。用 <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">tell</span> <span class="pre">mds.*</span> <span class="pre">help</span></code> 命令获取所有可用命令。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">metadata</span> <span class="o">&lt;</span><span class="n">gid</span><span class="o">/</span><span class="n">name</span><span class="o">/</span><span class="n">role</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>获取指定 MDS （监视器知道它）的元数据。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">repaired</span> <span class="o">&lt;</span><span class="n">role</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>把文件系统 rank 标记为已修复。这里不像名字说明的那样，这个命令不会更改 MDS ，它操纵的是先前被标记为已损坏的文件系统 rank 。</p>
+</div>
+<div class="section" id="id7">
+<h2>客户端最低版本限制<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>It is sometimes desirable to set the minimum version of Ceph that a client must be
+running to connect to a CephFS cluster. Older clients may sometimes still be
+running with bugs that can cause locking issues between clients (due to
+capability release). CephFS provides a mechanism to set the minimum
+client version:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs</span> <span class="n">name</span><span class="o">&gt;</span> <span class="n">min_compat_client</span> <span class="o">&lt;</span><span class="n">release</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>For example, to only allow Nautilus clients, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="nb">set</span> <span class="n">cephfs</span> <span class="n">min_compat_client</span> <span class="n">nautilus</span>
+</pre></div>
+</div>
+<p>Clients running an older version will be automatically evicted.</p>
+</div>
+<div class="section" id="id8">
+<h2>全局配置选项<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">flag</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">flag</span> <span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">flag</span> <span class="n">val</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">confirmation</span> <span class="n">string</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>设置全局的 CephFS 标记（即不是特定于某个文件系统的）。当前，仅有的标记是 enable_multiple ，启用它就可以支持多个 CephFS
+文件系统。</p>
+<p>有些标志会强迫你用 <code class="docutils literal notranslate"><span class="pre">--yes-i-really-mean-it</span></code> 或者类似的语句（执行时会提示）来确认你的意图。运行这类命令时要三思而后行，它们通常用于提示非常危险的动作。</p>
+</div>
+<div class="section" id="id9">
+<h2>高级选项<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>以下这些命令在常规操作中用不到，在遇到异常时才需要。这些命令若使用不当会产生严重问题，甚至会导致文件系统无法访问。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">compat</span> <span class="n">rm_compat</span>
+</pre></div>
+</div>
+<p>删除一个兼容性功能标记。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">compat</span> <span class="n">rm_incompat</span>
+</pre></div>
+</div>
+<p>删除一个不兼容性功能标记。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">compat</span> <span class="n">show</span>
+</pre></div>
+</div>
+<p>展示 MDS 的兼容性标记。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mds</span> <span class="n">rmfailed</span>
+</pre></div>
+</div>
+<p>从失效集合中删除一个 rank 。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fs</span> <span class="n">reset</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">system</span> <span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>此命令可把文件系统状态（除名字和存储池以外的）重置为默认值。所有非 0 rank 都会保存在停止集里面。</p>
+</div>
+</div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -149,39 +261,47 @@ mds remove_data_pool # replaced by "fs remove_data_pool"</pre>
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../../rados/deployment/ceph-deploy-mds/">增加/删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-remove-mds/">配备、增加、删除 MDS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#managing-failover">故障切换的管理</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#configuring-standby-daemons">灾备守护进程的配置</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#examples">实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#id3">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds-standby-replay">热备的配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../createfs/">创建 CephFS 文件系统</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../kernel/">挂载 CephFS 文件系统</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../fuse/">把 CephFS 挂载为 FUSE</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../fstab/">通过 fstab 挂载 CephFS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/">ceph-fuse 手册页</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/">mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/"> 创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/"> 挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/"> 把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fstab/"> 通过 fstab 挂载 CephFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-shell/"> CephFS Shell 的用法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel-features/"> 内核驱动支持的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/"> ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/"> mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.fuse.ceph/"> mount.fuse.ceph 手册页</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">CephFS 管理命令</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CephFS 管理命令</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">文件系统管理</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">守护进程管理</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id3">全局配置选项</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">高级选项</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id5">旧命令</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">可配置选项</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">最大文件尺寸以及性能</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">关闭集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">快速关闭集群以进行反删除或灾难恢复</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">守护进程管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">客户端最低版本限制</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">全局配置选项</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">高级选项</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-size-limits/">深入理解 MDS 的缓存尺寸限制</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-states/">MDS 的各种状态</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#previously-experimental-features">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#id4">曾经是实验性的功能</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
@@ -192,48 +312,55 @@ mds remove_data_pool # replaced by "fs remove_data_pool"</pre>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../upgrading/">旧文件系统的升级</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">升级 MDS 集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/#firefly-jewel">升级比 Firefly 老的文件系统，需过 Jewel 这个槛</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dirfrags/">目录分片的配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../multimds/">多活 MDS 的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../app-best-practices/">应用最佳实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../scrub/">洗刷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fs-volumes/">FS 卷和子卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">元数据修复</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../#for-developers">开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../#id2">开发者指南</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -243,17 +370,17 @@ mds remove_data_pool # replaced by "fs remove_data_pool"</pre>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../posix/" title="与 POSIX 标准的差异"
+          <a href="../cache-size-limits/" title="深入理解 MDS 的缓存尺寸限制"
              >next</a> |</li>
         <li class="right" >
           <a href="../best-practices/" title="CephFS 最佳实践"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >Ceph 文件系统</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 文件系统</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

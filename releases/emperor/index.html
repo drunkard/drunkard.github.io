@@ -1,0 +1,946 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>v0.72.3 Emperor (pending release) &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="v0.67.12 “Dumpling” (draft)" href="../dumpling/" />
+    <link rel="prev" title="v0.80.11 Firefly" href="../firefly/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../dumpling/" title="v0.67.12 “Dumpling” (draft)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../firefly/" title="v0.80.11 Firefly"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 版本（索引）</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../archived-index/" accesskey="U">归档的版本</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/releases/emperor.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="v0-72-3-emperor-pending-release">
+<h1>v0.72.3 Emperor (pending release)<a class="headerlink" href="#v0-72-3-emperor-pending-release" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="upgrading">
+<h2>Upgrading<a class="headerlink" href="#upgrading" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p>Monitor ‘auth’ read-only commands now expect the user to have ‘rx’ caps.
+This is the same behavior that was present in dumpling, but in emperor
+and more recent development releases the ‘r’ cap was sufficient.  Note that
+this backported security fix will break mon keys that are using the following
+commands but do not have the ‘x’ bit in the mon capability:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">auth</span> <span class="n">export</span>
+<span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span>
+<span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="n">key</span>
+<span class="n">ceph</span> <span class="n">auth</span> <span class="nb">print</span><span class="o">-</span><span class="n">key</span>
+<span class="n">ceph</span> <span class="n">auth</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-72-2-emperor">
+<h1>v0.72.2 Emperor<a class="headerlink" href="#v0-72-2-emperor" title="Permalink to this headline">¶</a></h1>
+<p>This is the second bugfix release for the v0.72.x Emperor series.  We
+have fixed a hang in radosgw, and fixed (again) a problem with monitor
+CLI compatibility with mixed version monitors.  (In the future this
+will no longer be a problem.)</p>
+<div class="section" id="id1">
+<h2>Upgrading<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The JSON schema for the ‘osd pool set …’ command changed slightly.  Please
+avoid issuing this particular command via the CLI while there is a mix of
+v0.72.1 and v0.72.2 monitor daemons running.</p></li>
+<li><p>As part of fix for #6796, ‘ceph osd pool set &lt;pool&gt; &lt;var&gt; &lt;arg&gt;’ now
+receives &lt;arg&gt; as an integer instead of a string.  This affects how
+‘hashpspool’ flag is set/unset: instead of ‘true’ or ‘false’, it now
+must be ‘0’ or ‘1’.</p></li>
+</ul>
+</div>
+<div class="section" id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>mon: ‘osd pool set …’ syntax change</p></li>
+<li><p>osd: added test for missing on-disk HEAD object</p></li>
+<li><p>osd: fix osd bench block size argument</p></li>
+<li><p>rgw: fix hang on large object GET</p></li>
+<li><p>rgw: fix rare use-after-free</p></li>
+<li><p>rgw: various DR bug fixes</p></li>
+<li><p>rgw: do not return error on empty owner when setting ACL</p></li>
+<li><p>sysvinit, upstart: prevent starting daemons using both init systems</p></li>
+</ul>
+<p>For more detailed information, see <a class="reference download internal" download="" href="../../_downloads/bbdba11b5e077fac4f07b92b13981d80/v0.72.2.txt"><code class="xref download docutils literal notranslate"><span class="pre">the</span> <span class="pre">complete</span> <span class="pre">changelog</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="v0-72-1-emperor">
+<h1>v0.72.1 Emperor<a class="headerlink" href="#v0-72-1-emperor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="important-note">
+<h2>Important Note<a class="headerlink" href="#important-note" title="Permalink to this headline">¶</a></h2>
+<p>When you are upgrading from Dumpling to Emperor, do not run any of the
+“ceph osd pool set” commands while your monitors are running separate versions.
+Doing so could result in inadvertently changing cluster configuration settings
+that exhaust compute resources in your OSDs.</p>
+</div>
+<div class="section" id="id2">
+<h2>Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>osd: fix upgrade bug #6761</p></li>
+<li><p>ceph_filestore_tool: introduced tool to repair errors caused by #6761</p></li>
+</ul>
+<p>This release addresses issue #6761.  Upgrading to Emperor can cause
+reads to begin returning ENFILE (too many open files).  v0.72.1 fixes
+that upgrade issue and adds a tool ceph_filestore_tool to repair osd
+stores affected by this bug.</p>
+<p>To repair a cluster affected by this bug:</p>
+<ol class="arabic">
+<li><p>Upgrade all osd machines to v0.72.1</p></li>
+<li><p>Install the ceph-test package on each osd machine to get ceph_filestore_tool</p></li>
+<li><p>Stop all osd processes</p></li>
+<li><p>To see all lost objects, run the following on each osd with the osd stopped and
+the osd data directory mounted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph_filestore_tool</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">lost</span><span class="o">-</span><span class="n">objects</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">filestore</span><span class="o">-</span><span class="n">path</span><span class="o">=&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">osd</span><span class="o">-</span><span class="n">filestore</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">journal</span><span class="o">-</span><span class="n">path</span><span class="o">=&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">osd</span><span class="o">-</span><span class="n">journal</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>To fix all lost objects, run the following on each osd with the
+osd stopped and the osd data directory mounted:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph_filestore_tool</span> <span class="o">--</span><span class="n">fix</span><span class="o">-</span><span class="n">lost</span><span class="o">-</span><span class="n">objects</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">lost</span><span class="o">-</span><span class="n">objects</span><span class="o">=</span><span class="n">true</span> <span class="o">--</span><span class="n">filestore</span><span class="o">-</span><span class="n">path</span><span class="o">=&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">osd</span><span class="o">-</span><span class="n">filestore</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">journal</span><span class="o">-</span><span class="n">path</span><span class="o">=&lt;</span><span class="n">path</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">osd</span><span class="o">-</span><span class="n">journal</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Once lost objects have been repaired on each osd, you can restart
+the cluster.</p></li>
+</ol>
+<p>Note, the ceph_filestore_tool performs a scan of all objects on the
+osd and may take some time.</p>
+</div>
+</div>
+<div class="section" id="v0-72-emperor">
+<h1>v0.72 Emperor<a class="headerlink" href="#v0-72-emperor" title="Permalink to this headline">¶</a></h1>
+<p>This is the fifth major release of Ceph, the fourth since adopting a
+3-month development cycle.  This release brings several new features,
+including multi-datacenter replication for the radosgw, improved
+usability, and lands a lot of incremental performance and internal
+refactoring work to support upcoming features in Firefly.</p>
+<div class="section" id="id3">
+<h2>Important Note<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>When you are upgrading from Dumpling to Emperor, do not run any of the
+“ceph osd pool set” commands while your monitors are running separate versions.
+Doing so could result in inadvertently changing cluster configuration settings
+that exhaust compute resources in your OSDs.</p>
+</div>
+<div class="section" id="highlights">
+<h2>Highlights<a class="headerlink" href="#highlights" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>common: improved crc32c performance</p></li>
+<li><p>librados: new example client and class code</p></li>
+<li><p>mds: many bug fixes and stability improvements</p></li>
+<li><p>mon: health warnings when pool pg_num values are not reasonable</p></li>
+<li><p>mon: per-pool performance stats</p></li>
+<li><p>osd, librados: new object copy primitives</p></li>
+<li><p>osd: improved interaction with backend file system to reduce latency</p></li>
+<li><p>osd: much internal refactoring to support ongoing erasure coding and tiering support</p></li>
+<li><p>rgw: bucket quotas</p></li>
+<li><p>rgw: improved CORS support</p></li>
+<li><p>rgw: performance improvements</p></li>
+<li><p>rgw: validate S3 tokens against Keystone</p></li>
+</ul>
+<p>Coincident with core Ceph, the Emperor release also brings:</p>
+<ul class="simple">
+<li><p>radosgw-agent: support for multi-datacenter replication for disaster recovery</p></li>
+<li><p>tgt: improved support for iSCSI via upstream tgt</p></li>
+</ul>
+<p>Packages for both are available on ceph.com.</p>
+</div>
+<div class="section" id="upgrade-sequencing">
+<h2>Upgrade sequencing<a class="headerlink" href="#upgrade-sequencing" title="Permalink to this headline">¶</a></h2>
+<p>There are no specific upgrade restrictions on the order or sequence of
+upgrading from 0.67.x Dumpling. However, you cannot run any of the
+“ceph osd pool set” commands while your monitors are running separate versions.
+Doing so could result in inadvertently changing cluster configuration settings
+and exhausting compute resources in your OSDs.</p>
+<p>It is also possible to do a rolling upgrade from 0.61.x Cuttlefish,
+but there are ordering restrictions.  (This is the same set of
+restrictions for Cuttlefish to Dumpling.)</p>
+<ol class="arabic simple">
+<li><p>Upgrade ceph-common on all nodes that will use the command line ‘ceph’ utility.</p></li>
+<li><p>Upgrade all monitors (upgrade ceph package, restart ceph-mon
+daemons).  This can happen one daemon or host at a time.  Note that
+because cuttlefish and dumpling monitors can’t talk to each other,
+all monitors should be upgraded in relatively short succession to
+minimize the risk that an a untimely failure will reduce
+availability.</p></li>
+<li><p>Upgrade all osds (upgrade ceph package, restart ceph-osd daemons).
+This can happen one daemon or host at a time.</p></li>
+<li><p>Upgrade radosgw (upgrade radosgw package, restart radosgw daemons).</p></li>
+</ol>
+</div>
+<div class="section" id="upgrading-from-v0-71">
+<h2>Upgrading from v0.71<a class="headerlink" href="#upgrading-from-v0-71" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ceph-fuse and radosgw now use the same default values for the admin
+socket and log file paths that the other daemons (ceph-osd,
+ceph-mon, etc.) do.  If you run these daemons as non-root, you may
+need to adjust your ceph.conf to disable these options or to adjust
+the permissions on /var/run/ceph and /var/log/ceph.</p></li>
+</ul>
+</div>
+<div class="section" id="upgrading-from-v0-67-dumpling">
+<h2>Upgrading from v0.67 Dumpling<a class="headerlink" href="#upgrading-from-v0-67-dumpling" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ceph-fuse and radosgw now use the same default values for the admin
+socket and log file paths that the other daemons (ceph-osd,
+ceph-mon, etc.) do.  If you run these daemons as non-root, you may
+need to adjust your ceph.conf to disable these options or to adjust
+the permissions on /var/run/ceph and /var/log/ceph.</p></li>
+<li><p>The MDS now disallows snapshots by default as they are not
+considered stable.  The command ‘ceph mds set allow_snaps’ will
+enable them.</p></li>
+<li><p>For clusters that were created before v0.44 (pre-argonaut, Spring
+2012) and store radosgw data, the auto-upgrade from TMAP to OMAP
+objects has been disabled.  Before upgrading, make sure that any
+buckets created on pre-argonaut releases have been modified (e.g.,
+by PUTing and then DELETEing an object from each bucket).  Any
+cluster created with argonaut (v0.48) or a later release or not
+using radosgw never relied on the automatic conversion and is not
+affected by this change.</p></li>
+<li><p>Any direct users of the ‘tmap’ portion of the librados API should be
+aware that the automatic tmap -&gt; omap conversion functionality has
+been removed.</p></li>
+<li><p>Most output that used K or KB (e.g., for kilobyte) now uses a
+lower-case k to match the official SI convention.  Any scripts that
+parse output and check for an upper-case K will need to be modified.</p></li>
+<li><p>librados::Rados::pool_create_async() and librados::Rados::pool_delete_async()
+don’t drop a reference to the completion object on error, caller needs to take
+care of that. This has never really worked correctly and we were leaking an
+object</p></li>
+<li><p>‘ceph osd crush set &lt;id&gt; &lt;weight&gt; &lt;loc..&gt;’ no longer adds the osd to the
+specified location, as that’s a job for ‘ceph osd crush add’.  It will
+however continue to work just the same as long as the osd already exists
+in the crush map.</p></li>
+<li><p>The OSD now enforces that class write methods cannot both mutate an
+object and return data.  The rbd.assign_bid method, the lone
+offender, has been removed.  This breaks compatibility with
+pre-bobtail librbd clients by preventing them from creating new
+images.</p></li>
+<li><p>librados now returns on commit instead of ack for synchronous calls.
+This is a bit safer in the case where both OSDs and the client crash, and
+is probably how it should have been acting from the beginning. Users are
+unlikely to notice but it could result in lower performance in some
+circumstances. Those who care should switch to using the async interfaces,
+which let you specify safety semantics precisely.</p></li>
+<li><p>The C++ librados AioComplete::get_version() method was incorrectly
+returning an int (usually 32-bits).  To avoid breaking library
+compatibility, a get_version64() method is added that returns the
+full-width value.  The old method is deprecated and will be removed
+in a future release.  Users of the C++ librados API that make use of
+the get_version() method should modify their code to avoid getting a
+value that is truncated from 64 to to 32 bits.</p></li>
+</ul>
+</div>
+<div class="section" id="notable-changes-since-v0-71">
+<h2>Notable Changes since v0.71<a class="headerlink" href="#notable-changes-since-v0-71" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>build: fix [/usr]/sbin locations (Alan Somers)</p></li>
+<li><p>ceph-fuse, radosgw: enable admin socket and logging by default</p></li>
+<li><p>ceph: make -h behave when monitors are down</p></li>
+<li><p>common: cache crc32c values where possible</p></li>
+<li><p>common: fix looping on BSD (Alan Somers)</p></li>
+<li><p>librados, mon: ability to query/ping out-of-quorum monitor status (Joao Luis)</p></li>
+<li><p>librbd python bindings: fix parent image name limit (Josh Durgin)</p></li>
+<li><p>mds: avoid leaking objects when deleting truncated files (Yan, Zheng)</p></li>
+<li><p>mds: fix F_GETLK (Yan, Zheng)</p></li>
+<li><p>mds: fix many bugs with stray (unlinked) inodes (Yan, Zheng)</p></li>
+<li><p>mds: fix many directory fragmentation bugs (Yan, Zheng)</p></li>
+<li><p>mon: allow (un)setting HASHPSPOOL flag on existing pools (Joao Luis)</p></li>
+<li><p>mon: make ‘osd pool rename’ idempotent (Joao Luis)</p></li>
+<li><p>osd: COPY_GET on-wire encoding improvements (Greg Farnum)</p></li>
+<li><p>osd: bloom_filter encodability, fixes, cleanups (Loic Dachary, Sage Weil)</p></li>
+<li><p>osd: fix handling of racing read vs write (Samuel Just)</p></li>
+<li><p>osd: reduce blocking on backing fs (Samuel Just)</p></li>
+<li><p>radosgw-agent: multi-region replication/DR</p></li>
+<li><p>rgw: fix/improve swift COPY support (Yehuda Sadeh)</p></li>
+<li><p>rgw: misc fixes to support DR (Josh Durgin, Yehuda Sadeh)</p></li>
+<li><p>rgw: per-bucket quota (Yehuda Sadeh)</p></li>
+<li><p>rpm: fix junit dependencies (Alan Grosskurth)</p></li>
+</ul>
+</div>
+<div class="section" id="notable-changes-since-v0-67-dumpling">
+<h2>Notable Changes since v0.67 Dumpling<a class="headerlink" href="#notable-changes-since-v0-67-dumpling" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>build cleanly under clang (Christophe Courtaut)</p></li>
+<li><p>build: Makefile refactor (Roald J. van Loon)</p></li>
+<li><p>build: fix [/usr]/sbin locations (Alan Somers)</p></li>
+<li><p>ceph-disk: fix journal preallocation</p></li>
+<li><p>ceph-fuse, radosgw: enable admin socket and logging by default</p></li>
+<li><p>ceph-fuse: fix problem with readahead vs truncate race (Yan, Zheng)</p></li>
+<li><p>ceph-fuse: trim deleted inodes from cache (Yan, Zheng)</p></li>
+<li><p>ceph-fuse: use newer fuse api (Jianpeng Ma)</p></li>
+<li><p>ceph-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao Luis)</p></li>
+<li><p>ceph-post-file: new command to easily share logs or other files with ceph devs</p></li>
+<li><p>ceph: improve parsing of CEPH_ARGS (Benoit Knecht)</p></li>
+<li><p>ceph: make -h behave when monitors are down</p></li>
+<li><p>ceph: parse CEPH_ARGS env variable</p></li>
+<li><p>common: bloom_filter improvements, cleanups</p></li>
+<li><p>common: cache crc32c values where possible</p></li>
+<li><p>common: correct SI is kB not KB (Dan Mick)</p></li>
+<li><p>common: fix looping on BSD (Alan Somers)</p></li>
+<li><p>common: migrate SharedPtrRegistry to use boost::shared_ptr&lt;&gt; (Loic Dachary)</p></li>
+<li><p>common: misc portability fixes (Noah Watkins)</p></li>
+<li><p>crc32c: fix optimized crc32c code (it now detects arch support properly)</p></li>
+<li><p>crc32c: improved intel-optimized crc32c support (~8x faster on my laptop!)</p></li>
+<li><p>crush: fix name caching</p></li>
+<li><p>doc: erasure coding design notes (Loic Dachary)</p></li>
+<li><p>hadoop: removed old version of shim to avoid confusing users (Noah Watkins)</p></li>
+<li><p>librados, mon: ability to query/ping out-of-quorum monitor status (Joao Luis)</p></li>
+<li><p>librados: fix async aio completion wakeup</p></li>
+<li><p>librados: fix installed header #includes (Dan Mick)</p></li>
+<li><p>librados: get_version64() method for C++ API</p></li>
+<li><p>librados: hello_world example (Greg Farnum)</p></li>
+<li><p>librados: sync calls now return on commit (instead of ack) (Greg Farnum)</p></li>
+<li><p>librbd python bindings: fix parent image name limit (Josh Durgin)</p></li>
+<li><p>librbd, ceph-fuse: avoid some sources of ceph-fuse, rbd cache stalls</p></li>
+<li><p>mds: avoid leaking objects when deleting truncated files (Yan, Zheng)</p></li>
+<li><p>mds: fix F_GETLK (Yan, Zheng)</p></li>
+<li><p>mds: fix LOOKUPSNAP bug</p></li>
+<li><p>mds: fix heap profiler commands (Joao Luis)</p></li>
+<li><p>mds: fix locking deadlock (David Disseldorp)</p></li>
+<li><p>mds: fix many bugs with stray (unlinked) inodes (Yan, Zheng)</p></li>
+<li><p>mds: fix many directory fragmentation bugs (Yan, Zheng)</p></li>
+<li><p>mds: fix mds rejoin with legacy parent backpointer xattrs (Alexandre Oliva)</p></li>
+<li><p>mds: fix rare restart/failure race during fs creation</p></li>
+<li><p>mds: fix standby-replay when we fall behind (Yan, Zheng)</p></li>
+<li><p>mds: fix stray directory purging (Yan, Zheng)</p></li>
+<li><p>mds: notify clients about deleted files (so they can release from their cache) (Yan, Zheng)</p></li>
+<li><p>mds: several bug fixes with clustered mds (Yan, Zheng)</p></li>
+<li><p>mon, osd: improve osdmap trimming logic (Samuel Just)</p></li>
+<li><p>mon, osd: initial CLI for configuring tiering</p></li>
+<li><p>mon: a few ‘ceph mon add’ races fixed (command is now idempotent) (Joao Luis)</p></li>
+<li><p>mon: allow (un)setting HASHPSPOOL flag on existing pools (Joao Luis)</p></li>
+<li><p>mon: allow cap strings with . to be unquoted</p></li>
+<li><p>mon: allow logging level of cluster log (/var/log/ceph/ceph.log) to be adjusted</p></li>
+<li><p>mon: avoid rewriting full osdmaps on restart (Joao Luis)</p></li>
+<li><p>mon: continue to discover peer addr info during election phase</p></li>
+<li><p>mon: disallow CephFS snapshots until ‘ceph mds set allow_new_snaps’ (Greg Farnum)</p></li>
+<li><p>mon: do not expose uncommitted state from ‘osd crush {add,set} …’ (Joao Luis)</p></li>
+<li><p>mon: fix ‘ceph osd crush reweight …’ (Joao Luis)</p></li>
+<li><p>mon: fix ‘osd crush move …’ command for buckets (Joao Luis)</p></li>
+<li><p>mon: fix byte counts (off by factor of 4) (Dan Mick, Joao Luis)</p></li>
+<li><p>mon: fix paxos corner case</p></li>
+<li><p>mon: kv properties for pools to support EC (Loic Dachary)</p></li>
+<li><p>mon: make ‘osd pool rename’ idempotent (Joao Luis)</p></li>
+<li><p>mon: modify ‘auth add’ semantics to make a bit more sense (Joao Luis)</p></li>
+<li><p>mon: new ‘osd perf’ command to dump recent performance information (Samuel Just)</p></li>
+<li><p>mon: new and improved ‘ceph -s’ or ‘ceph status’ command (more info, easier to read)</p></li>
+<li><p>mon: some auth check cleanups (Joao Luis)</p></li>
+<li><p>mon: track per-pool stats (Joao Luis)</p></li>
+<li><p>mon: warn about pools with bad pg_num</p></li>
+<li><p>mon: warn when mon data stores grow very large (Joao Luis)</p></li>
+<li><p>monc: fix small memory leak</p></li>
+<li><p>new wireshark patches pulled into the tree (Kevin Jones)</p></li>
+<li><p>objecter, librados: redirect requests based on cache tier config</p></li>
+<li><p>objecter: fix possible hang when cluster is unpaused (Josh Durgin)</p></li>
+<li><p>osd, librados: add new COPY_FROM rados operation</p></li>
+<li><p>osd, librados: add new COPY_GET rados operations (used by COPY_FROM)</p></li>
+<li><p>osd: ‘osd recover clone overlap limit’ option to limit cloning during recovery (Samuel Just)</p></li>
+<li><p>osd: COPY_GET on-wire encoding improvements (Greg Farnum)</p></li>
+<li><p>osd: add ‘osd heartbeat min healthy ratio’ configurable (was hard-coded at 33%)</p></li>
+<li><p>osd: add option to disable pg log debug code (which burns CPU)</p></li>
+<li><p>osd: allow cap strings with . to be unquoted</p></li>
+<li><p>osd: automatically detect proper xattr limits (David Zafman)</p></li>
+<li><p>osd: avoid extra copy in erasure coding reference implementation (Loic Dachary)</p></li>
+<li><p>osd: basic cache pool redirects (Greg Farnum)</p></li>
+<li><p>osd: basic whiteout, dirty flag support (not yet used)</p></li>
+<li><p>osd: bloom_filter encodability, fixes, cleanups (Loic Dachary, Sage Weil)</p></li>
+<li><p>osd: clean up and generalize copy-from code (Greg Farnum)</p></li>
+<li><p>osd: cls_hello OSD class example</p></li>
+<li><p>osd: erasure coding doc updates (Loic Dachary)</p></li>
+<li><p>osd: erasure coding plugin infrastructure, tests (Loic Dachary)</p></li>
+<li><p>osd: experiemental support for ZFS (zfsonlinux.org) (Yan, Zheng)</p></li>
+<li><p>osd: fix RWORDER flags</p></li>
+<li><p>osd: fix exponential backoff of slow request warnings (Loic Dachary)</p></li>
+<li><p>osd: fix handling of racing read vs write (Samuel Just)</p></li>
+<li><p>osd: fix version value returned by various operations (Greg Farnum)</p></li>
+<li><p>osd: generalized temp object infrastructure</p></li>
+<li><p>osd: ghobject_t infrastructure for EC (David Zafman)</p></li>
+<li><p>osd: improvements for compatset support and storage (David Zafman)</p></li>
+<li><p>osd: infrastructure to copy objects from other OSDs</p></li>
+<li><p>osd: instrument peering states (David Zafman)</p></li>
+<li><p>osd: misc copy-from improvements</p></li>
+<li><p>osd: opportunistic crc checking on stored data (off by default)</p></li>
+<li><p>osd: properly enforce RD/WR flags for rados classes</p></li>
+<li><p>osd: reduce blocking on backing fs (Samuel Just)</p></li>
+<li><p>osd: refactor recovery using PGBackend (Samuel Just)</p></li>
+<li><p>osd: remove old magical tmap-&gt;omap conversion</p></li>
+<li><p>osd: remove old pg log on upgrade (Samuel Just)</p></li>
+<li><p>osd: revert xattr size limit (fixes large rgw uploads)</p></li>
+<li><p>osd: use fdatasync(2) instead of fsync(2) to improve performance (Sam Just)</p></li>
+<li><p>pybind: fix blacklisting nonce (Loic Dachary)</p></li>
+<li><p>radosgw-agent: multi-region replication/DR</p></li>
+<li><p>rgw: complete in-progress requests before shutting down</p></li>
+<li><p>rgw: default log level is now more reasonable (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix S3 auth with response-* query string params (Sylvain Munaut, Yehuda Sadeh)</p></li>
+<li><p>rgw: fix a few minor memory leaks (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix acl group check (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix inefficient use of std::list::size() (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix major CPU utilization bug with internal caching (Yehuda Sadeh, Mark Nelson)</p></li>
+<li><p>rgw: fix ordering of write operations (preventing data loss on crash) (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix ordering of writes for mulitpart upload (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix various CORS bugs (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix/improve swift COPY support (Yehuda Sadeh)</p></li>
+<li><p>rgw: improve help output (Christophe Courtaut)</p></li>
+<li><p>rgw: misc fixes to support DR (Josh Durgin, Yehuda Sadeh)</p></li>
+<li><p>rgw: per-bucket quota (Yehuda Sadeh)</p></li>
+<li><p>rgw: validate S3 tokens against keystone (Roald J. van Loon)</p></li>
+<li><p>rgw: wildcard support for keystone roles (Christophe Courtaut)</p></li>
+<li><p>rpm: fix junit dependencies (Alan Grosskurth)</p></li>
+<li><p>sysvinit radosgw: fix status return code (Danny Al-Gaaf)</p></li>
+<li><p>sysvinit rbdmap: fix error ‘service rbdmap stop’ (Laurent Barbe)</p></li>
+<li><p>sysvinit: add condrestart command (Dan van der Ster)</p></li>
+<li><p>sysvinit: fix shutdown order (mons last) (Alfredo Deza)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-71">
+<h1>v0.71<a class="headerlink" href="#v0-71" title="Permalink to this headline">¶</a></h1>
+<p>This development release includes a significant amount of new code and
+refactoring, as well as a lot of preliminary functionality that will be needed
+for erasure coding and tiering support.  There are also several significant
+patch sets improving this with the MDS.</p>
+<div class="section" id="id4">
+<h2>Upgrading<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The MDS now disallows snapshots by default as they are not
+considered stable.  The command ‘ceph mds set allow_snaps’ will
+enable them.</p></li>
+<li><p>For clusters that were created before v0.44 (pre-argonaut, Spring
+2012) and store radosgw data, the auto-upgrade from TMAP to OMAP
+objects has been disabled.  Before upgrading, make sure that any
+buckets created on pre-argonaut releases have been modified (e.g.,
+by PUTing and then DELETEing an object from each bucket).  Any
+cluster created with argonaut (v0.48) or a later release or not
+using radosgw never relied on the automatic conversion and is not
+affected by this change.</p></li>
+<li><p>Any direct users of the ‘tmap’ portion of the librados API should be
+aware that the automatic tmap -&gt; omap conversion functionality has
+been removed.</p></li>
+<li><p>Most output that used K or KB (e.g., for kilobyte) now uses a
+lower-case k to match the official SI convention.  Any scripts that
+parse output and check for an upper-case K will need to be modified.</p></li>
+</ul>
+</div>
+<div class="section" id="notable-changes">
+<h2>Notable Changes<a class="headerlink" href="#notable-changes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>build: Makefile refactor (Roald J. van Loon)</p></li>
+<li><p>ceph-disk: fix journal preallocation</p></li>
+<li><p>ceph-fuse: trim deleted inodes from cache (Yan, Zheng)</p></li>
+<li><p>ceph-fuse: use newer fuse api (Jianpeng Ma)</p></li>
+<li><p>ceph-kvstore-tool: new tool for working with leveldb (copy, crc) (Joao Luis)</p></li>
+<li><p>common: bloom_filter improvements, cleanups</p></li>
+<li><p>common: correct SI is kB not KB (Dan Mick)</p></li>
+<li><p>common: misc portability fixes (Noah Watkins)</p></li>
+<li><p>hadoop: removed old version of shim to avoid confusing users (Noah Watkins)</p></li>
+<li><p>librados: fix installed header #includes (Dan Mick)</p></li>
+<li><p>librbd, ceph-fuse: avoid some sources of ceph-fuse, rbd cache stalls</p></li>
+<li><p>mds: fix LOOKUPSNAP bug</p></li>
+<li><p>mds: fix standby-replay when we fall behind (Yan, Zheng)</p></li>
+<li><p>mds: fix stray directory purging (Yan, Zheng)</p></li>
+<li><p>mon: disallow CephFS snapshots until ‘ceph mds set allow_new_snaps’ (Greg Farnum)</p></li>
+<li><p>mon, osd: improve osdmap trimming logic (Samuel Just)</p></li>
+<li><p>mon: kv properties for pools to support EC (Loic Dachary)</p></li>
+<li><p>mon: some auth check cleanups (Joao Luis)</p></li>
+<li><p>mon: track per-pool stats (Joao Luis)</p></li>
+<li><p>mon: warn about pools with bad pg_num</p></li>
+<li><p>osd: automatically detect proper xattr limits (David Zafman)</p></li>
+<li><p>osd: avoid extra copy in erasure coding reference implementation (Loic Dachary)</p></li>
+<li><p>osd: basic cache pool redirects (Greg Farnum)</p></li>
+<li><p>osd: basic whiteout, dirty flag support (not yet used)</p></li>
+<li><p>osd: clean up and generalize copy-from code (Greg Farnum)</p></li>
+<li><p>osd: erasure coding doc updates (Loic Dachary)</p></li>
+<li><p>osd: erasure coding plugin infrastructure, tests (Loic Dachary)</p></li>
+<li><p>osd: fix RWORDER flags</p></li>
+<li><p>osd: fix exponential backoff of slow request warnings (Loic Dachary)</p></li>
+<li><p>osd: generalized temp object infrastructure</p></li>
+<li><p>osd: ghobject_t infrastructure for EC (David Zafman)</p></li>
+<li><p>osd: improvements for compatset support and storage (David Zafman)</p></li>
+<li><p>osd: misc copy-from improvements</p></li>
+<li><p>osd: opportunistic crc checking on stored data (off by default)</p></li>
+<li><p>osd: refactor recovery using PGBackend (Samuel Just)</p></li>
+<li><p>osd: remove old magical tmap-&gt;omap conversion</p></li>
+<li><p>pybind: fix blacklisting nonce (Loic Dachary)</p></li>
+<li><p>rgw: default log level is now more reasonable (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix acl group check (Yehuda Sadeh)</p></li>
+<li><p>sysvinit: fix shutdown order (mons last) (Alfredo Deza)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-70">
+<h1>v0.70<a class="headerlink" href="#v0-70" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id5">
+<h2>Upgrading<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>librados::Rados::pool_create_async() and librados::Rados::pool_delete_async()
+don’t drop a reference to the completion object on error, caller needs to take
+care of that. This has never really worked correctly and we were leaking an
+object</p></li>
+<li><p>‘ceph osd crush set &lt;id&gt; &lt;weight&gt; &lt;loc..&gt;’ no longer adds the osd to the
+specified location, as that’s a job for ‘ceph osd crush add’.  It will
+however continue to work just the same as long as the osd already exists
+in the crush map.</p></li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h2>Notable Changes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>mon: a few ‘ceph mon add’ races fixed (command is now idempotent) (Joao Luis)</p></li>
+<li><p>crush: fix name caching</p></li>
+<li><p>rgw: fix a few minor memory leaks (Yehuda Sadeh)</p></li>
+<li><p>ceph: improve parsing of CEPH_ARGS (Benoit Knecht)</p></li>
+<li><p>mon: avoid rewriting full osdmaps on restart (Joao Luis)</p></li>
+<li><p>crc32c: fix optimized crc32c code (it now detects arch support properly)</p></li>
+<li><p>mon: fix ‘ceph osd crush reweight …’ (Joao Luis)</p></li>
+<li><p>osd: revert xattr size limit (fixes large rgw uploads)</p></li>
+<li><p>mds: fix heap profiler commands (Joao Luis)</p></li>
+<li><p>rgw: fix inefficient use of std::list::size() (Yehuda Sadeh)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-69">
+<h1>v0.69<a class="headerlink" href="#v0-69" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id7">
+<h2>Upgrading<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The sysvinit /etc/init.d/ceph script will, by default, update the
+CRUSH location of an OSD when it starts.  Previously, if the
+monitors were not available, this command would hang indefinitely.
+Now, that step will time out after 10 seconds and the ceph-osd daemon
+will not be started.</p></li>
+<li><p>Users of the librados C++ API should replace users of get_version()
+with get_version64() as the old method only returns a 32-bit value
+for a 64-bit field.  The existing 32-bit get_version() method is now
+deprecated.</p></li>
+<li><p>The OSDs are now more picky that request payload match their
+declared size.  A write operation across N bytes that includes M
+bytes of data will now be rejected.  No known clients do this, but
+the because the server-side behavior has changed it is possible that
+an application misusing the interface may now get errors.</p></li>
+<li><p>The OSD now enforces that class write methods cannot both mutate an
+object and return data.  The rbd.assign_bid method, the lone
+offender, has been removed.  This breaks compatibility with
+pre-bobtail librbd clients by preventing them from creating new
+images.</p></li>
+<li><p>librados now returns on commit instead of ack for synchronous calls.
+This is a bit safer in the case where both OSDs and the client crash, and
+is probably how it should have been acting from the beginning. Users are
+unlikely to notice but it could result in lower performance in some
+circumstances. Those who care should switch to using the async interfaces,
+which let you specify safety semantics precisely.</p></li>
+<li><p>The C++ librados AioComplete::get_version() method was incorrectly
+returning an int (usually 32-bits).  To avoid breaking library
+compatibility, a get_version64() method is added that returns the
+full-width value.  The old method is deprecated and will be removed
+in a future release.  Users of the C++ librados API that make use of
+the get_version() method should modify their code to avoid getting a
+value that is truncated from 64 to to 32 bits.</p></li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h2>Notable Changes<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>build cleanly under clang (Christophe Courtaut)</p></li>
+<li><p>common: migrate SharedPtrRegistry to use boost::shared_ptr&lt;&gt; (Loic Dachary)</p></li>
+<li><p>doc: erasure coding design notes (Loic Dachary)</p></li>
+<li><p>improved intel-optimized crc32c support (~8x faster on my laptop!)</p></li>
+<li><p>librados: get_version64() method for C++ API</p></li>
+<li><p>mds: fix locking deadlock (David Disseldorp)</p></li>
+<li><p>mon, osd: initial CLI for configuring tiering</p></li>
+<li><p>mon: allow cap strings with . to be unquoted</p></li>
+<li><p>mon: continue to discover peer addr info during election phase</p></li>
+<li><p>mon: fix ‘osd crush move …’ command for buckets (Joao Luis)</p></li>
+<li><p>mon: warn when mon data stores grow very large (Joao Luis)</p></li>
+<li><p>objecter, librados: redirect requests based on cache tier config</p></li>
+<li><p>osd, librados: add new COPY_FROM rados operation</p></li>
+<li><p>osd, librados: add new COPY_GET rados operations (used by COPY_FROM)</p></li>
+<li><p>osd: add ‘osd heartbeat min healthy ratio’ configurable (was hard-coded at 33%)</p></li>
+<li><p>osd: add option to disable pg log debug code (which burns CPU)</p></li>
+<li><p>osd: allow cap strings with . to be unquoted</p></li>
+<li><p>osd: fix version value returned by various operations (Greg Farnum)</p></li>
+<li><p>osd: infrastructure to copy objects from other OSDs</p></li>
+<li><p>osd: use fdatasync(2) instead of fsync(2) to improve performance (Sam Just)</p></li>
+<li><p>rgw: fix major CPU utilization bug with internal caching (Yehuda Sadeh, Mark Nelson)</p></li>
+<li><p>rgw: fix ordering of write operations (preventing data loss on crash) (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix ordering of writes for mulitpart upload (Yehuda Sadeh)</p></li>
+<li><p>rgw: fix various CORS bugs (Yehuda Sadeh)</p></li>
+<li><p>rgw: improve help output (Christophe Courtaut)</p></li>
+<li><p>rgw: validate S3 tokens against keystone (Roald J. van Loon)</p></li>
+<li><p>rgw: wildcard support for keystone roles (Christophe Courtaut)</p></li>
+<li><p>sysvinit radosgw: fix status return code (Danny Al-Gaaf)</p></li>
+<li><p>sysvinit rbdmap: fix error ‘service rbdmap stop’ (Laurent Barbe)</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="v0-68">
+<h1>v0.68<a class="headerlink" href="#v0-68" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id9">
+<h2>Upgrading<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>‘ceph osd crush set &lt;id&gt; &lt;weight&gt; &lt;loc..&gt;’ no longer adds the osd to the
+specified location, as that’s a job for ‘ceph osd crush add’.  It will
+however continue to work just the same as long as the osd already exists
+in the crush map.</p></li>
+<li><p>The OSD now enforces that class write methods cannot both mutate an
+object and return data.  The rbd.assign_bid method, the lone
+offender, has been removed.  This breaks compatibility with
+pre-bobtail librbd clients by preventing them from creating new
+images.</p></li>
+<li><p>librados now returns on commit instead of ack for synchronous calls.
+This is a bit safer in the case where both OSDs and the client crash, and
+is probably how it should have been acting from the beginning. Users are
+unlikely to notice but it could result in lower performance in some
+circumstances. Those who care should switch to using the async interfaces,
+which let you specify safety semantics precisely.</p></li>
+<li><p>The C++ librados AioComplete::get_version() method was incorrectly
+returning an int (usually 32-bits).  To avoid breaking library
+compatibility, a get_version64() method is added that returns the
+full-width value.  The old method is deprecated and will be removed
+in a future release.  Users of the C++ librados API that make use of
+the get_version() method should modify their code to avoid getting a
+value that is truncated from 64 to to 32 bits.</p></li>
+</ul>
+</div>
+<div class="section" id="id10">
+<h2>Notable Changes<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>ceph-fuse: fix problem with readahead vs truncate race (Yan, Zheng)</p></li>
+<li><p>ceph-post-file: new command to easily share logs or other files with ceph devs</p></li>
+<li><p>ceph: parse CEPH_ARGS env variable</p></li>
+<li><p>librados: fix async aio completion wakeup</p></li>
+<li><p>librados: hello_world example (Greg Farnum)</p></li>
+<li><p>librados: sync calls now return on commit (instead of ack) (Greg Farnum)</p></li>
+<li><p>mds: fix mds rejoin with legacy parent backpointer xattrs (Alexandre Oliva)</p></li>
+<li><p>mds: fix rare restart/failure race during fs creation</p></li>
+<li><p>mds: notify clients about deleted files (so they can release from their cache) (Yan, Zheng)</p></li>
+<li><p>mds: several bug fixes with clustered mds (Yan, Zheng)</p></li>
+<li><p>mon: allow logging level of cluster log (/var/log/ceph/ceph.log) to be adjusted</p></li>
+<li><p>mon: do not expose uncommitted state from ‘osd crush {add,set} …’ (Joao Luis)</p></li>
+<li><p>mon: fix byte counts (off by factor of 4) (Dan Mick, Joao Luis)</p></li>
+<li><p>mon: fix paxos corner case</p></li>
+<li><p>mon: modify ‘auth add’ semantics to make a bit more sense (Joao Luis)</p></li>
+<li><p>mon: new ‘osd perf’ command to dump recent performance information (Samuel Just)</p></li>
+<li><p>mon: new and improved ‘ceph -s’ or ‘ceph status’ command (more info, easier to read)</p></li>
+<li><p>monc: fix small memory leak</p></li>
+<li><p>new wireshark patches pulled into the tree (Kevin Jones)</p></li>
+<li><p>objecter: fix possible hang when cluster is unpaused (Josh Durgin)</p></li>
+<li><p>osd: ‘osd recover clone overlap limit’ option to limit cloning during recovery (Samuel Just)</p></li>
+<li><p>osd: cls_hello OSD class example</p></li>
+<li><p>osd: experiemental support for ZFS (zfsonlinux.org) (Yan, Zheng)</p></li>
+<li><p>osd: instrument peering states (David Zafman)</p></li>
+<li><p>osd: properly enforce RD/WR flags for rados classes</p></li>
+<li><p>osd: remove old pg log on upgrade (Samuel Just)</p></li>
+<li><p>rgw: complete in-progress requests before shutting down</p></li>
+<li><p>rgw: fix S3 auth with response-* query string params (Sylvain Munaut, Yehuda Sadeh)</p></li>
+<li><p>sysvinit: add condrestart command (Dan van der Ster)</p></li>
+</ul>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 版本（索引）</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../#id1">活跃版本</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../#id2">归档版本</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../archived-index/">归档版本目录</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../luminous/">v12.2.13 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-12-luminous">v12.2.12 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-11-luminous">v12.2.11 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-10-luminous">v12.2.10 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-9-luminous">v12.2.9 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-8-luminous">v12.2.8 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-7-luminous">v12.2.7 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-6-luminous">v12.2.6 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-5-luminous">v12.2.5 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-4-luminous">v12.2.4 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-3-luminous">v12.2.3 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-2-luminous">v12.2.2 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-1-luminous">v12.2.1 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../luminous/#v12-2-0-luminous">v12.2.0 Luminous</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../kraken/">v11.2.1 Kraken</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../kraken/#v11-2-0-kraken">v11.2.0 Kraken</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../kraken/#v11-0-2-kraken">v11.0.2 Kraken</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/">v10.2.11 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-10-jewel">v10.2.10 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-9-jewel">v10.2.9 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-8-jewel">v10.2.8 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-7-jewel">v10.2.7 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-6-jewel">v10.2.6 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-5-jewel">v10.2.5 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-4-jewel">v10.2.4 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-3-jewel">v10.2.3 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-2-jewel">v10.2.2 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-1-jewel">v10.2.1 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../jewel/#v10-2-0-jewel">v10.2.0 Jewel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/">v9.2.1 Infernalis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-2-0-infernalis">v9.2.0 Infernalis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-1-0-infernalis-release-candidate">v9.1.0 Infernalis release candidate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-0-3">v9.0.3</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-0-2">v9.0.2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-0-1">v9.0.1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../infernalis/#v9-0-0">v9.0.0</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/">v0.94.10 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-9-hammer">v0.94.9 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-8-hammer">v0.94.8 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-7-hammer">v0.94.7 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-6-hammer">v0.94.6 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-5-hammer">v0.94.5 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-4-hammer">v0.94.4 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-3-hammer">v0.94.3 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-2-hammer">v0.94.2 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-1-hammer">v0.94.1 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-94-hammer">v0.94 Hammer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-93">v0.93</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-92">v0.92</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-91">v0.91</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-90">v0.90</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-89">v0.89</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../hammer/#v0-88">v0.88</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/">v0.87.2 Giant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-87-1-giant">v0.87.1 Giant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-87-giant">v0.87 Giant</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-86">v0.86</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-85">v0.85</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-84">v0.84</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-83">v0.83</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-82">v0.82</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../giant/#v0-81">v0.81</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/">v0.80.11 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-10-firefly">v0.80.10 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-9-firefly">v0.80.9 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-8-firefly">v0.80.8 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-7-firefly">v0.80.7 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-6-firefly">v0.80.6 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-5-firefly">v0.80.5 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-4-firefly">v0.80.4 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-3-firefly">v0.80.3 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-2-firefly">v0.80.2 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-1-firefly">v0.80.1 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-80-firefly">v0.80 Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-79">v0.79</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-78">v0.78</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-77">v0.77</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-76">v0.76</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-75">v0.75</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-74">v0.74</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../firefly/#v0-73">v0.73</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">v0.72.3 Emperor (pending release)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#upgrading">Upgrading</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-72-2-emperor">v0.72.2 Emperor</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id1">Upgrading</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#changes">Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-72-1-emperor">v0.72.1 Emperor</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#important-note">Important Note</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-72-emperor">v0.72 Emperor</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id3">Important Note</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#highlights">Highlights</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#upgrade-sequencing">Upgrade sequencing</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#upgrading-from-v0-71">Upgrading from v0.71</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#upgrading-from-v0-67-dumpling">Upgrading from v0.67 Dumpling</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#notable-changes-since-v0-71">Notable Changes since v0.71</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#notable-changes-since-v0-67-dumpling">Notable Changes since v0.67 Dumpling</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-71">v0.71</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id4">Upgrading</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#notable-changes">Notable Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-70">v0.70</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id5">Upgrading</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id6">Notable Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-69">v0.69</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id7">Upgrading</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id8">Notable Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#v0-68">v0.68</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id9">Upgrading</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id10">Notable Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/">v0.67.12 “Dumpling” (draft)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-11-dumpling">v0.67.11 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-10-dumpling">v0.67.10 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-9-dumpling">v0.67.9 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-8-dumpling">v0.67.8 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-7-dumpling">v0.67.7 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-6-dumpling">v0.67.6 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-5-dumpling">v0.67.5 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-4-dumpling">v0.67.4 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-3-dumpling">v0.67.3 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-2-dumpling">v0.67.2 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-1-dumpling">v0.67.1 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-67-dumpling">v0.67 “Dumpling”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-66">v0.66</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-65">v0.65</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-64">v0.64</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-63">v0.63</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dumpling/#v0-62">v0.62</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/">v0.61.9 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-8-cuttlefish">v0.61.8 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-7-cuttlefish">v0.61.7 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-6-cuttlefish">v0.61.6 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-5-cuttlefish">v0.61.5 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-4-cuttlefish">v0.61.4 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-3-cuttlefish">v0.61.3 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-2-cuttlefish">v0.61.2 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-1-cuttlefish">v0.61.1 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-61-cuttlefish">v0.61 “Cuttlefish”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-60">v0.60</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-59">v0.59</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-58">v0.58</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cuttlefish/#v0-57">v0.57</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/">v0.56.7 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-6-bobtail">v0.56.6 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-5-bobtail">v0.56.5 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-4-bobtail">v0.56.4 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-3-bobtail">v0.56.3 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-2-bobtail">v0.56.2 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-1-bobtail">v0.56.1 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-56-bobtail">v0.56 “bobtail”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bobtail/#v0-54">v0.54</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../argonaut/">v0.48.3 “argonaut”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../argonaut/#v0-48-2-argonaut">v0.48.2 “argonaut”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../argonaut/#v0-48-1-argonaut">v0.48.1 “argonaut”</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../argonaut/#v0-48-argonaut">v0.48 “argonaut”</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../dumpling/" title="v0.67.12 “Dumpling” (draft)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../firefly/" title="v0.80.11 Firefly"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 版本（索引）</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../archived-index/" >归档的版本</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

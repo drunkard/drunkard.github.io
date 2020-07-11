@@ -1,36 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>RBD Layering &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>RBD Layering &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Ceph Release Process" href="../release-process/" />
+    <link rel="prev" title="RBD Export &amp; Import" href="../rbd-export/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,15 +30,37 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../release-process/" title="Ceph Release Process"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../rbd-export/" title="RBD Export &amp; Import"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" accesskey="U">Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/dev/rbd-layering.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="rbd-layering">
 <h1>RBD Layering<a class="headerlink" href="#rbd-layering" title="Permalink to this headline">¶</a></h1>
 <p>RBD layering refers to the creation of copy-on-write clones of block
@@ -55,28 +68,31 @@ devices. This allows for fast image creation, for example to clone a
 golden master image of a virtual machine into a new instance. To
 simplify the semantics, you can only create a clone of a snapshot -
 snapshots are always read-only, so the rest of the image is
-unaffected, and there&#8217;s no possibility of writing to them
+unaffected, and there’s no possibility of writing to them
 accidentally.</p>
-<p>From a user&#8217;s perspective, a clone is just like any other rbd image.
+<p>From a user’s perspective, a clone is just like any other rbd image.
 You can take snapshots of them, read/write them, resize them, etc.
-There are no restrictions on clones from a user&#8217;s viewpoint.</p>
+There are no restrictions on clones from a user’s viewpoint.</p>
 <p>Note: the terms <cite>child</cite> and <cite>parent</cite> below mean an rbd image created
 by cloning, and the rbd image snapshot a child was cloned from.</p>
 <div class="section" id="command-line-interface">
 <h2>Command line interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
 <p>Before cloning a snapshot, you must mark it as protected, to prevent
 it from being deleted while child images refer to it:</p>
-<div class="highlight-python"><pre>$ rbd snap protect pool/image@snap</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rbd snap protect pool/image@snap
+</pre></div>
 </div>
 <p>Then you can perform the clone:</p>
-<div class="highlight-python"><pre>$ rbd clone [--parent] pool/parent@snap [--image] pool2/child1</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rbd clone [--parent] pool/parent@snap [--image] pool2/child1
+</pre></div>
 </div>
 <p>You can create a clone with different object sizes from the parent:</p>
-<div class="highlight-python"><pre>$ rbd clone --order 25 pool/parent@snap pool2/child2</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rbd clone --order 25 pool/parent@snap pool2/child2
+</pre></div>
 </div>
 <p>To delete the parent, you must first mark it unprotected, which checks
 that there are no children left:</p>
-<div class="highlight-python"><pre>$ rbd snap unprotect pool/image@snap
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rbd snap unprotect pool/image@snap
 Cannot unprotect: Still in use by pool2/image2
 $ rbd children pool/image@snap
 pool2/child1
@@ -85,17 +101,19 @@ $ rbd flatten pool2/child1
 $ rbd rm pool2/child2
 $ rbd snap rm pool/image@snap
 Cannot remove a protected snapshot: pool/image@snap
-$ rbd snap unprotect pool/image@snap</pre>
+$ rbd snap unprotect pool/image@snap
+</pre></div>
 </div>
 <p>Then the snapshot can be deleted like normal:</p>
-<div class="highlight-python"><pre>$ rbd snap rm pool/image@snap</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ rbd snap rm pool/image@snap
+</pre></div>
 </div>
 </div>
 <div class="section" id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="data-flow">
 <h3>Data Flow<a class="headerlink" href="#data-flow" title="Permalink to this headline">¶</a></h3>
-<p>In the initial implementation, called &#8216;trivial layering&#8217;, there will
+<p>In the initial implementation, called ‘trivial layering’, there will
 be no tracking of which objects exist in a clone. A read that hits a
 non-existent object will attempt to read from the parent snapshot, and
 this will continue recursively until an object exists or an image with
@@ -103,7 +121,7 @@ no parent is found. This is done through the normal read path from
 the parent, so differing object sizes between parents and children
 do not matter.</p>
 <p>Before a write to an object is performed, the object is checked for
-existence. If it doesn&#8217;t exist, a copy-up operation is performed,
+existence. If it doesn’t exist, a copy-up operation is performed,
 which means reading the relevant range of data from the parent
 snapshot and writing it (plus the original write) to the child
 image. To prevent races with multiple writes trying to copy-up the
@@ -131,7 +149,7 @@ accomplished with a new per-pool object, <cite>rbd_children</cite>, which maps
 (parent pool id, parent image id, parent snapshot id) to a list of
 child image ids. This is stored in the same pool as the child image
 because the client creating a clone already has read/write access to
-everything in this pool, but may not have write access to the parent&#8217;s
+everything in this pool, but may not have write access to the parent’s
 pool. This lets a client with read-only access to one pool clone a
 snapshot from that pool into a pool they have full access to. It
 increases the cost of unprotecting an image, since this needs to check
@@ -143,17 +161,17 @@ image.</p>
 <div class="section" id="protection">
 <h3>Protection<a class="headerlink" href="#protection" title="Permalink to this headline">¶</a></h3>
 <p>Internally, protection_state is a field in the header object that
-can be in three states. &#8220;protected&#8221;, &#8220;unprotected&#8221;, and
-&#8220;unprotecting&#8221;. The first two are set as the result of &#8220;rbd
-protect/unprotect&#8221;. The &#8220;unprotecting&#8221; state is set while the &#8220;rbd
-unprotect&#8221; command checks for any child images. Only snapshots in the
-&#8220;protected&#8221; state may be cloned, so the &#8220;unprotected&#8221; state prevents
+can be in three states. “protected”, “unprotected”, and
+“unprotecting”. The first two are set as the result of “rbd
+protect/unprotect”. The “unprotecting” state is set while the “rbd
+unprotect” command checks for any child images. Only snapshots in the
+“protected” state may be cloned, so the “unprotected” state prevents
 a race like:</p>
 <ol class="arabic simple">
-<li>A: walk through all pools, look for clones, find none</li>
-<li>B: create a clone</li>
-<li>A: unprotect parent</li>
-<li>A: rbd snap rm <a class="reference external" href="mailto:pool/parent&#37;&#52;&#48;snap">pool/parent<span>&#64;</span>snap</a></li>
+<li><p>A: walk through all pools, look for clones, find none</p></li>
+<li><p>B: create a clone</p></li>
+<li><p>A: unprotect parent</p></li>
+<li><p>A: rbd snap rm <a class="reference external" href="mailto:pool/parent&#37;&#52;&#48;snap">pool/parent<span>&#64;</span>snap</a></p></li>
 </ol>
 </div>
 <div class="section" id="resizing">
@@ -173,7 +191,7 @@ amount of overlap the child has with the parent, since resizing only
 changes the end of an image. When a child is created, its overlap
 is the size of the parent snapshot. On each subsequent resize, the
 overlap is <cite>min(overlap, new_size)</cite>. That is, shrinking the image
-may shrinks the overlap, but increasing the image&#8217;s size does not
+may shrinks the overlap, but increasing the image’s size does not
 change the overlap.</p>
 <p>Objects that do not exist past the overlap are treated as zeroes.
 Objects that do not exist before that point fall back to reading
@@ -204,17 +222,17 @@ in a pool, however.</p>
 <h2>Header changes<a class="headerlink" href="#header-changes" title="Permalink to this headline">¶</a></h2>
 <p>The header needs a few new fields:</p>
 <ul class="simple">
-<li>int64_t parent_pool_id</li>
-<li>string parent_image_id</li>
-<li>uint64_t parent_snap_id</li>
-<li>uint64_t overlap (how much of the image may be referring to the parent)</li>
+<li><p>int64_t parent_pool_id</p></li>
+<li><p>string parent_image_id</p></li>
+<li><p>uint64_t parent_snap_id</p></li>
+<li><p>uint64_t overlap (how much of the image may be referring to the parent)</p></li>
 </ul>
-<p>These are stored in a &#8220;parent&#8221; key, which is only present if the image
+<p>These are stored in a “parent” key, which is only present if the image
 has a parent.</p>
 <div class="section" id="cls-rbd">
 <h3>cls_rbd<a class="headerlink" href="#cls-rbd" title="Permalink to this headline">¶</a></h3>
 <p>Some new methods are needed:</p>
-<div class="highlight-python"><pre>/***************** methods on the rbd header *********************/
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/***************** methods on the rbd header *********************/
 /**
  * Sets the parent and overlap keys.
  * Fails if any of these keys exist, since the image already
@@ -264,22 +282,24 @@ dir_get_name(string id);
 dir_list(string start_after, uint64_t max_return);
 dir_add_image(string name, string id);
 dir_remove_image(string name, string id);
-dir_rename_image(string src, string dest, string id);</pre>
+dir_rename_image(string src, string dest, string id);
+</pre></div>
 </div>
 <p>Two existing methods will change if the image supports
 layering:</p>
-<div class="highlight-python"><pre>snapshot_add - stores current overlap and has_parent with
-               other snapshot metadata (images that don't have
-               layering enabled aren't affected)
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snapshot_add</span> <span class="o">-</span> <span class="n">stores</span> <span class="n">current</span> <span class="n">overlap</span> <span class="ow">and</span> <span class="n">has_parent</span> <span class="k">with</span>
+               <span class="n">other</span> <span class="n">snapshot</span> <span class="n">metadata</span> <span class="p">(</span><span class="n">images</span> <span class="n">that</span> <span class="n">don</span><span class="s1">&#39;t have</span>
+               <span class="n">layering</span> <span class="n">enabled</span> <span class="n">aren</span><span class="s1">&#39;t affected)</span>
 
-set_size     - will adjust the parent overlap down as needed.</pre>
+<span class="n">set_size</span>     <span class="o">-</span> <span class="n">will</span> <span class="n">adjust</span> <span class="n">the</span> <span class="n">parent</span> <span class="n">overlap</span> <span class="n">down</span> <span class="k">as</span> <span class="n">needed</span><span class="o">.</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="librbd">
 <h3>librbd<a class="headerlink" href="#librbd" title="Permalink to this headline">¶</a></h3>
 <p>Opening a child image opens its parent (and this will continue
 recursively as needed). This means that an ImageCtx will contain a
-pointer to the parent image context. Differing object sizes won&#8217;t
+pointer to the parent image context. Differing object sizes won’t
 matter, since reading from the parent will go through the parent
 image context.</p>
 <p>Discard will need to change for layered images so that it only
@@ -289,61 +309,140 @@ could not tell if we needed to read them from the parent.</p>
 create except size (size of the parent image is used).</p>
 <p>Instead of expanding the rbd_info struct, we will break the metadata
 retrieval into several API calls.  Right now, the only users of
-rbd_stat() other than &#8216;rbd info&#8217; only use it to retrieve image size.</p>
+rbd_stat() other than ‘rbd info’ only use it to retrieve image size.</p>
 </div>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../">Table Of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/">开发者指南</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../internals/">Ceph 内幕</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../blkin/">用 Blkin 追踪 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bluestore/">BlueStore Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cache-pool/">Cache pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-reclaim/">CephFS Reclaim Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-snapshots/">CephFS 快照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephx_protocol/">Cephx 认证协议详细阐述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/">配置管理系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-key/">config-key layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../context/">CephContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corpus/">资料库结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cpu-profiler/">Oprofile 的安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cxx/">C++17 and libstdc++ ABI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../delayed-delete/">CephFS delayed deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev_cluster_deployement/">开发集群的部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev_cluster_deployement/#id6">在同一机器上部署多套开发集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development-workflow/">开发流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../documenting/">为 Ceph 写作文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encoding/">序列化（编码、解码）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../erasure-coded-pool/">纠删码存储池</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../file-striping/">File striping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../freebsd/">FreeBSD Implementation details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generatedocs/">Ceph 文档的构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iana/">IANA 号</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kernel-client-troubleshooting/">Kernel client troubleshooting (FS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kubernetes/">Hacking on Ceph in Kubernetes with Rook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libs/">Library architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logging/">集群日志的用法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/">调试日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos/">在 MacOS 上构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../messenger/">Messenger notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-bootstrap/">Monitor bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-on-disk-formats/">ON-DISK FORMAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-osdmap-prune/">FULL OSDMAP VERSION PRUNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../msgr2/">msgr2 协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-encoding/">Network Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-protocol/">网络协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../object-store/">对象存储架构概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd-class-path/">OSD class path issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peering/">互联</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf/">Using perf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_counters/">性能计数器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_histograms/">Perf histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement-group/">PG （归置组）说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quick_guide/">开发者指南（快速）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rados-client-protocol/">RADOS 客户端协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-diff/">RBD 增量备份</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-export/">RBD Export &amp; Import</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">RBD Layering</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-interface">Command line interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-flow">Data Flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parent-child-relationships">Parent/Child relationships</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#protection">Protection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resizing">Resizing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#renaming">Renaming</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#header-changes">Header changes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cls-rbd">cls_rbd</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#librbd">librbd</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../release-process/">Ceph Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../seastore/">SeaStore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sepia/">Sepia 社区测试实验室</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../session_authentication/">Session Authentication for the Cephx Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../testing/">测试笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../versions/">Public OSD Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../wireshark/">Wireshark Dissector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_internals/">OSD 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mds_internals/">MDS 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/">RADOS 网关开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph-volume/">ceph-volume 开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -352,11 +451,18 @@ rbd_stat() other than &#8216;rbd info&#8217; only use it to retrieve image size.
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../release-process/" title="Ceph Release Process"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../rbd-export/" title="RBD Export &amp; Import"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" >Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

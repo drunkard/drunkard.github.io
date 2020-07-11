@@ -1,36 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>ECBackend 实现策略 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>ECBackend 实现策略 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="../../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../../../genindex/" />
+    <link rel="search" title="Search" href="../../../../search/" />
+    <link rel="next" title="last_epoch_started" href="../../last_epoch_started/" />
+    <link rel="prev" title="jerasure 插件" href="../jerasure/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,15 +30,39 @@
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../../last_epoch_started/" title="last_epoch_started"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../jerasure/" title="jerasure 插件"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../internals/" >Ceph 内幕</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../" >OSD 开发者文档</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../" accesskey="U">纠删码编码的归置组</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/dev/osd_internals/erasure_coding/ecbackend.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="ecbackend">
 <span id="ecbackend-implementation-strategy"></span><h1>ECBackend 实现策略<a class="headerlink" href="#ecbackend" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="misc-initial-design-notes">
@@ -56,17 +71,17 @@
 overwrites debug flag enabled) design for ec pools restricted
 EC pools to operations which can be easily rolled back:</p>
 <ul class="simple">
-<li>CEPH_OSD_OP_APPEND: We can roll back an append locally by
-including the previous object size as part of the PG log event.</li>
-<li>CEPH_OSD_OP_DELETE: The possibility of rolling back a delete
+<li><p>CEPH_OSD_OP_APPEND: We can roll back an append locally by
+including the previous object size as part of the PG log event.</p></li>
+<li><p>CEPH_OSD_OP_DELETE: The possibility of rolling back a delete
 requires that we retain the deleted object until all replicas have
 persisted the deletion event.  ErasureCoded backend will therefore
 need to store objects with the version at which they were created
 included in the key provided to the filestore.  Old versions of an
 object can be pruned when all replicas have committed up to the log
-event deleting the object.</li>
-<li>CEPH_OSD_OP_(SET|RM)ATTR: If we include the prior value of the attr
-to be set or removed, we can roll back these operations locally.</li>
+event deleting the object.</p></li>
+<li><p>CEPH_OSD_OP_(SET|RM)ATTR: If we include the prior value of the attr
+to be set or removed, we can roll back these operations locally.</p></li>
 </ul>
 <p>Log entries contain a structure explaining how to locally undo the
 operation represented by the operation
@@ -81,13 +96,13 @@ the first position of the acting set.  It also needs to be able to
 leave holes in the requested acting set.</p>
 <p>Core Changes:</p>
 <ul class="simple">
-<li>OSDMap::pg_to_*_osds needs to separately return a primary.  For most
-cases, this can continue to be acting[0].</li>
-<li>MOSDPGTemp (and related OSD structures) needs to be able to specify
-a primary as well as an acting set.</li>
-<li>Much of the existing code base assumes that acting[0] is the primary
+<li><p>OSDMap::pg_to_*_osds needs to separately return a primary.  For most
+cases, this can continue to be acting[0].</p></li>
+<li><p>MOSDPGTemp (and related OSD structures) needs to be able to specify
+a primary as well as an acting set.</p></li>
+<li><p>Much of the existing code base assumes that acting[0] is the primary
 and that all elements of acting are valid.  This needs to be cleaned
-up since the acting set may contain holes.</li>
+up since the acting set may contain holes.</p></li>
 </ul>
 </div>
 <div class="section" id="distinguished-acting-set-positions">
@@ -106,16 +121,16 @@ in chunk 4 have different names.  To that end, the objectstore must
 include the chunk id in the object key.</p>
 <p>Core changes:</p>
 <ul class="simple">
-<li>The objectstore <a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/common/hobject.h#L241">ghobject_t needs to also include a chunk id</a> making it more like
-tuple&lt;hobject_t, gen_t, shard_t&gt;.</li>
-<li>coll_t needs to include a shard_t.</li>
-<li>The OSD pg_map and similar pg mappings need to work in terms of a
+<li><p>The objectstore <a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/common/hobject.h#L241">ghobject_t needs to also include a chunk id</a> making it more like
+tuple&lt;hobject_t, gen_t, shard_t&gt;.</p></li>
+<li><p>coll_t needs to include a shard_t.</p></li>
+<li><p>The OSD pg_map and similar pg mappings need to work in terms of a
 spg_t (essentially
 pair&lt;pg_t, shard_t&gt;).  Similarly, pg-&gt;pg messages need to include
-a shard_t</li>
-<li>For client-&gt;PG messages, the OSD will need a way to know which PG
+a shard_t</p></li>
+<li><p>For client-&gt;PG messages, the OSD will need a way to know which PG
 chunk should get the message since the OSD may contain both a
-primary and non-primary chunk for the same pg</li>
+primary and non-primary chunk for the same pg</p></li>
 </ul>
 </div>
 <div class="section" id="object-classes">
@@ -126,9 +141,9 @@ a special SYNC read.</p>
 <div class="section" id="scrub">
 <h3>Scrub<a class="headerlink" href="#scrub" title="Permalink to this headline">¶</a></h3>
 <p>The main catch, however, for ec pools is that sending a crc32 of the
-stored chunk on a replica isn&#8217;t particularly helpful since the chunks
+stored chunk on a replica isn’t particularly helpful since the chunks
 on different replicas presumably store different data.  Because we
-don&#8217;t support overwrites except via DELETE, however, we have the
+don’t support overwrites except via DELETE, however, we have the
 option of maintaining a crc32 on each chunk through each append.
 Thus, each replica instead simply computes a crc32 of its own stored
 chunk and compares it with the locally stored checksum.  The replica
@@ -151,18 +166,18 @@ than shifting the other elements of the acting set out of position.</p>
 <p>A RADOS put operation can span
 multiple stripes of a single object. There must be code that
 tessellates the application level write into a set of per-stripe write
-operations &#8211; some whole-stripes and up to two partial
+operations – some whole-stripes and up to two partial
 stripes. Without loss of generality, for the remainder of this
 document we will focus exclusively on writing a single stripe (whole
-or partial). We will use the symbol &#8220;W&#8221; to represent the number of
+or partial). We will use the symbol “W” to represent the number of
 blocks within a stripe that are being written, i.e., W &lt;= K.</p>
 <p>There are three data flows for handling a write into an EC stripe. The
 choice of which of the three data flows to choose is based on the size
 of the write operation and the arithmetic properties of the selected
 parity-generation algorithm.</p>
 <ol class="arabic simple">
-<li>whole stripe is written/overwritten</li>
-<li>a read-modify-write operation is performed.</li>
+<li><p>whole stripe is written/overwritten</p></li>
+<li><p>a read-modify-write operation is performed.</p></li>
 </ol>
 <div class="section" id="whole-stripe-write">
 <h3>WHOLE STRIPE WRITE<a class="headerlink" href="#whole-stripe-write" title="Permalink to this headline">¶</a></h3>
@@ -186,7 +201,7 @@ written. The RADOS operation is acknowledged.</p>
 phase process: commit and rollforward. The primary sends the log
 entries with the operation described (see
 osd_types.h:TransactionInfo::(LocalRollForward|LocalRollBack).
-In all cases, the &#8220;commit&#8221; is performed in place, possibly leaving some
+In all cases, the “commit” is performed in place, possibly leaving some
 information required for a rollback in a write-aside object.  The
 rollforward phase occurs once all acting set replicas have committed
 the commit (sorry, overloaded term) and removes the rollback information.</p>
@@ -199,14 +214,14 @@ efficient primitive for this.</p>
 committed once all replicas have committed.  Currently, whenever we
 send a write, we also indicate that all previously committed
 operations should be rolled forward (see
-ECBackend::try_reads_to_commit).  If there aren&#8217;t any in the pipeline
+ECBackend::try_reads_to_commit).  If there aren’t any in the pipeline
 when we arrive at the waiting_rollforward queue, we start a dummy
 write to move things along (see the Pipeline section later on and
 ECBackend::try_finish_rmw).</p>
 </div>
 <div class="section" id="extentcache">
 <h3>ExtentCache<a class="headerlink" href="#extentcache" title="Permalink to this headline">¶</a></h3>
-<p>It&#8217;s pretty important to be able to pipeline writes on the same
+<p>It’s pretty important to be able to pipeline writes on the same
 object.  For this reason, there is a cache of extents written by
 cacheable operations.  Each extent remains pinned until the operations
 referring to it are committed.  The pipeline prevents rmw operations
@@ -221,8 +236,8 @@ under which cuncurrent operations can refer to the same object.</p>
 <p>Reading src/osd/ExtentCache.h should have given a good idea of how
 operations might overlap.  There are several states involved in
 processing a write operation and an important invariant which
-isn&#8217;t enforced by PrimaryLogPG at a higher level which need to be
-managed by ECBackend.  The important invariant is that we can&#8217;t
+isn’t enforced by PrimaryLogPG at a higher level which need to be
+managed by ECBackend.  The important invariant is that we can’t
 have uncacheable and rmw operations running at the same time
 on the same object.  For simplicity, we simply enforce that any
 operation which contains an rmw operation must wait until
@@ -235,55 +250,166 @@ ECBackend::try_&lt;from&gt;_to_&lt;to&gt;.</p>
 </div>
 
 
+
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../../">
               <img class="logo" src="../../../../_static/logo.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../../../">Table Of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../developer_guide/">开发者指南</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../internals/">Ceph 内幕</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../blkin/">用 Blkin 追踪 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../bluestore/">BlueStore Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cache-pool/">Cache pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cephfs-reclaim/">CephFS Reclaim Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cephfs-snapshots/">CephFS 快照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cephx_protocol/">Cephx 认证协议详细阐述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../config/">配置管理系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../config-key/">config-key layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../context/">CephContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../corpus/">资料库结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cpu-profiler/">Oprofile 的安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../cxx/">C++17 and libstdc++ ABI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../delayed-delete/">CephFS delayed deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_cluster_deployement/">开发集群的部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dev_cluster_deployement/#id6">在同一机器上部署多套开发集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development-workflow/">开发流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../documenting/">为 Ceph 写作文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../encoding/">序列化（编码、解码）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../erasure-coded-pool/">纠删码存储池</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../file-striping/">File striping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../freebsd/">FreeBSD Implementation details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generatedocs/">Ceph 文档的构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../iana/">IANA 号</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kernel-client-troubleshooting/">Kernel client troubleshooting (FS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../kubernetes/">Hacking on Ceph in Kubernetes with Rook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../libs/">Library architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../logging/">集群日志的用法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../logs/">调试日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../macos/">在 MacOS 上构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../messenger/">Messenger notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mon-bootstrap/">Monitor bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mon-on-disk-formats/">ON-DISK FORMAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mon-osdmap-prune/">FULL OSDMAP VERSION PRUNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../msgr2/">msgr2 协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../network-encoding/">Network Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../network-protocol/">网络协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../object-store/">对象存储架构概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../osd-class-path/">OSD class path issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../peering/">互联</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../perf/">Using perf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../perf_counters/">性能计数器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../perf_histograms/">Perf histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../placement-group/">PG （归置组）说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../quick_guide/">开发者指南（快速）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rados-client-protocol/">RADOS 客户端协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd-diff/">RBD 增量备份</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd-export/">RBD Export &amp; Import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rbd-layering/">RBD Layering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../release-process/">Ceph Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../seastore/">SeaStore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../sepia/">Sepia 社区测试实验室</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../session_authentication/">Session Authentication for the Cephx Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../testing/">测试笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../versions/">Public OSD Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../wireshark/">Wireshark Dissector</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../">OSD 开发者文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../async_recovery/">Asynchronous Recovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../backfill_reservation/">Backfill Reservation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../">纠删码编码的归置组</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../#id2">术语</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../#id3">内容列表</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../developer_notes/">开发者注意事项</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../jerasure/">Jerasure 插件</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">ECBackend 实现策略</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#misc-initial-design-notes">设计初稿的各种起因</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pgtemp-and-crush">PGTemp and Crush</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#distinguished-acting-set-positions">Distinguished acting set positions</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#object-classes">Object Classes</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#scrub">Scrub</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#crush">Crush</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">ECBackend</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#main-operation-overview">MAIN OPERATION OVERVIEW</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#whole-stripe-write">WHOLE STRIPE WRITE</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#read-modify-write">READ-MODIFY-WRITE</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#osd-object-write-and-consistency">OSD Object Write and Consistency</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#extentcache">ExtentCache</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pipeline">Pipeline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../last_epoch_started/">last_epoch_started</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../log_based_pg/">Log Based PG</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../map_message_handling/">Map and PG Message handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../osd_overview/">OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../osd_throttles/">OSD 油门（ throttle ）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pg/">PG</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pg_removal/">PG Removal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pgpool/">PGPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../recovery_reservation/">Recovery Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../scrub/">Scrubbing Behavior Table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../snaps/">快照</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../watch_notify/">关注通知</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../wbthrottle/">回写抑制</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mds_internals/">MDS 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../radosgw/">RADOS 网关开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../ceph-volume/">ceph-volume 开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -292,11 +418,20 @@ ECBackend::try_&lt;from&gt;_to_&lt;to&gt;.</p>
         <li class="right" >
           <a href="../../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../../last_epoch_started/" title="last_epoch_started"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../jerasure/" title="jerasure 插件"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../internals/" >Ceph 内幕</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../" >OSD 开发者文档</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../" >纠删码编码的归置组</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

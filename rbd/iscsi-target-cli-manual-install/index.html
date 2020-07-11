@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>手动安装 ceph-iscsi &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="iSCSI Initiators 的配置" href="../iscsi-initiators/" />
+    <link rel="prev" title="用命令行配置 iSCSI Target" href="../iscsi-target-cli/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../iscsi-initiators/" title="iSCSI Initiators 的配置"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../iscsi-target-cli/" title="用命令行配置 iSCSI Target"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../rbd-integrations/" >Ceph 块设备与第三方对接</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../iscsi-overview/" >Ceph iSCSI Gateway</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="../iscsi-targets/" >iSCSI Targets</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="../iscsi-target-cli/" accesskey="U">用命令行配置 iSCSI Target</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rbd/iscsi-target-cli-manual-install.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="ceph-iscsi">
+<h1>手动安装 ceph-iscsi<a class="headerlink" href="#ceph-iscsi" title="Permalink to this headline">¶</a></h1>
+<p><strong>Requirements</strong></p>
+<p>To complete the installation of ceph-iscsi, there are 4 steps:</p>
+<ol class="arabic simple">
+<li><p>Install common packages from your Linux distribution’s software repository</p></li>
+<li><p>Install Git to fetch the remaining packages directly from their Git repositories</p></li>
+<li><p>Ensure a compatible kernel is used</p></li>
+<li><p>Install all the components of ceph-iscsi and start associated daemons:</p>
+<ul class="simple">
+<li><p>tcmu-runner</p></li>
+<li><p>rtslib-fb</p></li>
+<li><p>configshell-fb</p></li>
+<li><p>targetcli-fb</p></li>
+<li><p>ceph-iscsi</p></li>
+</ul>
+</li>
+</ol>
+<div class="section" id="install-common-packages">
+<h2>1. Install Common Packages<a class="headerlink" href="#install-common-packages" title="Permalink to this headline">¶</a></h2>
+<p>The following packages will be used by ceph-iscsi and target tools.
+They must be installed from your Linux distribution’s software repository
+on each machine that will be a iSCSI gateway:</p>
+<ul class="simple">
+<li><p>libnl3</p></li>
+<li><p>libkmod</p></li>
+<li><p>librbd1</p></li>
+<li><p>pyparsing</p></li>
+<li><p>python kmod</p></li>
+<li><p>python pyudev</p></li>
+<li><p>python gobject</p></li>
+<li><p>python urwid</p></li>
+<li><p>python pyparsing</p></li>
+<li><p>python rados</p></li>
+<li><p>python rbd</p></li>
+<li><p>python netifaces</p></li>
+<li><p>python crypto</p></li>
+<li><p>python requests</p></li>
+<li><p>python flask</p></li>
+<li><p>pyOpenSSL</p></li>
+</ul>
+</div>
+<div class="section" id="install-git">
+<h2>2. Install Git<a class="headerlink" href="#install-git" title="Permalink to this headline">¶</a></h2>
+<p>In order to install all the packages needed to run iSCSI with Ceph, you need to download them directly from their repository by using Git.
+On CentOS/RHEL execute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">sudo</span> <span class="n">yum</span> <span class="n">install</span> <span class="n">git</span>
+</pre></div>
+</div>
+<p>On Debian/Ubuntu execute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">git</span>
+</pre></div>
+</div>
+<p>To know more about Git and how it works, please, visit <a class="reference external" href="https://git-scm.com">https://git-scm.com</a></p>
+</div>
+<div class="section" id="ensure-a-compatible-kernel-is-used">
+<h2>3. Ensure a compatible kernel is used<a class="headerlink" href="#ensure-a-compatible-kernel-is-used" title="Permalink to this headline">¶</a></h2>
+<p>Ensure you use a supported kernel that contains the required Ceph iSCSI patches:</p>
+<ul class="simple">
+<li><p>all Linux distribution with a kernel v4.16 or newer, or</p></li>
+<li><p>Red Hat Enterprise Linux or CentOS 7.5 or later (in these distributions ceph-iscsi support is backported)</p></li>
+</ul>
+<p>If you are already using a compatible kernel, you can go to next step.
+However, if you are NOT using a compatible kernel then check your distro’s
+documentation for specific instructions on how to build this kernel. The only
+Ceph iSCSI specific requirements are that the following build options must be
+enabled:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CONFIG_TARGET_CORE</span><span class="o">=</span><span class="n">m</span>
+<span class="n">CONFIG_TCM_USER2</span><span class="o">=</span><span class="n">m</span>
+<span class="n">CONFIG_ISCSI_TARGET</span><span class="o">=</span><span class="n">m</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="install-ceph-iscsi">
+<h2>4. Install ceph-iscsi<a class="headerlink" href="#install-ceph-iscsi" title="Permalink to this headline">¶</a></h2>
+<p>Finally, the remaining tools can be fetched directly from their Git repositories and their associated services started</p>
+<div class="section" id="tcmu-runner">
+<h3>tcmu-runner<a class="headerlink" href="#tcmu-runner" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="nb">open</span><span class="o">-</span><span class="n">iscsi</span><span class="o">/</span><span class="n">tcmu</span><span class="o">-</span><span class="n">runner</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">tcmu</span><span class="o">-</span><span class="n">runner</span>
+</pre></div>
+</div>
+<p>Run the following command to install all the needed dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="o">./</span><span class="n">extra</span><span class="o">/</span><span class="n">install_dep</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Now you can build the tcmu-runner.
+To do so, use the following build command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">cmake</span> <span class="o">-</span><span class="n">Dwith</span><span class="o">-</span><span class="n">glfs</span><span class="o">=</span><span class="n">false</span> <span class="o">-</span><span class="n">Dwith</span><span class="o">-</span><span class="n">qcow</span><span class="o">=</span><span class="n">false</span> <span class="o">-</span><span class="n">DSUPPORT_SYSTEMD</span><span class="o">=</span><span class="n">ON</span> <span class="o">-</span><span class="n">DCMAKE_INSTALL_PREFIX</span><span class="o">=/</span><span class="n">usr</span>
+<span class="o">&gt;</span> <span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>Enable and start the daemon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">tcmu</span><span class="o">-</span><span class="n">runner</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">tcmu</span><span class="o">-</span><span class="n">runner</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="rtslib-fb">
+<h3>rtslib-fb<a class="headerlink" href="#rtslib-fb" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="nb">open</span><span class="o">-</span><span class="n">iscsi</span><span class="o">/</span><span class="n">rtslib</span><span class="o">-</span><span class="n">fb</span><span class="o">.</span><span class="n">git</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">rtslib</span><span class="o">-</span><span class="n">fb</span>
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="configshell-fb">
+<h3>configshell-fb<a class="headerlink" href="#configshell-fb" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="nb">open</span><span class="o">-</span><span class="n">iscsi</span><span class="o">/</span><span class="n">configshell</span><span class="o">-</span><span class="n">fb</span><span class="o">.</span><span class="n">git</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">configshell</span><span class="o">-</span><span class="n">fb</span>
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="targetcli-fb">
+<h3>targetcli-fb<a class="headerlink" href="#targetcli-fb" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="nb">open</span><span class="o">-</span><span class="n">iscsi</span><span class="o">/</span><span class="n">targetcli</span><span class="o">-</span><span class="n">fb</span><span class="o">.</span><span class="n">git</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">targetcli</span><span class="o">-</span><span class="n">fb</span>
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+<span class="o">&gt;</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">target</span>
+<span class="o">&gt;</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">target</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The ceph-iscsi tools assume they are managing all targets
+on the system. If targets have been setup and are being managed by
+targetcli the target service must be disabled.</p>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="id1">
+<h3>ceph-iscsi<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">ceph</span><span class="o">/</span><span class="n">ceph</span><span class="o">-</span><span class="n">iscsi</span><span class="o">.</span><span class="n">git</span>
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">ceph</span><span class="o">-</span><span class="n">iscsi</span>
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">scripts</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span>
+<span class="o">&gt;</span> <span class="n">cp</span> <span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">gw</span><span class="o">.</span><span class="n">service</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span>
+<span class="o">&gt;</span> <span class="n">cp</span> <span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">api</span><span class="o">.</span><span class="n">service</span> <span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span>
+</pre></div>
+</div>
+<p>Enable and start the daemon:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">daemon</span><span class="o">-</span><span class="n">reload</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">gw</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">gw</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">api</span>
+<span class="o">&gt;</span> <span class="n">systemctl</span> <span class="n">start</span> <span class="n">rbd</span><span class="o">-</span><span class="n">target</span><span class="o">-</span><span class="n">api</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Installation is complete. Proceed to the setup section in the
+<a class="reference external" href="../iscsi-target-cli">main ceph-iscsi CLI page</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 块设备</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../rados-rbd-cmds/">基本命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-operations/">运维</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../rbd-integrations/">对接</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../rbd-ko/">内核模块</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../qemu-rbd/">QEMU</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../libvirt/">libvirt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-openstack/">OpenStack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rbd-cloudstack/">CloudStack</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../iscsi-overview/">LIO iSCSI Gateway</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../iscsi-requirements/">Requirements</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../iscsi-targets/">Configuring the iSCSI Target</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../iscsi-target-ansible/">Using Ansible</a></li>
+<li class="toctree-l5 current"><a class="reference internal" href="../iscsi-target-cli/">Using the Command Line Interface</a><ul class="current">
+<li class="toctree-l6 current"><a class="current reference internal" href="#">手动安装 ceph-iscsi</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#install-common-packages">1. Install Common Packages</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#install-git">2. Install Git</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#ensure-a-compatible-kernel-is-used">3. Ensure a compatible kernel is used</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#install-ceph-iscsi">4. Install ceph-iscsi</a><ul>
+<li class="toctree-l8"><a class="reference internal" href="#tcmu-runner">tcmu-runner</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#rtslib-fb">rtslib-fb</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#configshell-fb">configshell-fb</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#targetcli-fb">targetcli-fb</a></li>
+<li class="toctree-l8"><a class="reference internal" href="#id1">ceph-iscsi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../iscsi-initiators/">Configuring the iSCSI Initiators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../iscsi-monitoring/">Monitoring the iSCSI Gateways</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../iscsi-initiators/" title="iSCSI Initiators 的配置"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../iscsi-target-cli/" title="用命令行配置 iSCSI Target"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../rbd-integrations/" >Ceph 块设备与第三方对接</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../iscsi-overview/" >Ceph iSCSI Gateway</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="../iscsi-targets/" >iSCSI Targets</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="../iscsi-target-cli/" >用命令行配置 iSCSI Target</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

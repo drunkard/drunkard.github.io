@@ -1,36 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>开发集群的部署 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>开发集群的部署 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="开发流程" href="../development-workflow/" />
+    <link rel="prev" title="CephFS delayed deletion" href="../delayed-delete/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,15 +30,37 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../development-workflow/" title="开发流程"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../delayed-delete/" title="CephFS delayed deletion"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" accesskey="U">Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/dev/dev_cluster_deployement.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>开发集群的部署<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <p>要从事 ceph 开发，可以用 <em>vstart.sh</em> 工具部署一个位于本地的伪集群，以便测试。</p>
@@ -56,193 +69,330 @@
 <p>用此工具可在本机部署伪集群以便开发，它可以启动 rgw 、 mon 、
 osd 、和/或 mds ，不指定的话会启动所有类型。</p>
 <p>要启动开发集群，执行此命令：</p>
-<div class="highlight-python"><pre>vstart.sh [OPTIONS]...</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vstart</span><span class="o">.</span><span class="n">sh</span> <span class="p">[</span><span class="n">OPTIONS</span><span class="p">]</span><span class="o">...</span>
+</pre></div>
 </div>
 <p>要停止集群，可以执行：</p>
-<div class="highlight-python"><pre>./stop.sh</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">stop</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id3">
 <h2>选项<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <dl class="option">
+<dt id="cmdoption-bluestore">
+<code class="sig-name descname">--bluestore</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-bluestore" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 bluestore 作为 OSD 的对象存储后端。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-cache">
+<code class="sig-name descname">--cache</code><code class="sig-prename descclassname"> &lt;pool&gt;</code><a class="headerlink" href="#cmdoption-cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>给指定存储池配置一个缓存层。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-d">
+<code class="sig-name descname">-d</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--debug</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>在调试模式下启动。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-e">
+<code class="sig-name descname">-e</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-e" title="Permalink to this definition">¶</a></dt>
+<dd><p>创建一个纠删码存储池。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-f">
+<code class="sig-name descname">-f</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--filestore</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-f" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 filestore 作为 OSD 的对象存储后端。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-hitset">
+<code class="sig-name descname">--hitset</code><code class="sig-prename descclassname"> &lt;pool&gt; &lt;hit_set_type&gt;</code><a class="headerlink" href="#cmdoption-hitset" title="Permalink to this definition">¶</a></dt>
+<dd><p>启用 hitset 追踪。</p>
+</dd></dl>
+
+<dl class="option">
 <dt id="cmdoption-i">
-<tt class="descname">-i</tt><tt class="descclassname"> ip_address</tt><a class="headerlink" href="#cmdoption-i" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-i</code><code class="sig-prename descclassname"> ip_address</code><a class="headerlink" href="#cmdoption-i" title="Permalink to this definition">¶</a></dt>
 <dd><p>绑定到指定的 <em>ip_address</em> （ IP 地址），而不是从主机名解析。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-k">
-<tt class="descname">-k</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-k" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">-k</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-k" title="Permalink to this definition">¶</a></dt>
 <dd><p>保留旧的配置文件，而非覆盖它们。</p>
 </dd></dl>
 
 <dl class="option">
+<dt id="cmdoption-kstore">
+<code class="sig-name descname">-K</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--kstore</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-kstore" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 kstore 作为 OSD 的对象存储后端。</p>
+</dd></dl>
+
+<dl class="option">
 <dt id="cmdoption-l">
-<tt class="descname">-l</tt><tt class="descclassname"></tt><tt class="descclassname">, </tt><tt class="descname">--localhost</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-l" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use localhost instead of hostanme.</p>
+<code class="sig-name descname">-l</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--localhost</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-l" title="Permalink to this definition">¶</a></dt>
+<dd><p>用 localhost 作为主机名。</p>
 </dd></dl>
 
 <dl class="option">
 <dt id="cmdoption-m">
-<tt class="descname">-m</tt><tt class="descclassname"> ip[:port]</tt><a class="headerlink" href="#cmdoption-m" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specifies monitor <em>ip</em> address and <em>port</em>.</p>
+<code class="sig-name descname">-m</code><code class="sig-prename descclassname"> ip[:port]</code><a class="headerlink" href="#cmdoption-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定监视器的 <em>ip</em> 地址和端口 <em>port</em> 。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-n">
-<tt class="descname">-n</tt><tt class="descclassname"></tt><tt class="descclassname">, </tt><tt class="descname">--new</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-n" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new cluster.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-o">
-<tt class="descname">-o</tt><tt class="descclassname"> config</tt><a class="headerlink" href="#cmdoption-o" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add <em>config</em> to all sections in the ceph configuration.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-r">
-<tt class="descname">-r</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-r" title="Permalink to this definition">¶</a></dt>
-<dd><p>启动 radosgw ，端口从 8000 起递增。</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--nodaemon">
-<tt class="descname">--nodaemon</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption--nodaemon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use ceph-run as wrapper for mon/osd/mds.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--smallmds">
-<tt class="descname">--smallmds</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption--smallmds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure mds with small limit cache size.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-x">
-<tt class="descname">-x</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-x" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enable Cephx (on by default).</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-X">
-<tt class="descname">-X</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-X" title="Permalink to this definition">¶</a></dt>
-<dd><p>Disable Cephx.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption-d">
-<tt class="descname">-d</tt><tt class="descclassname"></tt><tt class="descclassname">, </tt><tt class="descname">--debug</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Launch in debug mode</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--valgrind">
-<tt class="descname">--valgrind</tt><tt class="descclassname">[_{osd,mds,mon}] 'valgrind_toolname [args...]'</tt><a class="headerlink" href="#cmdoption--valgrind" title="Permalink to this definition">¶</a></dt>
-<dd><p>Launch the osd/mds/mon/all the ceph binaries using valgrind with the specified tool and arguments.</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--">
-<tt class="descname">--</tt><tt class="descclassname">{mon,osd,mds}_num</tt><a class="headerlink" href="#cmdoption--" title="Permalink to this definition">¶</a></dt>
-<dd><p>设置 mon/osd/mds 守护进程的数量。</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--bluestore">
-<tt class="descname">--bluestore</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption--bluestore" title="Permalink to this definition">¶</a></dt>
-<dd><p>指定 bluestore 作为 OSD 的对象存储后端。</p>
-</dd></dl>
-
-<dl class="option">
-<dt id="cmdoption--memstore">
-<tt class="descname">--memstore</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption--memstore" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-memstore">
+<code class="sig-name descname">--memstore</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-memstore" title="Permalink to this definition">¶</a></dt>
 <dd><p>指定 memstore 作为 OSD 的对象存储后端。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption--cache">
-<tt class="descname">--cache</tt><tt class="descclassname"> &lt;pool&gt;</tt><a class="headerlink" href="#cmdoption--cache" title="Permalink to this definition">¶</a></dt>
-<dd><p>给指定存储池配置一个缓存层。</p>
+<dt id="cmdoption-multimds">
+<code class="sig-name descname">--multimds</code><code class="sig-prename descclassname"> &lt;count&gt;</code><a class="headerlink" href="#cmdoption-multimds" title="Permalink to this definition">¶</a></dt>
+<dd><p>启用多 MDS 功能、且指定最大活跃数。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-n">
+<code class="sig-name descname">-n</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--new</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-n" title="Permalink to this definition">¶</a></dt>
+<dd><p>创建一个新集群。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-not-new">
+<code class="sig-name descname">-N</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--not-new</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-not-new" title="Permalink to this definition">¶</a></dt>
+<dd><p>重用现有的集群配置（默认行为）。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-nodaemon">
+<code class="sig-name descname">--nodaemon</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-nodaemon" title="Permalink to this definition">¶</a></dt>
+<dd><p>用 ceph-run 作为 mon/osd/mds 的包装。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-nolockdep">
+<code class="sig-name descname">--nolockdep</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-nolockdep" title="Permalink to this definition">¶</a></dt>
+<dd><p>禁用 lockdep 。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-o">
+<code class="sig-name descname">-o</code><code class="sig-prename descclassname"> config</code><a class="headerlink" href="#cmdoption-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>把配置 <em>config</em> 加进 ceph 配置的所有段落下。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-rgw-port">
+<code class="sig-name descname">--rgw_port</code><code class="sig-prename descclassname"> &lt;port&gt;</code><a class="headerlink" href="#cmdoption-rgw-port" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 ceph rgw 的 HTTP 监听端口。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-rgw-frontend">
+<code class="sig-name descname">--rgw_frontend</code><code class="sig-prename descclassname"> &lt;frontend&gt;</code><a class="headerlink" href="#cmdoption-rgw-frontend" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 rgw 前端（默认是 civetweb ）。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-rgw-compression">
+<code class="sig-name descname">--rgw_compression</code><code class="sig-prename descclassname"> &lt;compression_type&gt;</code><a class="headerlink" href="#cmdoption-rgw-compression" title="Permalink to this definition">¶</a></dt>
+<dd><p>指定 rgw 压缩插件（默认是禁用的）。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-smallmds">
+<code class="sig-name descname">--smallmds</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-smallmds" title="Permalink to this definition">¶</a></dt>
+<dd><p>给 MDS 配置小缓存尺寸。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-short">
+<code class="sig-name descname">--short</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-short" title="Permalink to this definition">¶</a></dt>
+<dd><p>只能用短对象名，对 ext4 开发版有必要指定。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-valgrind-osd-mds-mon">
+<code class="sig-name descname">--valgrind[_{osd,mds,mon}]</code><code class="sig-prename descclassname"> 'valgrind_toolname [args...]'</code><a class="headerlink" href="#cmdoption-valgrind-osd-mds-mon" title="Permalink to this definition">¶</a></dt>
+<dd><p>在 valgrind 环境下、用指定的工具和参数，启动 ceph 的 osd/mds/mon/all 二进制。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-without-dashboard">
+<code class="sig-name descname">--without-dashboard</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-without-dashboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>不要用 mgr 的仪表盘运行。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-x">
+<code class="sig-name descname">-x</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-x" title="Permalink to this definition">¶</a></dt>
+<dd><p>启用 Cephx （默认开启）。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="id4">
+<code class="sig-name descname">-X</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#id4" title="Permalink to this definition">¶</a></dt>
+<dd><p>禁用 Cephx 。</p>
 </dd></dl>
 
 </div>
-<div class="section" id="id4">
-<h2>环境变量<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h2>环境变量<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>{OSD,MDS,MON,RGW}</p>
 <p>这些环境变量取值的数值表示你想启动的 ceph 例程数量。</p>
 <p>例如：</p>
-<div class="highlight-python"><pre>OSD=3 MON=3 RGW=1 vstart.sh</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OSD</span><span class="o">=</span><span class="mi">3</span> <span class="n">MON</span><span class="o">=</span><span class="mi">3</span> <span class="n">RGW</span><span class="o">=</span><span class="mi">1</span> <span class="n">vstart</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="id5">
-<h1>在同一机器上部署多套开发集群<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h1>
-<p>要在同一机器上启动多套 ceph 集群，可用 <em>mstart.sh</em> 脚本，它是前述 <em>vstart</em> 的简单包装。</p>
 <div class="section" id="id6">
-<h2>用法<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<h1>在同一机器上部署多套开发集群<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h1>
+<p>要在同一机器上启动多套 ceph 集群，可用 <em>mstart.sh</em> 脚本，它是前述 <em>vstart</em> 的简单包装。</p>
+<div class="section" id="id7">
+<h2>用法<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>要启动多套集群，你可以用 mstart 分别部署各集群，它会在不同端口上启动各个集群的监视器、 rgw 进程们，这样你就能在同一集群内运行多个监视器、 rgw 等进程了。调用方式如下：</p>
-<div class="highlight-python"><pre>mstart.sh &lt;cluster-name&gt; &lt;vstart options&gt;</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mstart</span><span class="o">.</span><span class="n">sh</span> <span class="o">&lt;</span><span class="n">cluster</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">vstart</span> <span class="n">options</span><span class="o">&gt;</span>
+</pre></div>
 </div>
 <p>例如：</p>
-<div class="highlight-python"><pre>./mstart.sh cluster1 -n -r</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">mstart</span><span class="o">.</span><span class="n">sh</span> <span class="n">cluster1</span> <span class="o">-</span><span class="n">n</span>
+</pre></div>
 </div>
 <p>关闭集群可以用：</p>
-<div class="highlight-python"><pre>./mstop.sh &lt;cluster-name&gt;</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">mstop</span><span class="o">.</span><span class="n">sh</span> <span class="o">&lt;</span><span class="n">cluster</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
 </div>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../">Table Of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/">开发者指南</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../internals/">Ceph 内幕</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../blkin/">用 Blkin 追踪 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bluestore/">BlueStore Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cache-pool/">Cache pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-reclaim/">CephFS Reclaim Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-snapshots/">CephFS 快照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephx_protocol/">Cephx 认证协议详细阐述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/">配置管理系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-key/">config-key layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../context/">CephContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corpus/">资料库结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cpu-profiler/">Oprofile 的安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cxx/">C++17 and libstdc++ ABI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../delayed-delete/">CephFS delayed deletion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">开发集群的部署</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">用法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">环境变量</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">在同一机器上部署多套开发集群</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">用法</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../development-workflow/">开发流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../documenting/">为 Ceph 写作文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encoding/">序列化（编码、解码）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../erasure-coded-pool/">纠删码存储池</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../file-striping/">File striping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../freebsd/">FreeBSD Implementation details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generatedocs/">Ceph 文档的构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iana/">IANA 号</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kernel-client-troubleshooting/">Kernel client troubleshooting (FS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kubernetes/">Hacking on Ceph in Kubernetes with Rook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libs/">Library architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logging/">集群日志的用法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/">调试日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos/">在 MacOS 上构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../messenger/">Messenger notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-bootstrap/">Monitor bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-on-disk-formats/">ON-DISK FORMAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-osdmap-prune/">FULL OSDMAP VERSION PRUNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../msgr2/">msgr2 协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-encoding/">Network Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-protocol/">网络协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../object-store/">对象存储架构概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd-class-path/">OSD class path issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peering/">互联</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf/">Using perf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_counters/">性能计数器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_histograms/">Perf histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement-group/">PG （归置组）说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quick_guide/">开发者指南（快速）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rados-client-protocol/">RADOS 客户端协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-diff/">RBD 增量备份</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-export/">RBD Export &amp; Import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-layering/">RBD Layering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release-process/">Ceph Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../seastore/">SeaStore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sepia/">Sepia 社区测试实验室</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../session_authentication/">Session Authentication for the Cephx Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../testing/">测试笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../versions/">Public OSD Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../wireshark/">Wireshark Dissector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_internals/">OSD 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mds_internals/">MDS 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/">RADOS 网关开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph-volume/">ceph-volume 开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -251,11 +401,18 @@ osd 、和/或 mds ，不指定的话会启动所有类型。</p>
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../development-workflow/" title="开发流程"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../delayed-delete/" title="CephFS delayed deletion"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" >Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

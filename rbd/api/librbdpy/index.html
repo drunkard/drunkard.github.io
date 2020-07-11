@@ -1,0 +1,1297 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Librbd 的 Python 接口 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="Ceph 对象网关" href="../../../radosgw/" />
+    <link rel="prev" title="Ceph 块设备 API" href="../" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../radosgw/" title="Ceph 对象网关"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../" title="Ceph 块设备 API"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">Ceph 块设备 API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rbd/api/librbdpy.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="librbd-python">
+<h1>Librbd 的 Python 接口<a class="headerlink" href="#librbd-python" title="Permalink to this headline">¶</a></h1>
+<p><cite>rbd</cite> 的 python 模块为 RBD 映像提供了类似文件的访问方法。</p>
+<div class="section" id="id1">
+<h2>实例：创建一映像并写入<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>要使用 <cite>rbd</cite> ，必须先连接 RADOS 并打开 IO 上下文：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span> <span class="o">=</span> <span class="n">rados</span><span class="o">.</span><span class="n">Rados</span><span class="p">(</span><span class="n">conffile</span><span class="o">=</span><span class="s1">&#39;my_ceph.conf&#39;</span><span class="p">)</span>
+<span class="n">cluster</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">ioctx</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="n">open_ioctx</span><span class="p">(</span><span class="s1">&#39;mypool&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>然后实例化 :class:rbd.RBD 对象，用它来创建映像：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rbd_inst</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">RBD</span><span class="p">()</span>
+<span class="n">size</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># 4 GiB</span>
+<span class="n">rbd_inst</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>要在映像上进行 I/O 操作，需实例化 :class:rbd.Image 对象：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">image</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span> <span class="o">*</span> <span class="mi">200</span>
+<span class="n">image</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>上面的代码向映像前面写入了 600 字节的 foo 字符串。注意数据不能是 :type:unicode ， librbd 不能如何处理大于 :c:type:char 的字符串。</p>
+<p>最后，关闭映像、 IO 上下文、和到 RADOS 的连接。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">image</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">ioctx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="n">cluster</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>安全起见，每个调用都应该封装到单独的 :finally 块内。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cluster</span> <span class="o">=</span> <span class="n">rados</span><span class="o">.</span><span class="n">Rados</span><span class="p">(</span><span class="n">conffile</span><span class="o">=</span><span class="s1">&#39;my_ceph_conf&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">cluster</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+    <span class="n">ioctx</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="n">open_ioctx</span><span class="p">(</span><span class="s1">&#39;my_pool&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rbd_inst</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">RBD</span><span class="p">()</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># 4 GiB</span>
+        <span class="n">rbd_inst</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span> <span class="o">*</span> <span class="mi">200</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">ioctx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">cluster</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>这样做有些繁琐，所以 <code class="xref py py-class docutils literal notranslate"><span class="pre">Rados</span></code> 、 <code class="xref py py-class docutils literal notranslate"><span class="pre">Ioctx</span></code> 和 <code class="xref py py-class docutils literal notranslate"><span class="pre">Image</span></code> 类可以当上下文管理器来用，它能自动关闭（见 <span class="target" id="index-0"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0343"><strong>PEP 343</strong></a> ）。当上下文管理器用时，上面的实例可以写成：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">rados</span><span class="o">.</span><span class="n">Rados</span><span class="p">(</span><span class="n">conffile</span><span class="o">=</span><span class="s1">&#39;my_ceph.conf&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cluster</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">cluster</span><span class="o">.</span><span class="n">open_ioctx</span><span class="p">(</span><span class="s1">&#39;mypool&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ioctx</span><span class="p">:</span>
+        <span class="n">rbd_inst</span> <span class="o">=</span> <span class="n">rbd</span><span class="o">.</span><span class="n">RBD</span><span class="p">()</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># 4 GiB</span>
+        <span class="n">rbd_inst</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">rbd</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span><span class="n">ioctx</span><span class="p">,</span> <span class="s1">&#39;myimage&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">image</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;foo&#39;</span> <span class="o">*</span> <span class="mi">200</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="module-rbd">
+<span id="api"></span><h2>API 参考<a class="headerlink" href="#module-rbd" title="Permalink to this headline">¶</a></h2>
+<p>This module is a thin wrapper around librbd.</p>
+<p>It currently provides all the synchronous methods of librbd that do
+not use callbacks.</p>
+<p>Error codes from librbd are turned into exceptions that subclass
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code>. Almost all methods may raise <code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code>
+(the base class of all rbd exceptions), <code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionError</span></code>
+and <code class="xref py py-class docutils literal notranslate"><span class="pre">IOError</span></code>, in addition to those documented for the
+method.</p>
+<dl class="class">
+<dt id="rbd.RBD">
+<em class="property">class </em><code class="sig-prename descclassname">rbd.</code><code class="sig-name descname">RBD</code><a class="headerlink" href="#rbd.RBD" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class wraps librbd CRUD functions.</p>
+<dl class="attribute">
+<dt id="rbd.RBD.clone">
+<code class="sig-name descname">clone</code><a class="headerlink" href="#rbd.RBD.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone a parent rbd snapshot into a COW sparse child.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p_ioctx</strong> – the parent context that represents the parent snap</p></li>
+<li><p><strong>p_name</strong> – the parent image name</p></li>
+<li><p><strong>p_snapname</strong> – the parent image snapshot name</p></li>
+<li><p><strong>c_ioctx</strong> – the child context that represents the new clone</p></li>
+<li><p><strong>c_name</strong> – the clone (child) name</p></li>
+<li><p><strong>features</strong> (<em>int</em>) – bitmask of features to enable; if set, must include layering</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – the image is split into (2**order) byte objects</p></li>
+<li><p><strong>stripe_unit</strong> (<em>int</em>) – stripe unit in bytes (default None to let librbd decide)</p></li>
+<li><p><strong>stripe_count</strong> (<em>int</em>) – objects to stripe over before looping</p></li>
+<li><p><strong>data_pool</strong> (<em>str</em>) – optional separate pool for data blocks</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageExists</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArgumentOutOfRange</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.config_get">
+<code class="sig-name descname">config_get</code><a class="headerlink" href="#rbd.RBD.config_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pool-level configuration override.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – key</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.config_list">
+<code class="sig-name descname">config_list</code><a class="headerlink" href="#rbd.RBD.config_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List pool-level config overrides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigPoolIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.config_remove">
+<code class="sig-name descname">config_remove</code><a class="headerlink" href="#rbd.RBD.config_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a pool-level configuration override.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – key</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.config_set">
+<code class="sig-name descname">config_set</code><a class="headerlink" href="#rbd.RBD.config_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a pool-level configuration override.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – key</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.create">
+<code class="sig-name descname">create</code><a class="headerlink" href="#rbd.RBD.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an rbd image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – the context in which to create the image</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – what the image is called</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – how big the image is in bytes</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – the image is split into (2**order) byte objects</p></li>
+<li><p><strong>old_format</strong> (<em>bool</em>) – whether to create an old-style image that
+is accessible by old clients, but can’t
+use more advanced features like layering.</p></li>
+<li><p><strong>features</strong> (<em>int</em>) – bitmask of features to enable</p></li>
+<li><p><strong>stripe_unit</strong> (<em>int</em>) – stripe unit in bytes (default None to let librbd decide)</p></li>
+<li><p><strong>stripe_count</strong> (<em>int</em>) – objects to stripe over before looping</p></li>
+<li><p><strong>data_pool</strong> (<em>str</em>) – optional separate pool for data blocks</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageExists</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.features_from_string">
+<code class="sig-name descname">features_from_string</code><a class="headerlink" href="#rbd.RBD.features_from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get features bitmask from str, if str_features is empty, it will return
+RBD_FEATURES_DEFAULT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>str_features</strong> (<em>str</em>) – feature str</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int - the features bitmask of the image</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.features_to_string">
+<code class="sig-name descname">features_to_string</code><a class="headerlink" href="#rbd.RBD.features_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert features bitmask to str.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>features</strong> (<em>int</em>) – feature bitmask</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - the features str of the image</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.group_create">
+<code class="sig-name descname">group_create</code><a class="headerlink" href="#rbd.RBD.group_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is used</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – the name of the group</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectExists</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.group_list">
+<code class="sig-name descname">group_list</code><a class="headerlink" href="#rbd.RBD.group_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list – a list of groups names</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.group_remove">
+<code class="sig-name descname">group_remove</code><a class="headerlink" href="#rbd.RBD.group_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an RBD group. This may take a long time, since it does
+not return until every image in the group has been removed
+from the group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the group is in</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – the name of the group to remove</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectNotFound</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.group_rename">
+<code class="sig-name descname">group_rename</code><a class="headerlink" href="#rbd.RBD.group_rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename an RBD group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the group is in</p></li>
+<li><p><strong>src</strong> (<em>str</em>) – the current name of the group</p></li>
+<li><p><strong>dest</strong> (<em>str</em>) – the new name of the group</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectExists</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ObjectNotFound</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.list">
+<code class="sig-name descname">list</code><a class="headerlink" href="#rbd.RBD.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List image names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list – a list of image names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.list2">
+<code class="sig-name descname">list2</code><a class="headerlink" href="#rbd.RBD.list2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the images in the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.migration_abort">
+<code class="sig-name descname">migration_abort</code><a class="headerlink" href="#rbd.RBD.migration_abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cancel a previously started but interrupted migration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_name</strong> (<em>str</em>) – the name of the image</p></li>
+<li><p><strong>on_progress</strong> (<em>callback function</em>) – optional progress callback function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.migration_commit">
+<code class="sig-name descname">migration_commit</code><a class="headerlink" href="#rbd.RBD.migration_commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Commit an executed RBD image migration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_name</strong> (<em>str</em>) – the name of the image</p></li>
+<li><p><strong>on_progress</strong> (<em>callback function</em>) – optional progress callback function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.migration_execute">
+<code class="sig-name descname">migration_execute</code><a class="headerlink" href="#rbd.RBD.migration_execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a prepared RBD image migration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_name</strong> (<em>str</em>) – the name of the image</p></li>
+<li><p><strong>on_progress</strong> (<em>callback function</em>) – optional progress callback function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.migration_prepare">
+<code class="sig-name descname">migration_prepare</code><a class="headerlink" href="#rbd.RBD.migration_prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare an RBD image migration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_name</strong> – the current name of the image</p></li>
+<li><p><strong>dest_ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which pool to migration into</p></li>
+<li><p><strong>dest_image_name</strong> (<em>str</em>) – the name of the destination image (may be the same image)</p></li>
+<li><p><strong>features</strong> (<em>int</em>) – bitmask of features to enable; if set, must include layering</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – the image is split into (2**order) byte objects</p></li>
+<li><p><strong>stripe_unit</strong> (<em>int</em>) – stripe unit in bytes (default None to let librbd decide)</p></li>
+<li><p><strong>stripe_count</strong> (<em>int</em>) – objects to stripe over before looping</p></li>
+<li><p><strong>data_pool</strong> (<em>str</em>) – optional separate pool for data blocks</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageExists</span></code></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FunctionNotSupported</span></code></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArgumentOutOfRange</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.migration_status">
+<code class="sig-name descname">migration_status</code><a class="headerlink" href="#rbd.RBD.migration_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return RBD image migration status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_name</strong> (<em>str</em>) – the name of the image</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>dict - contains the following keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">source_pool_id</span></code> (int) - source image pool id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_pool_namespace</span></code> (str) - source image pool namespace</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_image_name</span></code> (str) - source image name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source_image_id</span></code> (str) - source image id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dest_pool_id</span></code> (int) - destination image pool id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dest_pool_namespace</span></code> (str) - destination image pool namespace</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dest_image_name</span></code> (str) - destination image name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dest_image_id</span></code> (str) - destination image id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span></code> (int) - current migration state</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state_description</span></code> (str) - migration state description</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_image_info_list">
+<code class="sig-name descname">mirror_image_info_list</code><a class="headerlink" href="#rbd.RBD.mirror_image_info_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the mirror image instance ids of a pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>mode_filter</strong> – list images in this image mirror mode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MirrorImageInfoIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_image_instance_id_list">
+<code class="sig-name descname">mirror_image_instance_id_list</code><a class="headerlink" href="#rbd.RBD.mirror_image_instance_id_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the mirror image instance ids of a pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MirrorImageInstanceIdIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_image_status_list">
+<code class="sig-name descname">mirror_image_status_list</code><a class="headerlink" href="#rbd.RBD.mirror_image_status_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the mirror image statuses of a pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MirrorImageStatusIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_image_status_summary">
+<code class="sig-name descname">mirror_image_status_summary</code><a class="headerlink" href="#rbd.RBD.mirror_image_status_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get mirror image status summary of a pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list - a list of (state, count) tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_mode_get">
+<code class="sig-name descname">mirror_mode_get</code><a class="headerlink" href="#rbd.RBD.mirror_mode_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pool mirror mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int - pool mirror mode</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_mode_set">
+<code class="sig-name descname">mirror_mode_set</code><a class="headerlink" href="#rbd.RBD.mirror_mode_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set pool mirror mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>mirror_mode</strong> (<em>int</em>) – mirror mode to set</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_add">
+<code class="sig-name descname">mirror_peer_add</code><a class="headerlink" href="#rbd.RBD.mirror_peer_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add mirror peer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is used</p></li>
+<li><p><strong>site_name</strong> (<em>str</em>) – mirror peer site name</p></li>
+<li><p><strong>client_name</strong> (<em>str</em>) – mirror peer client name</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – the direction of the mirroring</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - peer uuid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_bootstrap_create">
+<code class="sig-name descname">mirror_peer_bootstrap_create</code><a class="headerlink" href="#rbd.RBD.mirror_peer_bootstrap_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new RBD mirroring bootstrap token for an
+external cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - bootstrap token</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_bootstrap_import">
+<code class="sig-name descname">mirror_peer_bootstrap_import</code><a class="headerlink" href="#rbd.RBD.mirror_peer_bootstrap_import" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import a bootstrap token from an external cluster to
+auto-configure the mirror peer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>direction</strong> (<em>int</em>) – mirror peer direction</p></li>
+<li><p><strong>token</strong> (<em>str</em>) – bootstrap token</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_get_attributes">
+<code class="sig-name descname">mirror_peer_get_attributes</code><a class="headerlink" href="#rbd.RBD.mirror_peer_get_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get optional mirror peer attributes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>uuid</strong> (<em>str</em>) – uuid of the mirror peer</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>dict - contains the following keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mon_host</span></code> (str) - monitor addresses</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code> (str) - CephX key</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_list">
+<code class="sig-name descname">mirror_peer_list</code><a class="headerlink" href="#rbd.RBD.mirror_peer_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the peers of a pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MirrorPeerIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_remove">
+<code class="sig-name descname">mirror_peer_remove</code><a class="headerlink" href="#rbd.RBD.mirror_peer_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove mirror peer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is used</p></li>
+<li><p><strong>uuid</strong> (<em>str</em>) – peer uuid</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_set_attributes">
+<code class="sig-name descname">mirror_peer_set_attributes</code><a class="headerlink" href="#rbd.RBD.mirror_peer_set_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set optional mirror peer attributes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>uuid</strong> (<em>str</em>) – uuid of the mirror peer</p></li>
+<li><p><strong>attributes</strong> (<em>dict</em>) – ‘mon_host’ and ‘key’ attributes</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_set_client">
+<code class="sig-name descname">mirror_peer_set_client</code><a class="headerlink" href="#rbd.RBD.mirror_peer_set_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set mirror peer client name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>uuid</strong> (<em>str</em>) – uuid of the mirror peer</p></li>
+<li><p><strong>client_name</strong> (<em>str</em>) – client name of the mirror peer to set</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_set_cluster">
+<code class="sig-name descname">mirror_peer_set_cluster</code><a class="headerlink" href="#rbd.RBD.mirror_peer_set_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_peer_set_name">
+<code class="sig-name descname">mirror_peer_set_name</code><a class="headerlink" href="#rbd.RBD.mirror_peer_set_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set mirror peer site name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is written</p></li>
+<li><p><strong>uuid</strong> (<em>str</em>) – uuid of the mirror peer</p></li>
+<li><p><strong>site_name</strong> (<em>str</em>) – site name of the mirror peer to set</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_site_name_get">
+<code class="sig-name descname">mirror_site_name_get</code><a class="headerlink" href="#rbd.RBD.mirror_site_name_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the local cluster’s friendly site name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rados</strong> – cluster connection</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - local site name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_site_name_set">
+<code class="sig-name descname">mirror_site_name_set</code><a class="headerlink" href="#rbd.RBD.mirror_site_name_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the local cluster’s friendly site name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rados</strong> – cluster connection</p></li>
+<li><p><strong>site_name</strong> – friendly site name</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.mirror_uuid_get">
+<code class="sig-name descname">mirror_uuid_get</code><a class="headerlink" href="#rbd.RBD.mirror_uuid_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pool mirror uuid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>ste - pool mirror uuid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.namespace_create">
+<code class="sig-name descname">namespace_create</code><a class="headerlink" href="#rbd.RBD.namespace_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an RBD namespace within a pool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – namespace name</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.namespace_exists">
+<code class="sig-name descname">namespace_exists</code><a class="headerlink" href="#rbd.RBD.namespace_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verifies if a namespace exists within a pool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – namespace name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bool - true if namespace exists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.namespace_list">
+<code class="sig-name descname">namespace_list</code><a class="headerlink" href="#rbd.RBD.namespace_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all namespaces within a pool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list - collection of namespace names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.namespace_remove">
+<code class="sig-name descname">namespace_remove</code><a class="headerlink" href="#rbd.RBD.namespace_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an RBD namespace from a pool</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – namespace name</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_init">
+<code class="sig-name descname">pool_init</code><a class="headerlink" href="#rbd.RBD.pool_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize an RBD pool
+:param ioctx: determines which RADOS pool
+:type ioctx: <code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>
+:param force: force init
+:type force: bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_metadata_get">
+<code class="sig-name descname">pool_metadata_get</code><a class="headerlink" href="#rbd.RBD.pool_metadata_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pool metadata for the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – metadata key</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - metadata value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_metadata_list">
+<code class="sig-name descname">pool_metadata_list</code><a class="headerlink" href="#rbd.RBD.pool_metadata_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List pool metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PoolMetadataIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_metadata_remove">
+<code class="sig-name descname">pool_metadata_remove</code><a class="headerlink" href="#rbd.RBD.pool_metadata_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove pool metadata for the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – metadata key</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>str - metadata value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_metadata_set">
+<code class="sig-name descname">pool_metadata_set</code><a class="headerlink" href="#rbd.RBD.pool_metadata_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set pool metadata for the given key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool is read</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – metadata key</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – metadata value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.pool_stats_get">
+<code class="sig-name descname">pool_stats_get</code><a class="headerlink" href="#rbd.RBD.pool_stats_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return RBD pool stats</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>dict - contains the following keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">image_count</span></code> (int) - image count</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">image_provisioned_bytes</span></code> (int) - image total HEAD provisioned bytes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">image_max_provisioned_bytes</span></code> (int) - image total max provisioned bytes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">image_snap_count</span></code> (int) - image snap count</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trash_count</span></code> (int) - trash image count</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trash_provisioned_bytes</span></code> (int) - trash total HEAD provisioned bytes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trash_max_provisioned_bytes</span></code> (int) - trash total max provisioned bytes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trash_snap_count</span></code> (int) - trash snap count</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.remove">
+<code class="sig-name descname">remove</code><a class="headerlink" href="#rbd.RBD.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an RBD image. This may take a long time, since it does
+not return until every object that comprises the image has
+been deleted. Note that all snapshots must be deleted before
+the image can be removed. If there are snapshots left,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ImageHasSnapshots</span></code> is raised. If the image is still
+open, or the watch from a crashed client has not expired,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ImageBusy</span></code> is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – the name of the image to remove</p></li>
+<li><p><strong>on_progress</strong> (<em>callback function</em>) – optional progress callback function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageBusy</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ImageHasSnapshots</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.rename">
+<code class="sig-name descname">rename</code><a class="headerlink" href="#rbd.RBD.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename an RBD image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>src</strong> (<em>str</em>) – the current name of the image</p></li>
+<li><p><strong>dest</strong> (<em>str</em>) – the new name of the image</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageExists</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_get">
+<code class="sig-name descname">trash_get</code><a class="headerlink" href="#rbd.RBD.trash_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve RBD image info from trash.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_id</strong> (<em>str</em>) – the id of the image to restore</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>dict - contains the following keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> (str) - image id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> (str) - image name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">source</span></code> (str) - source of deletion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deletion_time</span></code> (datetime) - time of deletion</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deferment_end_time</span></code> (datetime) - time that an image is allowed
+to be removed from trash</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_list">
+<code class="sig-name descname">trash_list</code><a class="headerlink" href="#rbd.RBD.trash_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all entries from trash.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TrashIterator</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_move">
+<code class="sig-name descname">trash_move</code><a class="headerlink" href="#rbd.RBD.trash_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move an RBD image to the trash.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – the name of the image to remove</p></li>
+<li><p><strong>delay</strong> (<em>int</em>) – time delay in seconds before the image can be deleted
+from trash</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_purge">
+<code class="sig-name descname">trash_purge</code><a class="headerlink" href="#rbd.RBD.trash_purge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete RBD images from trash in bulk.</p>
+<p>By default it removes images with deferment end time less than now.</p>
+<p>The timestamp is configurable, e.g. delete images that have expired a
+week ago.</p>
+<p>If the threshold is used it deletes images until X% pool usage is met.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>expire_ts</strong> (<em>datetime</em>) – timestamp for images to be considered as expired (UTC)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – percentage of pool usage to be met (0 to 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_remove">
+<code class="sig-name descname">trash_remove</code><a class="headerlink" href="#rbd.RBD.trash_remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an RBD image from trash. If image deferment time has not
+expired <code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionError</span></code> is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_id</strong> (<em>str</em>) – the id of the image to remove</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – force remove even if deferment time has not expired</p></li>
+<li><p><strong>on_progress</strong> (<em>callback function</em>) – optional progress callback function</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionError</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.trash_restore">
+<code class="sig-name descname">trash_restore</code><a class="headerlink" href="#rbd.RBD.trash_restore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore an RBD image from trash.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ioctx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">rados.Ioctx</span></code>) – determines which RADOS pool the image is in</p></li>
+<li><p><strong>image_id</strong> (<em>str</em>) – the id of the image to restore</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – the new name of the restored image</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rbd.RBD.version">
+<code class="sig-name descname">version</code><a class="headerlink" href="#rbd.RBD.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the version number of the <code class="docutils literal notranslate"><span class="pre">librbd</span></code> C library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a tuple of <code class="docutils literal notranslate"><span class="pre">(major,</span> <span class="pre">minor,</span> <span class="pre">extra)</span></code> components of the
+librbd version</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rbd.Image">
+<em class="property">class </em><code class="sig-prename descclassname">rbd.</code><code class="sig-name descname">Image</code><span class="sig-paren">(</span><em class="sig-param">ioctx</em>, <em class="sig-param">name=None</em>, <em class="sig-param">snapshot=None</em>, <em class="sig-param">read_only=False</em>, <em class="sig-param">image_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rbd.Image" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents an RBD image. It is used to perform I/O on
+the image and interact with snapshots.</p>
+<p><strong>Note</strong>: Any method of this class may raise <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageNotFound</span></code>
+if the image has been deleted.</p>
+<dl class="method">
+<dt id="rbd.Image.close">
+<code class="sig-name descname">close</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#rbd.Image.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release the resources used by this image object.</p>
+<p>After this is called, this object should not be used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rbd.Image.require_not_closed">
+<code class="sig-name descname">require_not_closed</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#rbd.Image.require_not_closed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the Image is not closed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InvalidArgument</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rbd.SnapIterator">
+<em class="property">class </em><code class="sig-prename descclassname">rbd.</code><code class="sig-name descname">SnapIterator</code><span class="sig-paren">(</span><em class="sig-param">Image image</em><span class="sig-paren">)</span><a class="headerlink" href="#rbd.SnapIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over snapshot info for an image.</p>
+<p>Yields a dictionary containing information about a snapshot.</p>
+<p>Keys are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">id</span></code> (int) - numeric identifier of the snapshot</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">size</span></code> (int) - size of the image at the time of snapshot (in bytes)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">name</span></code> (str) - name of the snapshot</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">namespace</span></code> (int) - enum for snap namespace</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">group</span></code> (dict) - optional for group namespace snapshots</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trash</span></code> (dict) - optional for trash namespace snapshots</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mirror</span></code> (dict) - optional for mirror namespace snapshots</p></li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 块设备</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rados-rbd-cmds/">基本命令</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rbd-operations/">运维</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rbd-integrations/">对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">APIs</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">librbd (Python)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">实例：创建一映像并写入</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-rbd">API 参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../../radosgw/" title="Ceph 对象网关"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../" title="Ceph 块设备 API"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 块设备</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >Ceph 块设备 API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

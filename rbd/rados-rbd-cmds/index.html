@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>块设备命令 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>块设备命令 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 块设备" href="../rbd/" />
-    <link rel="next" title="内核模块操作" href="../rbd-ko/" />
-    <link rel="prev" title="Ceph 块设备" href="../rbd/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Ceph 块设备运维" href="../rbd-operations/" />
+    <link rel="prev" title="Ceph 块设备" href="../" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,101 +31,238 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../rbd-ko/" title="内核模块操作"
+          <a href="../rbd-operations/" title="Ceph 块设备运维"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../rbd/" title="Ceph 块设备"
+          <a href="../" title="Ceph 块设备"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../rbd/" accesskey="U">Ceph 块设备</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 块设备</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rbd/rados-rbd-cmds.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>块设备命令<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
-<p id="index-0"><tt class="docutils literal"><span class="pre">rbd</span></tt> 命令可用于创建、罗列、内省和删除块设备映像，也可克隆映像、创建快照、回滚快照、查看快照等等。 <tt class="docutils literal"><span class="pre">rbd</span></tt> 命令用法详情见 <a class="reference external" href="../../man/8/rbd/">RBD – 管理 RADOS 块设备映像</a>。</p>
+<p id="index-0"><code class="docutils literal notranslate"><span class="pre">rbd</span></code> 命令可用于创建、罗列、自查和删除块设备映像，也可克隆映像、创建快照、回滚快照、查看快照等等。 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 命令用法详情见
+<a class="reference external" href="../../man/8/rbd/">RBD – 管理 RADOS 块设备映像</a>。</p>
 <div class="admonition important">
-<p class="first admonition-title">Important</p>
-<p class="last">要使用 Ceph 块设备命令，你必须有对应集群的访问权限。</p>
+<p class="admonition-title">Important</p>
+<p>要使用 Ceph 块设备命令，你必须有相应的集群访问权限。</p>
 </div>
 <div class="section" id="id2">
-<h2>创建块设备映像<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>要想把块设备加入某节点，你得先在 <a class="reference internal" href="../../glossary/#term-21"><em class="xref std std-term">Ceph 存储集群</em></a>中创建一个映像，用下列命令：</p>
-<div class="highlight-python"><pre>rbd create --size {megabytes} {pool-name}/{image-name}</pre>
+<h2>创建一个块设备存储池<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>在管理节点上，用 <code class="docutils literal notranslate"><span class="pre">ceph</span></code> 工具<a class="reference external" href="../../rados/operations/pools/#create-a-pool">创建一个存储池</a>。</p></li>
+<li><p>在管理节点上，用 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 工具初始化这个存储池以用于 RBD：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">pool</span> <span class="n">init</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
 </div>
-<p>例如，要在 <tt class="docutils literal"><span class="pre">swimmingpool</span></tt> 这个存储池中创建一个名为 <tt class="docutils literal"><span class="pre">bar</span></tt> 、大小为 1GB 的映像，执行下列命令：</p>
-<div class="highlight-python"><pre>rbd create --size 1024 swimmingpool/bar</pre>
-</div>
-<p>如果创建映像时不指定存储池，它将使用默认的 <tt class="docutils literal"><span class="pre">rbd</span></tt> 存储池。例如，下面的命令将默认在 <tt class="docutils literal"><span class="pre">rbd</span></tt> 存储池中创建一个大小为 1GB 、名为 <tt class="docutils literal"><span class="pre">foo</span></tt> 的映像：</p>
-<div class="highlight-python"><pre>rbd create --size 1024 foo</pre>
-</div>
+</li>
+</ol>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">指定此存储池前必须先创建它，详情见<a class="reference external" href="../../rados/operations/pools">存储池</a>。</p>
+<p class="admonition-title">Note</p>
+<p>没指定存储池名字时， <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 工具会假设默认的为
+rbd 。</p>
 </div>
 </div>
 <div class="section" id="id3">
-<h2>罗列块设备映像<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<p>要罗列 <tt class="docutils literal"><span class="pre">rbd</span></tt> 存储池中的块设备，用下列命令（即 <tt class="docutils literal"><span class="pre">rbd</span></tt> 是默认存储池名字）：</p>
-<div class="highlight-python"><pre>rbd ls</pre>
+<h2>创建一个块设备用户<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>Unless specified, the <code class="docutils literal notranslate"><span class="pre">rbd</span></code> command will access the Ceph cluster using the ID
+<code class="docutils literal notranslate"><span class="pre">admin</span></code>. This ID allows full administrative access to the cluster. It is
+recommended that you utilize a more restricted user wherever possible.</p>
+<p>To <a class="reference external" href="../../rados/operations/user-management#add-a-user">创建一个 Ceph 用户</a>, with <code class="docutils literal notranslate"><span class="pre">ceph</span></code> specify the <code class="docutils literal notranslate"><span class="pre">auth</span> <span class="pre">get-or-create</span></code>
+command, user name, monitor caps, and OSD caps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">client</span><span class="o">.</span><span class="p">{</span><span class="n">ID</span><span class="p">}</span> <span class="n">mon</span> <span class="s1">&#39;profile rbd&#39;</span> <span class="n">osd</span> <span class="s1">&#39;profile {profile name} [pool={pool-name}][, profile ...]&#39;</span>
+</pre></div>
 </div>
-<p>用下列命令罗列某个特定存储池中的块设备，用存储池名字替换掉 <tt class="docutils literal"><span class="pre">{poolname}</span></tt> ：</p>
-<div class="highlight-python"><pre>rbd ls {poolname}</pre>
+<p>For example, to create a user ID named <code class="docutils literal notranslate"><span class="pre">qemu</span></code> with read-write access to the
+pool <code class="docutils literal notranslate"><span class="pre">vms</span></code> and read-only access to the pool <code class="docutils literal notranslate"><span class="pre">images</span></code>, execute the
+following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">auth</span> <span class="n">get</span><span class="o">-</span><span class="ow">or</span><span class="o">-</span><span class="n">create</span> <span class="n">client</span><span class="o">.</span><span class="n">qemu</span> <span class="n">mon</span> <span class="s1">&#39;profile rbd&#39;</span> <span class="n">osd</span> <span class="s1">&#39;profile rbd pool=vms, profile rbd-read-only pool=images&#39;</span>
+</pre></div>
 </div>
-<p>例如：</p>
-<div class="highlight-python"><pre>rbd ls swimmingpool</pre>
+<p>The output from the <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">auth</span> <span class="pre">get-or-create</span></code> command will be the keyring for
+the specified user, which can be written to <code class="docutils literal notranslate"><span class="pre">/etc/ceph/ceph.client.{ID}.keyring</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The user ID can be specified when using the <code class="docutils literal notranslate"><span class="pre">rbd</span></code> command by
+providing the <code class="docutils literal notranslate"><span class="pre">--id</span> <span class="pre">{id}</span></code> optional argument.</p>
 </div>
 </div>
 <div class="section" id="id4">
-<h2>检索映像信息<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<p>用下列命令检索某特定映像的信息，用 <tt class="docutils literal"><span class="pre">{image-name}</span></tt> 替换映像名字：</p>
-<div class="highlight-python"><pre>rbd info {image-name}</pre>
+<h2>创建块设备映像<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>要想把块设备加入某节点，你得先在 <a class="reference internal" href="../../glossary/#term-7"><span class="xref std std-term">Ceph 存储集群</span></a>中创建一个映像，用下列命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">create</span> <span class="o">--</span><span class="n">size</span> <span class="p">{</span><span class="n">megabytes</span><span class="p">}</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
 </div>
-<p>例如：</p>
-<div class="highlight-python"><pre>rbd info foo</pre>
+<p>例如，要在 <code class="docutils literal notranslate"><span class="pre">swimmingpool</span></code> 存储池中创建一个名为 <code class="docutils literal notranslate"><span class="pre">bar</span></code> 、大小为 1GB 的映像，执行下列命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">create</span> <span class="o">--</span><span class="n">size</span> <span class="mi">1024</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="n">bar</span>
+</pre></div>
 </div>
-<p>用下列命令检索某存储池内一映像的信息，用 <tt class="docutils literal"><span class="pre">{image-name}</span></tt> 替换掉映像名字、用 <tt class="docutils literal"><span class="pre">{pool-name}</span></tt> 替换掉存储池名字：</p>
-<div class="highlight-python"><pre>rbd info {pool-name}/{image-name}</pre>
+<p>如果创建映像时不指定存储池，它将使用默认的 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 存储池。例如，下面的命令将默认在 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 存储池中创建一个大小为 1GB 、名为 <code class="docutils literal notranslate"><span class="pre">foo</span></code> 的映像：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">create</span> <span class="o">--</span><span class="n">size</span> <span class="mi">1024</span> <span class="n">foo</span>
+</pre></div>
 </div>
-<p>例如：</p>
-<div class="highlight-python"><pre>rbd info swimmingpool/bar</pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>指定此存储池前必须先创建它，详情见<a class="reference external" href="../../rados/operations/pools">存储池</a>。</p>
 </div>
 </div>
 <div class="section" id="id5">
-<h2>调整块设备映像尺寸<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="../../glossary/#term-38"><em class="xref std std-term">Ceph 块设备</em></a>映像是瘦接口设备，只有在你开始写入数据时它们才会占用物理空间。然而，它们都有最大容量，就是你设置的
-<tt class="docutils literal"><span class="pre">--size</span></tt> 选项。如果你想增加（或减小） Ceph 块设备映像的最大尺寸，用下列命令：</p>
-<div class="highlight-python"><pre>rbd resize --size 2048 foo (to increase)
-rbd resize --size 2048 foo --allow-shrink (to decrease)</pre>
+<h2>罗列块设备映像<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>要罗列 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 存储池中的块设备，用下列命令（即 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 是默认存储池名字）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">ls</span>
+</pre></div>
+</div>
+<p>用下列命令罗列某个特定存储池中的块设备，用存储池名字替换掉 <code class="docutils literal notranslate"><span class="pre">{poolname}</span></code> ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">ls</span> <span class="p">{</span><span class="n">poolname</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">ls</span> <span class="n">swimmingpool</span>
+</pre></div>
+</div>
+<p>要罗列 <code class="docutils literal notranslate"><span class="pre">rbd</span></code> 存储池内延期删除的块设备，用此命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">ls</span>
+</pre></div>
+</div>
+<p>要罗列指定存储池内延期删除的块设备，用下列命令，需把
+<code class="docutils literal notranslate"><span class="pre">{poolname}</span></code> 替换成这个存储池的名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">ls</span> <span class="p">{</span><span class="n">poolname</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">ls</span> <span class="n">swimmingpool</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id6">
-<h2>删除块设备映像<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<p>用下列命令删除块设备，用 <tt class="docutils literal"><span class="pre">{image-name}</span></tt> 替换映像名字：</p>
-<div class="highlight-python"><pre>rbd rm {image-name}</pre>
+<h2>检索映像信息<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>用下列命令检索某特定映像的信息，用 <code class="docutils literal notranslate"><span class="pre">{image-name}</span></code> 替换映像名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">info</span> <span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
 </div>
 <p>例如：</p>
-<div class="highlight-python"><pre>rbd rm foo</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">info</span> <span class="n">foo</span>
+</pre></div>
 </div>
-<p>用下列命令从某存储池中删除一个块设备，用 <tt class="docutils literal"><span class="pre">{image-name}</span></tt> 替换要删除的映像名、用 <tt class="docutils literal"><span class="pre">{pool-name}</span></tt> 替换存储池名字：</p>
-<div class="highlight-python"><pre>rbd rm {pool-name}/{image-name}</pre>
+<p>用下列命令检索某存储池内一映像的信息，用 <code class="docutils literal notranslate"><span class="pre">{image-name}</span></code> 替换掉映像名字、用 <code class="docutils literal notranslate"><span class="pre">{pool-name}</span></code> 替换掉存储池名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">info</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
 </div>
 <p>例如：</p>
-<div class="highlight-python"><pre>rbd rm swimmingpool/bar</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">info</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="n">bar</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h2>调整块设备映像尺寸<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../../glossary/#term-16"><span class="xref std std-term">Ceph 块设备</span></a>映像是瘦接口设备，只有在你开始写入数据时它们才会占用物理空间。然而，它们都有最大容量，就是你设置的
+<code class="docutils literal notranslate"><span class="pre">--size</span></code> 选项。如果你想增加（或减小） Ceph 块设备映像的最大尺寸，用下列命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">resize</span> <span class="o">--</span><span class="n">size</span> <span class="mi">2048</span> <span class="n">foo</span> <span class="p">(</span><span class="n">to</span> <span class="n">increase</span><span class="p">)</span>
+<span class="n">rbd</span> <span class="n">resize</span> <span class="o">--</span><span class="n">size</span> <span class="mi">2048</span> <span class="n">foo</span> <span class="o">--</span><span class="n">allow</span><span class="o">-</span><span class="n">shrink</span> <span class="p">(</span><span class="n">to</span> <span class="n">decrease</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h2>删除块设备映像<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>用下列命令删除块设备，用 <code class="docutils literal notranslate"><span class="pre">{image-name}</span></code> 替换映像名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">rm</span> <span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">rm</span> <span class="n">foo</span>
+</pre></div>
+</div>
+<p>用下列命令从某存储池中删除一个块设备，用 <code class="docutils literal notranslate"><span class="pre">{image-name}</span></code> 替换要删除的映像名、用 <code class="docutils literal notranslate"><span class="pre">{pool-name}</span></code> 替换存储池名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">rm</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">rm</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="n">bar</span>
+</pre></div>
+</div>
+<p>要从某一存储池中延期删除一个块设备，执行下列命令，但需把
+<code class="docutils literal notranslate"><span class="pre">{image-name}</span></code> 替换成要操作的映像名、把 <code class="docutils literal notranslate"><span class="pre">{pool-name}</span></code> 替换成存储池的名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">mv</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="n">name</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">mv</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="n">bar</span>
+</pre></div>
+</div>
+<p>要从某一存储池删除已延期的块设备，执行下列命令，但需把
+<code class="docutils literal notranslate"><span class="pre">{image-id}</span></code> 替换成欲删除映像的 id 、把 <code class="docutils literal notranslate"><span class="pre">{pool-name}</span></code> 替换成存储池的名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">rm</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="nb">id</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">rm</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="mi">2</span><span class="n">bf4474b0dc51</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>你可以把一个映像移入垃圾池，即便它有快照、或正在被克隆品引用着，但不能从垃圾池删掉。</p></li>
+<li><p>你可以用 <em>–expires-at</em> 设置延期时间（默认为 <code class="docutils literal notranslate"><span class="pre">now</span></code> ），并且，它的延期时间没到的话是不能删除的，除非你用 <em>–force</em>
+选项。</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id9">
+<h2>块设备映像的恢复<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>要恢复 rbd 存储池内的一个延期删除块设备，用下列命令，但需把
+<code class="docutils literal notranslate"><span class="pre">{image-id}</span></code> 替换成那个映像的 id ：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">restore</span> <span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="nb">id</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">restore</span> <span class="mi">2</span><span class="n">bf4474b0dc51</span>
+</pre></div>
+</div>
+<p>要恢复指定存储池内的一个延期删除块设备，用下列命令，但需把
+<code class="docutils literal notranslate"><span class="pre">{image-id}</span></code> 替换成映像的 id 、 <code class="docutils literal notranslate"><span class="pre">{pool-name}</span></code> 替换成存储池名字：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">restore</span> <span class="p">{</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="p">}</span><span class="o">/</span><span class="p">{</span><span class="n">image</span><span class="o">-</span><span class="nb">id</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">restore</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="mi">2</span><span class="n">bf4474b0dc51</span>
+</pre></div>
+</div>
+<p>在恢复时，你还可以加 <code class="docutils literal notranslate"><span class="pre">--image</span></code> 选项来重命名它。</p>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">trash</span> <span class="n">restore</span> <span class="n">swimmingpool</span><span class="o">/</span><span class="mi">2</span><span class="n">bf4474b0dc51</span> <span class="o">--</span><span class="n">image</span> <span class="n">new</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
 </div>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -145,72 +270,62 @@ rbd resize --size 2048 foo --allow-shrink (to decrease)</pre>
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../rbd/">Ceph 块设备</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="">命令</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">创建块设备映像</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id3">罗列块设备映像</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">检索映像信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">调整块设备映像尺寸</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">删除块设备映像</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 块设备</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">基本命令</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">创建一个块设备存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">创建一个块设备用户</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">创建块设备映像</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">罗列块设备映像</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">检索映像信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">调整块设备映像尺寸</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">删除块设备映像</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">块设备映像的恢复</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-ko/">内核模块</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-snapshot/">快照</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-mirroring/">RBD 镜像</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../qemu-rbd/">QEMU</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../libvirt/">libvirt</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-config-ref/">缓存选项</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-openstack/">OpenStack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-cloudstack/">CloudStack</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd/">rbd 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd-fuse/">rbd-fuse 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd-nbd/">rbd-nbd 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/ceph-rbdnamer/">ceph-rbdnamer 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../rbd-replay/">RBD 重放</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd-replay-prep/">rbd-replay-prep 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd-replay/">rbd-replay 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbd-replay-many/">rbd-replay-many 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../man/8/rbdmap/">rbdmap 手册页</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../librbdpy/">librbd 的 Python 接口</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-operations/">运维</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-integrations/">对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/">APIs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -220,17 +335,17 @@ rbd resize --size 2048 foo --allow-shrink (to decrease)</pre>
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../rbd-ko/" title="内核模块操作"
+          <a href="../rbd-operations/" title="Ceph 块设备运维"
              >next</a> |</li>
         <li class="right" >
-          <a href="../rbd/" title="Ceph 块设备"
+          <a href="../" title="Ceph 块设备"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../rbd/" >Ceph 块设备</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 块设备</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

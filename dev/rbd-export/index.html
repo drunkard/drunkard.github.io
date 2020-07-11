@@ -1,36 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>RBD Export &amp; Import &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>RBD Export &amp; Import &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="RBD Layering" href="../rbd-layering/" />
+    <link rel="prev" title="RBD 增量备份" href="../rbd-diff/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,31 +30,53 @@
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../rbd-layering/" title="RBD Layering"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../rbd-diff/" title="RBD 增量备份"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" accesskey="U">Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/dev/rbd-export.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="rbd-export-import">
 <h1>RBD Export &amp; Import<a class="headerlink" href="#rbd-export-import" title="Permalink to this headline">¶</a></h1>
-<p>This is a file format of an RBD image or snapshot. It&#8217;s a sparse format
+<p>This is a file format of an RBD image or snapshot. It’s a sparse format
 for the full image. There are three recording sections in the file.</p>
 <ol class="arabic simple">
-<li>Header.</li>
-<li>Metadata.</li>
-<li>Diffs.</li>
+<li><p>Header.</p></li>
+<li><p>Metadata.</p></li>
+<li><p>Diffs.</p></li>
 </ol>
 <div class="section" id="header">
 <h2>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h2>
-<p>&#8220;rbd image v2\n&#8221;</p>
+<p>“rbd image v2\n”</p>
 </div>
 <div class="section" id="metadata-records">
 <h2>Metadata records<a class="headerlink" href="#metadata-records" title="Permalink to this headline">¶</a></h2>
-<p>Every record has a one byte &#8220;tag&#8221; that identifies the record type,
+<p>Every record has a one byte “tag” that identifies the record type,
 followed by length of data, and then some other data.</p>
 <p>Metadata records come in the first part of the image.  Order is not
 important, as long as all the metadata records come before the data
@@ -76,41 +89,50 @@ records.</p>
 <div class="section" id="image-order">
 <h3>Image order<a class="headerlink" href="#image-order" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;O&#8217;</li>
-<li>le64: length of appending data (8)</li>
-<li>le64: image order</li>
+<li><p>u8: ‘O’</p></li>
+<li><p>le64: length of appending data (8)</p></li>
+<li><p>le64: image order</p></li>
 </ul>
 </div>
 <div class="section" id="image-format">
 <h3>Image format<a class="headerlink" href="#image-format" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;F&#8217;</li>
-<li>le64: length of appending data (8)</li>
-<li>le64: image format</li>
+<li><p>u8: ‘F’</p></li>
+<li><p>le64: length of appending data (8)</p></li>
+<li><p>le64: image format</p></li>
 </ul>
 </div>
 <div class="section" id="image-features">
 <h3>Image Features<a class="headerlink" href="#image-features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;T&#8217;</li>
-<li>le64: length of appending data (8)</li>
-<li>le64: image features</li>
+<li><p>u8: ‘T’</p></li>
+<li><p>le64: length of appending data (8)</p></li>
+<li><p>le64: image features</p></li>
 </ul>
 </div>
 <div class="section" id="image-stripe-unit">
 <h3>Image Stripe unit<a class="headerlink" href="#image-stripe-unit" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;U&#8217;</li>
-<li>le64: length of appending data (8)</li>
-<li>le64: image striping unit</li>
+<li><p>u8: ‘U’</p></li>
+<li><p>le64: length of appending data (8)</p></li>
+<li><p>le64: image striping unit</p></li>
 </ul>
 </div>
 <div class="section" id="image-stripe-count">
 <h3>Image Stripe count<a class="headerlink" href="#image-stripe-count" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;C&#8217;</li>
-<li>le64: length of appending data (8)</li>
-<li>le64: image striping count</li>
+<li><p>u8: ‘C’</p></li>
+<li><p>le64: length of appending data (8)</p></li>
+<li><p>le64: image striping count</p></li>
+</ul>
+</div>
+<div class="section" id="imagemeta-key-and-value">
+<h3>ImageMeta Key and Value<a class="headerlink" href="#imagemeta-key-and-value" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>u8: ‘M’</p></li>
+<li><p>le64: length of appending data (length of key + length of value + 4 * 2)</p></li>
+<li><p>string: image-meta key</p></li>
+<li><p>string: image-meta value</p></li>
 </ul>
 </div>
 </div>
@@ -119,71 +141,165 @@ records.</p>
 <div class="section" id="end">
 <h3>End<a class="headerlink" href="#end" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>u8: &#8216;E&#8217;</li>
+<li><p>u8: ‘E’</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="diffs-records">
 <h2>Diffs records<a class="headerlink" href="#diffs-records" title="Permalink to this headline">¶</a></h2>
 <p>Record the all snapshots and the HEAD in this section.</p>
+<div class="section" id="id1">
+<h3>快照保护状态<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Record the snapshot’s protection status if <cite>–export-format=2</cite>.
+- u8: ‘p’
+- le64: length of appending data (8)
+- u8: snap protection status (0 for false, 1 for true)</p>
+</div>
+<div class="section" id="others">
+<h3>Others<a class="headerlink" href="#others" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>le64: number of diffs</li>
-<li>Diffs ...</li>
+<li><p>le64: number of diffs</p></li>
+<li><p>Diffs …</p></li>
 </ul>
 <p>Detail please refer to rbd-diff.rst</p>
 </div>
 </div>
+</div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../">Table Of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/">开发者指南</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../internals/">Ceph 内幕</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../blkin/">用 Blkin 追踪 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../bluestore/">BlueStore Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cache-pool/">Cache pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-reclaim/">CephFS Reclaim Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephfs-snapshots/">CephFS 快照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cephx_protocol/">Cephx 认证协议详细阐述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config/">配置管理系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../config-key/">config-key layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../context/">CephContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corpus/">资料库结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cpu-profiler/">Oprofile 的安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cxx/">C++17 and libstdc++ ABI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../delayed-delete/">CephFS delayed deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev_cluster_deployement/">开发集群的部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dev_cluster_deployement/#id6">在同一机器上部署多套开发集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../development-workflow/">开发流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../documenting/">为 Ceph 写作文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../encoding/">序列化（编码、解码）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../erasure-coded-pool/">纠删码存储池</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../file-striping/">File striping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../freebsd/">FreeBSD Implementation details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generatedocs/">Ceph 文档的构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iana/">IANA 号</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kernel-client-troubleshooting/">Kernel client troubleshooting (FS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../kubernetes/">Hacking on Ceph in Kubernetes with Rook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../libs/">Library architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logging/">集群日志的用法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../logs/">调试日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../macos/">在 MacOS 上构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../messenger/">Messenger notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-bootstrap/">Monitor bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-on-disk-formats/">ON-DISK FORMAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mon-osdmap-prune/">FULL OSDMAP VERSION PRUNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../msgr2/">msgr2 协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-encoding/">Network Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../network-protocol/">网络协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../object-store/">对象存储架构概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd-class-path/">OSD class path issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../peering/">互联</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf/">Using perf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_counters/">性能计数器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../perf_histograms/">Perf histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement-group/">PG （归置组）说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quick_guide/">开发者指南（快速）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rados-client-protocol/">RADOS 客户端协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-diff/">RBD 增量备份</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">RBD Export &amp; Import</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#header">Header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata-records">Metadata records</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#image-order">Image order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-format">Image format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-features">Image Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-stripe-unit">Image Stripe unit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-stripe-count">Image Stripe count</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#imagemeta-key-and-value">ImageMeta Key and Value</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#final-record">Final Record</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#end">End</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#diffs-records">Diffs records</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">快照保护状态</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#others">Others</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rbd-layering/">RBD Layering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../release-process/">Ceph Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../seastore/">SeaStore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sepia/">Sepia 社区测试实验室</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../session_authentication/">Session Authentication for the Cephx Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../testing/">测试笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../versions/">Public OSD Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../wireshark/">Wireshark Dissector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_internals/">OSD 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mds_internals/">MDS 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../radosgw/">RADOS 网关开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ceph-volume/">ceph-volume 开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -192,11 +308,18 @@ records.</p>
         <li class="right" >
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../rbd-layering/" title="RBD Layering"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../rbd-diff/" title="RBD 增量备份"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../internals/" >Ceph 内幕</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

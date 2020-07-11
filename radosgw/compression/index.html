@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>压缩 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>压缩 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 对象网关" href="../" />
-    <link rel="next" title="加密" href="../encryption/" />
-    <link rel="prev" title="RGW 多租户" href="../multitenancy/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="LDAP 认证" href="../ldap-auth/" />
+    <link rel="prev" title="RGW 多租户" href="../multitenancy/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,86 +31,105 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../encryption/" title="加密"
+          <a href="../ldap-auth/" title="LDAP 认证"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../multitenancy/" title="RGW 多租户"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">Ceph 对象网关</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 对象网关</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/radosgw/compression.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="compression">
 <span id="id1"></span><h1>压缩<a class="headerlink" href="#compression" title="Permalink to this headline">¶</a></h1>
-<p class="versionadded">
-<span class="versionmodified">New in version Kraken.</span></p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version Kraken.</span></p>
+</div>
 <p>Ceph 对象网关支持在服务器端压缩上传的对象，可以用任何已有的压缩插件实现。</p>
 <div class="section" id="id2">
 <h2>配置<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>压缩功能可在域的归置目标那里启用，执行 <tt class="docutils literal"><span class="pre">radosgw-admin</span> <span class="pre">zone</span> <span class="pre">placement</span> <span class="pre">modify</span></tt>
-命令时加 <tt class="docutils literal"><span class="pre">--compression=&lt;type&gt;</span></tt> 选项即可。</p>
-<p>压缩类型 <tt class="docutils literal"><span class="pre">type</span></tt> 应该换成写入新对象数据时要用的压缩插件名。每个压缩的对象都记录了使用的压缩插件，所以更改此配置不影响已有对象的解压缩，更不会强制再次压缩已有对象。</p>
-<p>这个压缩选项对所有新上传到桶（桶使用了这个归置目标）内的对象起作用。 <tt class="docutils literal"><span class="pre">type</span></tt> 设置为空字符串或 <tt class="docutils literal"><span class="pre">none</span></tt> 时禁用压缩。</p>
+<p>压缩功能可在域的归置目标那里启用，执行 <code class="docutils literal notranslate"><span class="pre">radosgw-admin</span> <span class="pre">zone</span> <span class="pre">placement</span> <span class="pre">modify</span></code>
+命令时加 <code class="docutils literal notranslate"><span class="pre">--compression=&lt;type&gt;</span></code> 选项即可。</p>
+<p>压缩类型 <code class="docutils literal notranslate"><span class="pre">type</span></code> 应该换成写入新对象数据时要用的压缩插件名。每个压缩的对象都记录了使用的压缩插件，所以更改此配置不影响已有对象的解压缩，更不会强制再次压缩已有对象。</p>
+<p>这个压缩选项对所有新上传到桶（桶使用了这个归置目标）内的对象起作用。 <code class="docutils literal notranslate"><span class="pre">type</span></code> 设置为空字符串或 <code class="docutils literal notranslate"><span class="pre">none</span></code> 时禁用压缩。</p>
 <p>例如：</p>
-<div class="highlight-python"><pre>$ radosgw-admin zone placement modify --rgw-zone=default --placement-id=default-placement --compression=zlib
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ radosgw-admin zone placement modify --rgw-zone=default --placement-id=default-placement --compression=zlib
 {
 ...
-    "placement_pools": [
+    &quot;placement_pools&quot;: [
         {
-            "key": "default-placement",
-            "val": {
-                "index_pool": "default.rgw.buckets.index",
-                "data_pool": "default.rgw.buckets.data",
-                "data_extra_pool": "default.rgw.buckets.non-ec",
-                "index_type": 0,
-                "compression": "zlib"
+            &quot;key&quot;: &quot;default-placement&quot;,
+            &quot;val&quot;: {
+                &quot;index_pool&quot;: &quot;default.rgw.buckets.index&quot;,
+                &quot;data_pool&quot;: &quot;default.rgw.buckets.data&quot;,
+                &quot;data_extra_pool&quot;: &quot;default.rgw.buckets.non-ec&quot;,
+                &quot;index_type&quot;: 0,
+                &quot;compression&quot;: &quot;zlib&quot;
             }
         }
     ],
 ...
-}</pre>
+}
+</pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">如果你没做过<a class="reference external" href="../multisite">多站配置</a>，那么此命令会创建默认域
-<tt class="docutils literal"><span class="pre">default</span></tt> 。</p>
+<p class="admonition-title">Note</p>
+<p>如果你没做过<a class="reference external" href="../multisite">多站配置</a>，那么此命令会创建默认域
+<code class="docutils literal notranslate"><span class="pre">default</span></code> 。</p>
 </div>
 </div>
 <div class="section" id="id3">
 <h2>统计信息<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<p>当前，所有命令和 API 都是基于未压缩数据上报对象和桶的大小，某个桶的压缩统计信息可通过 <tt class="docutils literal"><span class="pre">bucket</span> <span class="pre">stats</span></tt> 命令查看：</p>
-<div class="highlight-python"><pre>$ radosgw-admin bucket stats --bucket=&lt;name&gt;
+<p>当前，所有命令和 API 都是基于未压缩数据上报对象和桶的大小，某个桶的压缩统计信息可通过 <code class="docutils literal notranslate"><span class="pre">bucket</span> <span class="pre">stats</span></code> 命令查看：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ radosgw-admin bucket stats --bucket=&lt;name&gt;
 {
 ...
-    "usage": {
-        "rgw.main": {
-            "size": 1075028,
-            "size_actual": 1331200,
-            "size_utilized": 592035,
-            "size_kb": 1050,
-            "size_kb_actual": 1300,
-            "size_kb_utilized": 579,
-            "num_objects": 104
+    &quot;usage&quot;: {
+        &quot;rgw.main&quot;: {
+            &quot;size&quot;: 1075028,
+            &quot;size_actual&quot;: 1331200,
+            &quot;size_utilized&quot;: 592035,
+            &quot;size_kb&quot;: 1050,
+            &quot;size_kb_actual&quot;: 1300,
+            &quot;size_kb_utilized&quot;: 579,
+            &quot;num_objects&quot;: 104
         }
     },
 ...
-}</pre>
+}
+</pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">size_utilized</span></tt> 和 <tt class="docutils literal"><span class="pre">size_kb_utilized</span></tt> 字段表示已压缩数据的总尺寸，单位分别是字节和千字节。</p>
+<p><code class="docutils literal notranslate"><span class="pre">size_utilized</span></code> 和 <code class="docutils literal notranslate"><span class="pre">size_kb_utilized</span></code> 字段表示已压缩数据的总尺寸，单位分别是字节和千字节。</p>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -130,72 +137,81 @@
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 对象网关</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../install/install-ceph-gateway/">基于 Civetweb 手动安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frontends/">HTTP 前端</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../placement/">Pool Placement and Storage Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../config-fcgi/">基于 Apache/FastCGI 的简单配置</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../federated-config/">联盟配置（已废弃）</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../multisite/">多站配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pools/">存储池的配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../config-ref/">配置参考</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../admin/">管理指南</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../s3/">S3 API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../swift/">Swift API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../adminops/">管理操作 API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/">Python 接口</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">与 LDAP 认证服务对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../keystone/">与 OpenStack Keystone 对接</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../barbican/">与 OpenStack Barbican 对接</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../opa/">与 Open Policy Agent 对接</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../multitenancy/">多租户</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">压缩</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">压缩</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">统计信息</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../ldap-auth/">LDAP 认证</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../encryption/">服务器端加密</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../bucketpolicy/">桶策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamicresharding/">动态的桶索引重分片</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mfa/">多因子认证</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sync-modules/">同步模块</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../layout/">RADOS 中的数据布局</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../upgrade_to_jewel/">升级到 Jewel 的早期版本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../STSLite/">STS Lite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../role/">Role</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw/">radosgw 手册页</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../man/8/radosgw-admin/">radosgw-admin 手册页</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -205,17 +221,17 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../encryption/" title="加密"
+          <a href="../ldap-auth/" title="LDAP 认证"
              >next</a> |</li>
         <li class="right" >
           <a href="../multitenancy/" title="RGW 多租户"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >Ceph 对象网关</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 对象网关</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

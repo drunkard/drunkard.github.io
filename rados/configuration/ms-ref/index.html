@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>消息传递 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>消息传递 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="配置" href="../" />
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="常规配置参考" href="../general-config-ref/" />
-    <link rel="prev" title="存储池、归置组和 CRUSH 配置参考" href="../pool-pg-config-ref/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="存储池、归置组和 CRUSH 配置参考" href="../pool-pg-config-ref/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -48,278 +36,294 @@
         <li class="right" >
           <a href="../pool-pg-config-ref/" title="存储池、归置组和 CRUSH 配置参考"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" accesskey="U">配置</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">配置</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/configuration/ms-ref.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>消息传递<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id2">
 <h2>常规选项<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">tcp</span> <span class="pre">nodelay</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">在信差的 TCP 会话上禁用 nagle 算法。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">initial</span> <span class="pre">backoff</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">出错时重连的初始等待时间。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Double</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">.2</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">max</span> <span class="pre">backoff</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">出错重连时等待的最大时间。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Double</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">15.0</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">nocrc</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">禁用网络消息的 crc 校验， CPU 不足时可提升性能。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">false</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">die</span> <span class="pre">on</span> <span class="pre">bad</span> <span class="pre">msg</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">调试选项，不要配置。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">false</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">dispatch</span> <span class="pre">throttle</span> <span class="pre">bytes</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">等着传送的消息尺寸阀值。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">100</span> <span class="pre">&lt;&lt;</span> <span class="pre">20</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">bind</span> <span class="pre">ipv6</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">如果想让守护进程绑定到 IPv6 地址而非 IPv4 就得启用（如果你指定了守护进程或集群 IP 就不必要了）</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">false</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">rwthread</span> <span class="pre">stack</span> <span class="pre">bytes</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">堆栈尺寸调试选项，不要配置。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">1024</span> <span class="pre">&lt;&lt;</span> <span class="pre">10</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">tcp</span> <span class="pre">read</span> <span class="pre">timeout</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">控制信差关闭空闲连接前的等待秒数。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">900</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">inject</span> <span class="pre">socket</span> <span class="pre">failures</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">调试选项，别配置。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">0</span></tt></td>
-</tr>
-</tbody>
-</table>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">tcp</span> <span class="pre">nodelay</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>在信差的 TCP 会话上禁用 nagle 算法。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">initial</span> <span class="pre">backoff</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>出错时重连的初始等待时间。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Double</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">.2</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">max</span> <span class="pre">backoff</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>出错重连时等待的最大时间。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Double</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">15.0</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">nocrc</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>禁用网络消息的 crc 校验， CPU 不足时可提升性能。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">die</span> <span class="pre">on</span> <span class="pre">bad</span> <span class="pre">msg</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>调试选项，不要配置。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">dispatch</span> <span class="pre">throttle</span> <span class="pre">bytes</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>等着传送的消息尺寸阀值。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">&lt;&lt;</span> <span class="pre">20</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">bind</span> <span class="pre">ipv6</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>如果想让守护进程绑定到 IPv6 地址而非 IPv4 就得启用（如果你指定了守护进程或集群 IP 就不必要了）</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">rwthread</span> <span class="pre">stack</span> <span class="pre">bytes</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>堆栈尺寸调试选项，不要配置。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">1024</span> <span class="pre">&lt;&lt;</span> <span class="pre">10</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">tcp</span> <span class="pre">read</span> <span class="pre">timeout</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>控制信差关闭空闲连接前的等待秒数。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">900</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">inject</span> <span class="pre">socket</span> <span class="pre">failures</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>调试选项，别配置。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p>
+</dd>
+</dl>
 </div>
 <div class="section" id="async-messenger">
 <span id="async-messenger-options"></span><h2>Async Messenger （异步信使）选项<a class="headerlink" href="#async-messenger" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">transport</span> <span class="pre">type</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">Async Messenger 所用的传输类型，可以是 <tt class="docutils literal"><span class="pre">posix</span></tt> 、
-<tt class="docutils literal"><span class="pre">dpdk</span></tt> 或者 <tt class="docutils literal"><span class="pre">rdma</span></tt> 。 POSIX 用标准 TCP/IP 网络，是默认的；其它传输类型还是实验性的，支持尚不完整。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">posix</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">op</span> <span class="pre">threads</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">各 Async Messenger 例程所用工作线程的初始数量。至少也得等于副本数的最大值，但是，如果 CPU 核心数比较少、或者单台服务器上的 OSD 很多，那你可以适当降低些。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">3</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">max</span> <span class="pre">op</span> <span class="pre">threads</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">各 Async Messenger 例程所用工作线程的最大数量。 CPU 核心数少时可以设置得小些， CPU 利用率低时可以大些（也就是在 I/O 操作期间会有一或多个 CPU 核心的利用率持续在 100% ）。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">64-bit Unsigned Integer</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">5</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">set</span> <span class="pre">affinity</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">设置为 true 时， Async Messenger 工作线程会绑到特定的
-CPU 核心。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">true</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">affinity</span> <span class="pre">cores</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body"><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">set</span> <span class="pre">affinity</span></tt> 为 true 时，此处的字符串可配置
-Async Messenger 工作线程如何绑到 CPU 核心上。例如， &#8220;0,2&#8221;
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">transport</span> <span class="pre">type</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>Async Messenger 所用的传输类型，可以是 <code class="docutils literal notranslate"><span class="pre">posix</span></code> 、
+<code class="docutils literal notranslate"><span class="pre">dpdk</span></code> 或者 <code class="docutils literal notranslate"><span class="pre">rdma</span></code> 。 POSIX 用标准 TCP/IP 网络，是默认的；其它传输类型还是实验性的，支持尚不完整。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">posix</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">op</span> <span class="pre">threads</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>各 Async Messenger 例程所用工作线程的初始数量。至少也得等于副本数的最大值，但是，如果 CPU 核心数比较少、或者单台服务器上的 OSD 很多，那你可以适当降低些。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">max</span> <span class="pre">op</span> <span class="pre">threads</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>各 Async Messenger 例程所用工作线程的最大数量。 CPU 核心数少时可以设置得小些， CPU 利用率低时可以大些（也就是在 I/O 操作期间会有一或多个 CPU 核心的利用率持续在 100% ）。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>64-bit Unsigned Integer</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">set</span> <span class="pre">affinity</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>设置为 true 时， Async Messenger 工作线程会绑到特定的
+CPU 核心。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">affinity</span> <span class="pre">cores</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">set</span> <span class="pre">affinity</span></code> 为 true 时，此处的字符串可配置
+Async Messenger 工作线程如何绑到 CPU 核心上。例如， “0,2”
 表示把工作线程 #1 和 #2 分别绑到 CPU 核心 #0 和 #2 上。
-<strong>注意：</strong> 手动设置亲和性时，千万别把工作线程绑到超线程或类似技术所虚拟出的 CPU 上，因为它们比一般 CPU 慢。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">String</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">(empty)</span></tt></td>
-</tr>
-</tbody>
-</table>
-<p><tt class="docutils literal"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">send</span> <span class="pre">inline</span></tt></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">描述:</th><td class="field-body">让生成这些消息的线程直接发送出去，而不是放入队列、再让
-Async Messenger 线程发送。现已知晓，在 CPU 核心很多的系统上，启用此选项会降低性能，所以默认禁用了。</td>
-</tr>
-<tr class="field-even field"><th class="field-name">类型:</th><td class="field-body">Boolean</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">是否必需:</th><td class="field-body">No</td>
-</tr>
-<tr class="field-even field"><th class="field-name">默认值:</th><td class="field-body"><tt class="docutils literal"><span class="pre">false</span></tt></td>
-</tr>
-</tbody>
-</table>
+<strong>注意：</strong> 手动设置亲和性时，千万别把工作线程绑到超线程或类似技术所虚拟出的 CPU 上，因为它们比一般 CPU 慢。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>String</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(empty)</span></code></p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">ms</span> <span class="pre">async</span> <span class="pre">send</span> <span class="pre">inline</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">描述</dt>
+<dd class="field-odd"><p>让生成这些消息的线程直接发送出去，而不是放入队列、再让
+Async Messenger 线程发送。现已知晓，在 CPU 核心很多的系统上，启用此选项会降低性能，所以默认禁用了。</p>
+</dd>
+<dt class="field-even">类型</dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+<dt class="field-odd">是否必需</dt>
+<dd class="field-odd"><p>No</p>
+</dd>
+<dt class="field-even">默认值</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p>
+</dd>
+</dl>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -327,22 +331,33 @@ Async Messenger 线程发送。现已知晓，在 CPU 核心很多的系统上�
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../">配置</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../filesystem-recommendations/">硬盘和文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../storage-devices/">存储设备</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">配置 Ceph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/">通用选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-network-config">网络</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id3">监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-osd-config">认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#osds">OSDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id5">心跳</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-logging-and-debugging">日志记录、调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#ceph-conf">ceph.conf 实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/#id7">跑多个集群</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../network-config-ref/">网络选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../msgr2/">信使协议 v2</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auth-config-ref/">认证选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-config-ref/">监视器选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-lookup-dns/">Looking op Monitors through DNS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mon-osd-interaction/">心跳选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../osd-config-ref/">OSD 选项</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../filestore-config-ref/">filestore 选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-config-ref/">BlueStore 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../filestore-config-ref/">FileStore 配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../journal-ref/">日志选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pool-pg-config-ref/">存储池、归置组和 CRUSH 选项</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">消息传递选项</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">消息传递选项</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id2">常规选项</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#async-messenger">Async Messenger （异步信使）选项</a></li>
 </ul>
@@ -358,40 +373,41 @@ Async Messenger 线程发送。现已知晓，在 CPU 核心很多的系统上�
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -406,13 +422,13 @@ Async Messenger 线程发送。现已知晓，在 CPU 核心很多的系统上�
         <li class="right" >
           <a href="../pool-pg-config-ref/" title="存储池、归置组和 CRUSH 配置参考"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../" >配置</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >配置</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

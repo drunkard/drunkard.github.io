@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>多活 MDS 守护进程的配置 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>多活 MDS 守护进程的配置 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 文件系统" href="../" />
-    <link rel="next" title="CephFS 支持的能力" href="../capabilities/" />
-    <link rel="prev" title="目录分片的配置" href="../dirfrags/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="NFS" href="../nfs/" />
+    <link rel="prev" title="目录分片的配置" href="../dirfrags/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,98 +31,114 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../capabilities/" title="CephFS 支持的能力"
+          <a href="../nfs/" title="NFS"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../dirfrags/" title="目录分片的配置"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">Ceph 文件系统</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 文件系统</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/cephfs/multimds.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="mds">
-<span id="configuring-multiple-active-mds-daemons"></span><h1>多活 MDS 守护进程的配置<a class="headerlink" href="#mds" title="Permalink to this headline">¶</a></h1>
+<span id="cephfs-multimds"></span><h1>多活 MDS 守护进程的配置<a class="headerlink" href="#mds" title="Permalink to this headline">¶</a></h1>
 <p><em>也叫： multi-mds 、 active-active MDS</em></p>
 <p>每个 CephFS 文件系统默认情况下都只配置一个活跃 MDS 守护进程。在大型系统中，为了扩展元数据性能你可以配置多个活跃的 MDS 守护进程，它们会共同承担元数据负载。</p>
-<div class="section" id="when-should-i-use-multiple-active-mds-daemons">
-<span id="id1"></span><h2>什么情况下我需要多个活跃的 MDS 守护进程？<a class="headerlink" href="#when-should-i-use-multiple-active-mds-daemons" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>什么情况下我需要多个活跃的 MDS 守护进程？<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>当元数据默认的单个 MDS 成为瓶颈时，你应该配置多个活跃的 MDS 守护进程。</p>
 <p>增加守护进程不一定都能提升性能，要看负载类型。典型地，单个客户端上的单个应用程序就不会受益于 MDS 守护进程的增加，除非这个应用程序是在并行地操作元数据。</p>
 <p>通常，有很多客户端（操作着很多不同的目录时更好）时，大量活跃的
 MDS 守护进程有利于性能提升。</p>
 </div>
-<div class="section" id="increasing-the-mds-active-cluster-size">
-<span id="id2"></span><h2>MDS 活跃集群的扩容<a class="headerlink" href="#increasing-the-mds-active-cluster-size" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h2>MDS 活跃集群的扩容<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>每一个 CephFS 文件系统都有自己的 <em>max_mds</em> 配置，它控制着会创建多少 rank 。有空闲守护进程可接管新 rank 时，文件系统 rank 的实际数量才会增加，比如只有一个 MDS 守护进程运行着、 max_mds 被设置成了 2 ，此时不会创建第二个 rank 。</p>
-<p>把 <tt class="docutils literal"><span class="pre">max_mds</span></tt> 设置为想要的 rank 数量。在下面的例子里，
-<tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">status</span></tt> 输出的 fsmap 行是此命令可能输出的结果。</p>
-<div class="highlight-python"><pre># fsmap e5: 1/1/1 up {0=a=up:active}, 2 up:standby
+<p>把 <code class="docutils literal notranslate"><span class="pre">max_mds</span></code> 设置为想要的 rank 数量。在下面的例子里，
+<code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">status</span></code> 输出的 fsmap 行是此命令可能输出的结果。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># fsmap e5: 1/1/1 up {0=a=up:active}, 2 up:standby</span>
 
-ceph fs set max_mds 2
+<span class="n">ceph</span> <span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">max_mds</span> <span class="mi">2</span>
 
-# fsmap e8: 2/2/2 up {0=a=up:active,1=c=up:creating}, 1 up:standby
-# fsmap e9: 2/2/2 up {0=a=up:active,1=c=up:active}, 1 up:standby</pre>
+<span class="c1"># fsmap e8: 2/2/2 up {0=a=up:active,1=c=up:creating}, 1 up:standby</span>
+<span class="c1"># fsmap e9: 2/2/2 up {0=a=up:active,1=c=up:active}, 1 up:standby</span>
+</pre></div>
 </div>
 <p>新创建的 rank (1) 会从 creating 状态过渡到 active 状态。</p>
 </div>
-<div class="section" id="standby-daemons">
-<span id="id3"></span><h2>灾备守护进程<a class="headerlink" href="#standby-daemons" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h2>灾备守护进程<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>即使拥有多活 MDS 守护进程，一个高可用系统<em>仍然需要灾备守护进程</em>来顶替失效的活跃守护进程。</p>
-<p>因此，高可用系统的 <tt class="docutils literal"><span class="pre">max_mds</span></tt> 实际最大值比系统中 MDS 服务器的总数小一。</p>
+<p>因此，高可用系统的 <code class="docutils literal notranslate"><span class="pre">max_mds</span></code> 实际最大值比系统中 MDS 服务器的总数小一。</p>
 <p>为了在多个服务器失效时仍能保持可用，需增加系统中的灾备守护进程，以弥补你能承受的服务器失效数量。</p>
 </div>
 <div class="section" id="rank">
-<span id="decreasing-the-number-of-ranks"></span><h2>减少 rank 数量<a class="headerlink" href="#rank" title="Permalink to this headline">¶</a></h2>
-<p>所有的 rank ，包括你要删除的 rank(s) ，必须先是活跃的。也就是说，你必须有至少 max_mds 个 MDS 守护进程可用。</p>
-<p>首先，把 max_mds 设置为较小的数字，比如我们想回到单活 MDS ：</p>
-<div class="highlight-python"><pre># fsmap e9: 2/2/2 up {0=a=up:active,1=c=up:active}, 1 up:standby
-ceph fs set max_mds 1
-# fsmap e10: 2/2/1 up {0=a=up:active,1=c=up:active}, 1 up:standby</pre>
+<h2>减少 rank 数量<a class="headerlink" href="#rank" title="Permalink to this headline">¶</a></h2>
+<p>减少 rank 数量和减少 <code class="docutils literal notranslate"><span class="pre">max_mds</span></code> 一样简单：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># fsmap e9: 2/2/2 up {0=a=up:active,1=c=up:active}, 1 up:standby</span>
+<span class="n">ceph</span> <span class="n">fs</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">fs_name</span><span class="o">&gt;</span> <span class="n">max_mds</span> <span class="mi">1</span>
+<span class="c1"># fsmap e10: 2/2/1 up {0=a=up:active,1=c=up:stopping}, 1 up:standby</span>
+<span class="c1"># fsmap e10: 2/2/1 up {0=a=up:active,1=c=up:stopping}, 1 up:standby</span>
+<span class="o">...</span>
+<span class="c1"># fsmap e10: 1/1/1 up {0=a=up:active}, 2 up:standby</span>
+</pre></div>
 </div>
-<p>注意，此时我们仍然有两个活跃 MDS ，即使降低了 max_mds 两个 rank
-还都在，因为 max_mds 只能限制新 rank 的创建。</p>
-<p>接下来，用 <tt class="docutils literal"><span class="pre">ceph</span> <span class="pre">mds</span> <span class="pre">deactivate</span> <span class="pre">&lt;rank&gt;</span></tt> 命令删除不需要的
-rank ：</p>
-<div class="highlight-python"><pre>ceph mds deactivate cephfs_a:1
-telling mds.1:1 172.21.9.34:6806/837679928 to deactivate
-
-# fsmap e11: 2/2/1 up {0=a=up:active,1=c=up:stopping}, 1 up:standby
-# fsmap e12: 1/1/1 up {0=a=up:active}, 1 up:standby
-# fsmap e13: 1/1/1 up {0=a=up:active}, 2 up:standby</pre>
-</div>
-<p>被取消活跃状态的 rank 会先进入 stopping 状态，并持续一段时间，在此期间它要把它分享的那部分元数据让出给活跃 MDS 守护进程，这个过程可能要持续数秒到数分钟。如果这个 MDS 卡在了 stopping 状态，那可能是触发了软件缺陷。</p>
-<p>如果处于 stopping 状态的 MDS 守护进程崩溃、或是被杀死了，就会有一个灾备顶替它，这个 rank 会回到 active 状态。等它回来后，你可以再次实施去激活操作。</p>
+<p>集群将会自动逐步地停掉多余的 rank ，直到符合 <code class="docutils literal notranslate"><span class="pre">max_mds</span></code> 。</p>
+<p>See <a class="reference internal" href="../administration/"><span class="doc">CephFS 管理命令</span></a> for more details which forms <code class="docutils literal notranslate"><span class="pre">&lt;role&gt;</span></code> can
+take.</p>
+<p>注意：被停掉的 rank 会先进入 stopping 状态，并持续一段时间，在此期间它要把它分享的那部分元数据转手给仍然活跃着的
+MDS 守护进程，这个过程可能要持续数秒到数分钟。如果这个 MDS
+卡在了 stopping 状态，那可能是触发了软件缺陷。</p>
+<p>如果一个 MDS 守护进程正处于 <code class="docutils literal notranslate"><span class="pre">up:stopping</span></code> 状态时崩溃了、或是被杀死了，就会有一个灾备顶替它，而且集群的监视器们也会阻止停止此守护进程的尝试。</p>
 <p>守护进程完成 stopping 状态后，它会自己重生并成为灾备。</p>
 </div>
-<div class="section" id="manually-pinning-directory-trees-to-a-particular-rank">
-<span id="id4"></span><h2>手动将目录树插入特定的 rank<a class="headerlink" href="#manually-pinning-directory-trees-to-a-particular-rank" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h2>手动将目录树插入特定的 rank<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>在多活元数据服务器配置中，均衡器负责在集群内均匀地散布元数据负荷。此设计对大多数用户来说都够用了，但是，有时人们想要跳过动态均衡器，手动把某些元数据映射到特定的 rank ；这样一来，管理员或用户就可以均匀地散布应用负荷、或者限制用户的元数据请求，以防他影响整个集群。</p>
-<p>为实现此目的，引入了一个机制，名为 <tt class="docutils literal"><span class="pre">export</span> <span class="pre">pin</span></tt> （导出销），是目录的一个扩展属性，名为 <tt class="docutils literal"><span class="pre">ceph.dir.pin</span></tt> 。用户可以用标准命令配置此属性：</p>
-<div class="highlight-python"><pre>setfattr -n ceph.dir.pin -v 2 path/to/dir</pre>
+<p>为实现此目的，引入了一个机制，名为 <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">pin</span></code> （导出销），是目录的一个扩展属性，名为 <code class="docutils literal notranslate"><span class="pre">ceph.dir.pin</span></code> 。用户可以用标准命令配置此属性：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">setfattr</span> <span class="o">-</span><span class="n">n</span> <span class="n">ceph</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">pin</span> <span class="o">-</span><span class="n">v</span> <span class="mi">2</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="nb">dir</span>
+</pre></div>
 </div>
-<p>这个扩展属性的值是给这个目录树分配的 rank ，默认值 <tt class="docutils literal"><span class="pre">-1</span></tt> 表示此目录没有销进（某个 rank ）。</p>
+<p>这个扩展属性的值是给这个目录树分配的 rank ，默认值 <code class="docutils literal notranslate"><span class="pre">-1</span></code> 表示此目录没有销进（某个 rank ）。</p>
 <p>一个目录的导出销是从最近的、配置了导出销的父目录继承的；同理，在一个目录上配置导出销会影响它的所有子目录。然而，设置子目录的导出销可以覆盖从父目录继承来的销子，例如：</p>
-<div class="highlight-python"><pre>mkdir -p a/b
-# "a" and "a/b" both start without an export pin set
-setfattr -n ceph.dir.pin -v 1 a/
-# a and b are now pinned to rank 1
-setfattr -n ceph.dir.pin -v 0 a/b
-# a/b is now pinned to rank 0 and a/ and the rest of its children are still pinned to rank 1</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="n">a</span><span class="o">/</span><span class="n">b</span>
+<span class="c1"># &quot;a&quot; and &quot;a/b&quot; both start without an export pin set</span>
+<span class="n">setfattr</span> <span class="o">-</span><span class="n">n</span> <span class="n">ceph</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">pin</span> <span class="o">-</span><span class="n">v</span> <span class="mi">1</span> <span class="n">a</span><span class="o">/</span>
+<span class="c1"># a and b are now pinned to rank 1</span>
+<span class="n">setfattr</span> <span class="o">-</span><span class="n">n</span> <span class="n">ceph</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">pin</span> <span class="o">-</span><span class="n">v</span> <span class="mi">0</span> <span class="n">a</span><span class="o">/</span><span class="n">b</span>
+<span class="c1"># a/b is now pinned to rank 0 and a/ and the rest of its children are still pinned to rank 1</span>
+</pre></div>
 </div>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -142,32 +146,36 @@ setfattr -n ceph.dir.pin -v 0 a/b
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../../rados/deployment/ceph-deploy-mds/">增加/删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-remove-mds/">配备、增加、删除 MDS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#managing-failover">故障切换的管理</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#configuring-standby-daemons">灾备守护进程的配置</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../standby/#examples">实例</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#id3">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds-standby-replay">热备的配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../createfs/">创建 CephFS 文件系统</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../kernel/">挂载 CephFS 文件系统</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../fuse/">把 CephFS 挂载为 FUSE</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../fstab/">通过 fstab 挂载 CephFS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/">ceph-fuse 手册页</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/">mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/"> 创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/"> 挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/"> 把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fstab/"> 通过 fstab 挂载 CephFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-shell/"> CephFS Shell 的用法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel-features/"> 内核驱动支持的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/"> ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/"> mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.fuse.ceph/"> mount.fuse.ceph 手册页</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../administration/">CephFS 管理命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-size-limits/">深入理解 MDS 的缓存尺寸限制</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-states/">MDS 的各种状态</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#previously-experimental-features">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#id4">曾经是实验性的功能</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
@@ -178,55 +186,62 @@ setfattr -n ceph.dir.pin -v 0 a/b
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../upgrading/">旧文件系统的升级</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">升级 MDS 集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/#firefly-jewel">升级比 Firefly 老的文件系统，需过 Jewel 这个槛</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../dirfrags/">目录分片的配置</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">多活 MDS 的配置</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#when-should-i-use-multiple-active-mds-daemons">什么情况下我需要多个活跃的 MDS 守护进程？</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#increasing-the-mds-active-cluster-size">MDS 活跃集群的扩容</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#standby-daemons">灾备守护进程</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">多活 MDS 的配置</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">什么情况下我需要多个活跃的 MDS 守护进程？</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">MDS 活跃集群的扩容</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">灾备守护进程</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rank">减少 rank 数量</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#manually-pinning-directory-trees-to-a-particular-rank">手动将目录树插入特定的 rank</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">手动将目录树插入特定的 rank</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../nfs/">通过 NFS 导出</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../app-best-practices/">应用最佳实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../scrub/">洗刷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fs-volumes/">FS 卷和子卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">元数据修复</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../#for-developers">开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../#id2">开发者指南</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -236,17 +251,17 @@ setfattr -n ceph.dir.pin -v 0 a/b
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../capabilities/" title="CephFS 支持的能力"
+          <a href="../nfs/" title="NFS"
              >next</a> |</li>
         <li class="right" >
           <a href="../dirfrags/" title="目录分片的配置"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >Ceph 文件系统</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 文件系统</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

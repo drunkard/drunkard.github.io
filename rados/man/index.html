@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>对象存储手册页 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>对象存储手册页 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="Ceph 存储集群" href="../" />
-    <link rel="next" title="ceph-disk – Ceph 的磁盘工具，适用于 OSD" href="../../man/8/ceph-disk/" />
-    <link rel="prev" title="内存剖析" href="../troubleshooting/memory-profiling/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="ceph-volume – Ceph OSD 部署和检查工具" href="../../man/8/ceph-volume/" />
+    <link rel="prev" title="内存剖析" href="../troubleshooting/memory-profiling/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,43 +31,59 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../man/8/ceph-disk/" title="ceph-disk – Ceph 的磁盘工具，适用于 OSD"
+          <a href="../../man/8/ceph-volume/" title="ceph-volume – Ceph OSD 部署和检查工具"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../troubleshooting/memory-profiling/" title="内存剖析"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">Ceph 存储集群</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 存储集群</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/man/index.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="id1">
 <h1>对象存储手册页<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-disk/">ceph-disk &#8211; Ceph 的磁盘工具，适用于 OSD</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph/">ceph &#8211; Ceph 管理工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-deploy/">ceph-deploy &#8211; Ceph 部署工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-rest-api/">ceph-rest-api &#8211; ceph 的 REST 风格管理服务器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-authtool/">ceph-authtool &#8211; ceph 密钥环操作工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-clsinfo/">ceph-clsinfo &#8211; 查看类对象信息</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-conf/">ceph-conf &#8211; ceph 配置文件工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-debugpack/">ceph-debugpack &#8211; ceph 调试信息打包工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-dencoder/">ceph-dencoder &#8211; ceph 编码器/解码器工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-mon/">ceph-mon &#8211; ceph 监视器守护进程</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-osd/">ceph-osd &#8211; ceph 对象存储守护进程</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-run/">ceph-run &#8211; 发生核心转储后重启守护进程</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-syn/">ceph-syn &#8211; ceph 的人造负载生成器</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/crushtool/">crushtool &#8211; CRUSH 图操作工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/librados-config/">librados-config &#8211; 显示关于 librados 的信息</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/monmaptool/">monmaptool &#8211; ceph 监视器运行图操作工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/osdmaptool/">osdmaptool &#8211; ceph osd 运行图操作工具</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../man/8/rados/">rados &#8211; rados 对象存储工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-volume/">ceph-volume – Ceph OSD 部署和检查工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-volume-systemd/">ceph-volume-systemd – systemd ceph-volume 辅助工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph/">ceph – Ceph 管理工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-deploy/">ceph-deploy – Ceph 部署工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-authtool/">ceph-authtool – ceph 密钥环操作工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-clsinfo/">ceph-clsinfo – 查看类对象信息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-conf/">ceph-conf – ceph 配置文件工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-debugpack/">ceph-debugpack – ceph 调试信息打包工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-dencoder/">ceph-dencoder – ceph 编码器/解码器工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-mon/">ceph-mon – ceph 监视器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-osd/">ceph-osd – ceph 对象存储守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-kvstore-tool/">ceph-kvstore-tool – ceph 的 kvstore 操作工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-run/">ceph-run – 发生核心转储后重启守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/ceph-syn/">ceph-syn – ceph 的人造负载生成器</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/crushtool/">crushtool – CRUSH 图操作工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/librados-config/">librados-config – 显示关于 librados 的信息</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/monmaptool/">monmaptool – ceph 监视器运行图操作工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/osdmaptool/">osdmaptool – ceph osd 运行图操作工具</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../man/8/rados/">rados – rados 对象存储工具</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -87,10 +91,11 @@
 </div>
 
 
+
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -98,32 +103,33 @@
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../configuration/">配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../deployment/">部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../operations/">运维</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">手册页</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-disk/">ceph-disk &#8211; Ceph 的磁盘工具，适用于 OSD</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph/">ceph &#8211; Ceph 管理工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-deploy/">ceph-deploy &#8211; Ceph 部署工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-rest-api/">ceph-rest-api &#8211; ceph 的 REST 风格管理服务器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-authtool/">ceph-authtool &#8211; ceph 密钥环操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-clsinfo/">ceph-clsinfo &#8211; 查看类对象信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-conf/">ceph-conf &#8211; ceph 配置文件工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-debugpack/">ceph-debugpack &#8211; ceph 调试信息打包工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-dencoder/">ceph-dencoder &#8211; ceph 编码器/解码器工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mon/">ceph-mon &#8211; ceph 监视器守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-osd/">ceph-osd &#8211; ceph 对象存储守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-run/">ceph-run &#8211; 发生核心转储后重启守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-syn/">ceph-syn &#8211; ceph 的人造负载生成器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/crushtool/">crushtool &#8211; CRUSH 图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/librados-config/">librados-config &#8211; 显示关于 librados 的信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/monmaptool/">monmaptool &#8211; ceph 监视器运行图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/osdmaptool/">osdmaptool &#8211; ceph osd 运行图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/rados/">rados &#8211; rados 对象存储工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-post-file/">ceph-post-file &#8211; 把文件上传给 ceph 开发者</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">手册页</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-volume/">ceph-volume – Ceph OSD 部署和检查工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-volume-systemd/">ceph-volume-systemd – systemd ceph-volume 辅助工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph/">ceph – Ceph 管理工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-deploy/">ceph-deploy – Ceph 部署工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-authtool/">ceph-authtool – ceph 密钥环操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-clsinfo/">ceph-clsinfo – 查看类对象信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-conf/">ceph-conf – ceph 配置文件工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-debugpack/">ceph-debugpack – ceph 调试信息打包工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-dencoder/">ceph-dencoder – ceph 编码器/解码器工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mon/">ceph-mon – ceph 监视器守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-osd/">ceph-osd – ceph 对象存储守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-kvstore-tool/">ceph-kvstore-tool – ceph 的 kvstore 操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-run/">ceph-run – 发生核心转储后重启守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-syn/">ceph-syn – ceph 的人造负载生成器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/crushtool/">crushtool – CRUSH 图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/librados-config/">librados-config – 显示关于 librados 的信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/monmaptool/">monmaptool – ceph 监视器运行图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/osdmaptool/">osdmaptool – ceph osd 运行图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/rados/">rados – rados 对象存储工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-post-file/">ceph-post-file – 把文件上传给 ceph 开发者</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
@@ -131,40 +137,41 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -174,17 +181,17 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../../man/8/ceph-disk/" title="ceph-disk – Ceph 的磁盘工具，适用于 OSD"
+          <a href="../../man/8/ceph-volume/" title="ceph-volume – Ceph OSD 部署和检查工具"
              >next</a> |</li>
         <li class="right" >
           <a href="../troubleshooting/memory-profiling/" title="内存剖析"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >Ceph 存储集群</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 存储集群</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

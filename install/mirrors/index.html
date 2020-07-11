@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Ceph 镜像 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Ceph 镜像 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../" />
-    <link rel="up" title="安装（手动）" href="../" />
-    <link rel="next" title="安装 ceph-deploy" href="../install-ceph-deploy/" />
-    <link rel="prev" title="构建 Ceph" href="../build-ceph/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Ceph 容器映像" href="../containers/" />
+    <link rel="prev" title="构建 Ceph" href="../build-ceph/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,21 +31,37 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../install-ceph-deploy/" title="安装 ceph-deploy"
+          <a href="../containers/" title="Ceph 容器映像"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../build-ceph/" title="构建 Ceph"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" accesskey="U">安装（手动）</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >安装 Ceph</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_manual/" accesskey="U">安装（手动）</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/install/mirrors.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="ceph">
 <h1>Ceph 镜像<a class="headerlink" href="#ceph" title="Permalink to this headline">¶</a></h1>
 <p>为提升用户体验，世界各地有多个 Ceph 镜像。</p>
@@ -66,28 +70,29 @@
 <h2>位置<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>这些镜像位于如下地点：</p>
 <ul class="simple">
-<li><strong>EU: Netherlands</strong>: <a class="reference external" href="http://eu.ceph.com/">http://eu.ceph.com/</a></li>
-<li><strong>AU: Australia</strong>: <a class="reference external" href="http://au.ceph.com/">http://au.ceph.com/</a></li>
-<li><strong>CZ: Czech Republic</strong>: <a class="reference external" href="http://cz.ceph.com/">http://cz.ceph.com/</a></li>
-<li><strong>SE: Sweden</strong>: <a class="reference external" href="http://se.ceph.com/">http://se.ceph.com/</a></li>
-<li><strong>DE: Germany</strong>: <a class="reference external" href="http://de.ceph.com/">http://de.ceph.com/</a></li>
-<li><strong>HK: Hong Kong</strong>: <a class="reference external" href="http://hk.ceph.com/">http://hk.ceph.com/</a></li>
-<li><strong>FR: France</strong>: <a class="reference external" href="http://fr.ceph.com/">http://fr.ceph.com/</a></li>
-<li><strong>UK: UK</strong>: <a class="reference external" href="http://uk.ceph.com">http://uk.ceph.com</a></li>
-<li><strong>US-East: US East Coast</strong>: <a class="reference external" href="http://us-east.ceph.com/">http://us-east.ceph.com/</a></li>
-<li><strong>US-West: US West Coast</strong>: <a class="reference external" href="http://us-west.ceph.com/">http://us-west.ceph.com/</a></li>
+<li><p><strong>EU: Netherlands</strong>: <a class="reference external" href="http://eu.ceph.com/">http://eu.ceph.com/</a></p></li>
+<li><p><strong>AU: Australia</strong>: <a class="reference external" href="http://au.ceph.com/">http://au.ceph.com/</a></p></li>
+<li><p><strong>SE: Sweden</strong>: <a class="reference external" href="http://se.ceph.com/">http://se.ceph.com/</a></p></li>
+<li><p><strong>DE: Germany</strong>: <a class="reference external" href="http://de.ceph.com/">http://de.ceph.com/</a></p></li>
+<li><p><strong>HK: Hong Kong</strong>: <a class="reference external" href="http://hk.ceph.com/">http://hk.ceph.com/</a></p></li>
+<li><p><strong>FR: France</strong>: <a class="reference external" href="http://fr.ceph.com/">http://fr.ceph.com/</a></p></li>
+<li><p><strong>UK: UK</strong>: <a class="reference external" href="http://uk.ceph.com">http://uk.ceph.com</a></p></li>
+<li><p><strong>US-East: US East Coast</strong>: <a class="reference external" href="http://us-east.ceph.com/">http://us-east.ceph.com/</a></p></li>
+<li><p><strong>US-Mid-West: Chicago</strong>: <a class="reference external" href="http://mirrors.gigenet.com/ceph/">http://mirrors.gigenet.com/ceph/</a></p></li>
+<li><p><strong>US-West: US West Coast</strong>: <a class="reference external" href="http://us-west.ceph.com/">http://us-west.ceph.com/</a></p></li>
+<li><p><strong>CN: China</strong>: <a class="reference external" href="http://mirrors.ustc.edu.cn/ceph/">http://mirrors.ustc.edu.cn/ceph/</a></p></li>
 </ul>
 <p>你可以把所有的 download.ceph.com URL 替换成任意镜像，例如：</p>
 <ul class="simple">
-<li><a class="reference external" href="http://download.ceph.com/tarballs/">http://download.ceph.com/tarballs/</a></li>
-<li><a class="reference external" href="http://download.ceph.com/debian-hammer/">http://download.ceph.com/debian-hammer/</a></li>
-<li><a class="reference external" href="http://download.ceph.com/rpm-hammer/">http://download.ceph.com/rpm-hammer/</a></li>
+<li><p><a class="reference external" href="http://download.ceph.com/tarballs/">http://download.ceph.com/tarballs/</a></p></li>
+<li><p><a class="reference external" href="http://download.ceph.com/debian-hammer/">http://download.ceph.com/debian-hammer/</a></p></li>
+<li><p><a class="reference external" href="http://download.ceph.com/rpm-hammer/">http://download.ceph.com/rpm-hammer/</a></p></li>
 </ul>
 <p>可以改成：</p>
 <ul class="simple">
-<li><a class="reference external" href="http://eu.ceph.com/tarballs/">http://eu.ceph.com/tarballs/</a></li>
-<li><a class="reference external" href="http://eu.ceph.com/debian-hammer/">http://eu.ceph.com/debian-hammer/</a></li>
-<li><a class="reference external" href="http://eu.ceph.com/rpm-hammer/">http://eu.ceph.com/rpm-hammer/</a></li>
+<li><p><a class="reference external" href="http://eu.ceph.com/tarballs/">http://eu.ceph.com/tarballs/</a></p></li>
+<li><p><a class="reference external" href="http://eu.ceph.com/debian-hammer/">http://eu.ceph.com/debian-hammer/</a></p></li>
+<li><p><a class="reference external" href="http://eu.ceph.com/rpm-hammer/">http://eu.ceph.com/rpm-hammer/</a></p></li>
 </ul>
 <div class="section" id="id2">
 <h3>建镜像点<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
@@ -95,9 +100,9 @@
 <a class="reference external" href="https://github.com/ceph/ceph/tree/master/mirroring">Github</a> 上也有个易用的脚本。</p>
 <p>镜像 Ceph 时，请遵守如下守则：</p>
 <ul class="simple">
-<li>选择离你近的镜像</li>
-<li>同步间隔不要小于 3 小时</li>
-<li>别在一小时的 0 分开始同步，在 0 到 59 之间随机选一个</li>
+<li><p>选择离你近的镜像</p></li>
+<li><p>同步间隔不要小于 3 小时</p></li>
+<li><p>别在一小时的 0 分开始同步，在 0 到 59 之间随机选一个</p></li>
 </ul>
 </div>
 <div class="section" id="id3">
@@ -110,10 +115,11 @@
 </div>
 
 
+
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../">
               <img class="logo" src="../../_static/logo.png" alt="Logo"/>
@@ -121,64 +127,74 @@
 <h3><a href="../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../start/">安装（快速）</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../">安装（手动）</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../#id2">获取软件</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../get-packages/">     获取二进制包</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../get-tarballs/">     获取源码包</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../clone-source/">     克隆源码</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../build-ceph/">     构建 Ceph</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">     Ceph 镜像</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id1">位置</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="#id2">建镜像点</a></li>
-<li class="toctree-l5"><a class="reference internal" href="#id3">申请官方镜像</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">安装 Ceph</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../#id1">建议的方法</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../#id2">其他方法</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index_manual/">安装（手动）</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index_manual/#id2">获取软件</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="../get-packages/">     获取软件包</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../get-tarballs/">     获取源码包</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../clone-source/">     克隆源码库</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../build-ceph/">     构建 Ceph</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">     Ceph 镜像</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id1">位置</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#id2">建镜像点</a></li>
+<li class="toctree-l7"><a class="reference internal" href="#id3">申请官方镜像</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="../containers/">     Ceph 容器</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../#id3">安装软件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../#id4">手动部署集群</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../#id5">升级软件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id3">安装软件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id4">手动部署一套集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index_manual/#id5">升级软件</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">安装 (ceph-deploy)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -188,17 +204,18 @@
           <a href="../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../install-ceph-deploy/" title="安装 ceph-deploy"
+          <a href="../containers/" title="Ceph 容器映像"
              >next</a> |</li>
         <li class="right" >
           <a href="../build-ceph/" title="构建 Ceph"
              >previous</a> |</li>
-        <li><a href="../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../" >安装（手动）</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >安装 Ceph</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../index_manual/" >安装（手动）</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

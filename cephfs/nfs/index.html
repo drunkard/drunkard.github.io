@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>NFS &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="分布式文件系统之上的应用程序最佳实践" href="../app-best-practices/" />
+    <link rel="prev" title="多活 MDS 守护进程的配置" href="../multimds/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../app-best-practices/" title="分布式文件系统之上的应用程序最佳实践"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../multimds/" title="多活 MDS 守护进程的配置"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 文件系统</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/cephfs/nfs.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="nfs">
+<h1>NFS<a class="headerlink" href="#nfs" title="Permalink to this headline">¶</a></h1>
+<p>CephFS namespaces can be exported over NFS protocol using the
+<a class="reference external" href="https://github.com/nfs-ganesha/nfs-ganesha/wiki">NFS-Ganesha NFS server</a>.</p>
+<div class="section" id="id1">
+<h2>必要条件<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Ceph file system (preferably latest stable luminous or higher versions)</p></li>
+<li><p>In the NFS server host machine, ‘libcephfs2’ (preferably latest stable
+luminous or higher), ‘nfs-ganesha’ and ‘nfs-ganesha-ceph’ packages (latest
+ganesha v2.5 stable or higher versions)</p></li>
+<li><p>NFS-Ganesha server host connected to the Ceph public network</p></li>
+</ul>
+</div>
+<div class="section" id="nfs-ganesha-cephfs">
+<h2>配置 NFS-Ganesha 来导出 CephFS<a class="headerlink" href="#nfs-ganesha-cephfs" title="Permalink to this headline">¶</a></h2>
+<p>NFS-Ganesha provides a File System Abstraction Layer (FSAL) to plug in different
+storage backends. <a class="reference external" href="https://github.com/nfs-ganesha/nfs-ganesha/tree/next/src/FSAL/FSAL_CEPH">FSAL_CEPH</a>
+is the plugin FSAL for CephFS. For each NFS-Ganesha export, FSAL_CEPH uses a
+libcephfs client, user-space CephFS client, to mount the CephFS path that
+NFS-Ganesha exports.</p>
+<p>Setting up NFS-Ganesha with CephFS, involves setting up NFS-Ganesha’s
+configuration file, and also setting up a Ceph configuration file and cephx
+access credentials for the Ceph clients created by NFS-Ganesha to access
+CephFS.</p>
+<div class="section" id="nfs-ganesha">
+<h3>NFS-Ganesha 配置<a class="headerlink" href="#nfs-ganesha" title="Permalink to this headline">¶</a></h3>
+<p>A sample ganesha.conf configured with FSAL_CEPH can be found here,
+<a class="reference external" href="https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/config_samples/ceph.conf">https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/config_samples/ceph.conf</a>.
+It is suitable for a standalone NFS-Ganesha server, or an active/passive
+configuration of NFS-Ganesha servers managed by some sort of clustering
+software (e.g., Pacemaker). Important details about the options are
+added as comments in the sample conf. There are options to do the following:</p>
+<ul class="simple">
+<li><p>minimize Ganesha caching wherever possible since the libcephfs clients
+(of FSAL_CEPH) also cache aggressively</p></li>
+<li><p>read from Ganesha config files stored in RADOS objects</p></li>
+<li><p>store client recovery data in RADOS OMAP key-value interface</p></li>
+<li><p>mandate NFSv4.1+ access</p></li>
+<li><p>enable read delegations (need at least v13.0.1 ‘libcephfs2’ package
+and v2.6.0 stable ‘nfs-ganesha’ and ‘nfs-ganesha-ceph’ packages)</p></li>
+</ul>
+</div>
+<div class="section" id="libcephfs">
+<h3>给 libcephfs 客户端的配置<a class="headerlink" href="#libcephfs" title="Permalink to this headline">¶</a></h3>
+<p>libcephfs 客户端所需的 ceph.conf 配置包括：</p>
+<ul>
+<li><p>a [client] section with <code class="docutils literal notranslate"><span class="pre">mon_host</span></code> option set to let the clients connect
+to the Ceph cluster’s monitors, usually generated via <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">config</span> <span class="pre">generate-minimal-conf</span></code>, e.g.,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="k">global</span><span class="p">]</span>
+        <span class="n">mon</span> <span class="n">host</span> <span class="o">=</span> <span class="p">[</span><span class="n">v2</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.7</span><span class="p">:</span><span class="mi">3300</span><span class="p">,</span><span class="n">v1</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.7</span><span class="p">:</span><span class="mi">6789</span><span class="p">],</span> <span class="p">[</span><span class="n">v2</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.8</span><span class="p">:</span><span class="mi">3300</span><span class="p">,</span><span class="n">v1</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.8</span><span class="p">:</span><span class="mi">6789</span><span class="p">],</span> <span class="p">[</span><span class="n">v2</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.9</span><span class="p">:</span><span class="mi">3300</span><span class="p">,</span><span class="n">v1</span><span class="p">:</span><span class="mf">192.168</span><span class="o">.</span><span class="mf">1.9</span><span class="p">:</span><span class="mi">6789</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="nfsv4">
+<h2>用 NFSv4 客户端挂载<a class="headerlink" href="#nfsv4" title="Permalink to this headline">¶</a></h2>
+<p>It is preferred to mount the NFS-Ganesha exports using NFSv4.1+ protocols
+to get the benefit of sessions.</p>
+<p>Conventions for mounting NFS resources are platform-specific. The
+following conventions work on Linux and some Unix platforms:</p>
+<p>From the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mount</span> <span class="o">-</span><span class="n">t</span> <span class="n">nfs</span> <span class="o">-</span><span class="n">o</span> <span class="n">nfsvers</span><span class="o">=</span><span class="mf">4.1</span><span class="p">,</span><span class="n">proto</span><span class="o">=</span><span class="n">tcp</span> <span class="o">&lt;</span><span class="n">ganesha</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">ganesha</span><span class="o">-</span><span class="n">pseudo</span><span class="o">-</span><span class="n">path</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">mount</span><span class="o">-</span><span class="n">point</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>当前限制<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Per running ganesha daemon, FSAL_CEPH can only export one Ceph file system
+although multiple directories in a Ceph file system may be exported.</p></li>
+</ul>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 文件系统</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../#cephfs">CephFS 使用文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../add-remove-mds/">配备、增加、删除 MDS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/">术语</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds">MDS 守护进程的引用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#id3">故障切换的管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../standby/#mds-standby-replay">热备的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-config-ref/">MDS 配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-config-ref/">客户端配置选项</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../journaler/">Journaler 配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-mds/">ceph-mds 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../createfs/"> 创建 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel/"> 挂载 CephFS 文件系统</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fuse/"> 把 CephFS 挂载为 FUSE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fstab/"> 通过 fstab 挂载 CephFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-shell/"> CephFS Shell 的用法</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../kernel-features/"> 内核驱动支持的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/ceph-fuse/"> ceph-fuse 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.ceph/"> mount.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../man/8/mount.fuse.ceph/"> mount.fuse.ceph 手册页</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../best-practices/">最佳部署实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../administration/">CephFS 管理命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-size-limits/">深入理解 MDS 的缓存尺寸限制</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mds-states/">MDS 的各种状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../posix/">POSIX 兼容性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/">实验性功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../experimental-features/#id4">曾经是实验性的功能</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quota/">CephFS 配额管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../hadoop/">在 Ceph 上使用 Hadoop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cephfs-journal-tool/">cephfs-journal-tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../file-layouts/">文件布局</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../eviction/">驱逐客户端</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../full/">文件系统占满的处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-messages/">健康消息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/">故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../disaster-recovery/">灾难恢复</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../client-auth/">客户端认证</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/">升级 MDS 集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upgrading/#firefly-jewel">升级比 Firefly 老的文件系统，需过 Jewel 这个槛</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dirfrags/">目录分片的配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multimds/">多活 MDS 的配置</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">通过 NFS 导出</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">必要条件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nfs-ganesha-cephfs">配置 NFS-Ganesha 来导出 CephFS</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#nfs-ganesha">NFS-Ganesha 配置</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#libcephfs">给 libcephfs 客户端的配置</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#nfsv4">用 NFSv4 客户端挂载</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">当前限制</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../app-best-practices/">应用最佳实践</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../scrub/">洗刷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fs-volumes/">FS 卷和子卷</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../#id1">元数据修复</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../#id2">开发者指南</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../app-best-practices/" title="分布式文件系统之上的应用程序最佳实践"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../multimds/" title="多活 MDS 守护进程的配置"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 文件系统</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

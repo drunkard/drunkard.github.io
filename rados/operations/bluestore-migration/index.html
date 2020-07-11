@@ -1,0 +1,483 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>迁移到 BlueStore &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="控制命令" href="../control/" />
+    <link rel="prev" title="设备管理" href="../devices/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../control/" title="控制命令"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../devices/" title="设备管理"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">集群运维</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/operations/bluestore-migration.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="bluestore">
+<h1>迁移到 BlueStore<a class="headerlink" href="#bluestore" title="Permalink to this headline">¶</a></h1>
+<p>Each OSD can run either BlueStore or FileStore, and a single Ceph
+cluster can contain a mix of both.  Users who have previously deployed
+FileStore are likely to want to transition to BlueStore in order to
+take advantage of the improved performance and robustness.  There are
+several strategies for making such a transition.</p>
+<p>An individual OSD cannot be converted in place in isolation, however:
+BlueStore and FileStore are simply too different for that to be
+practical.  “Conversion” will rely either on the cluster’s normal
+replication and healing support or tools and strategies that copy OSD
+content from an old (FileStore) device to a new (BlueStore) one.</p>
+<div class="section" id="bluestore-osd">
+<h2>用 BlueStore 部署一个新 OSD<a class="headerlink" href="#bluestore-osd" title="Permalink to this headline">¶</a></h2>
+<p>Any new OSDs (e.g., when the cluster is expanded) can be deployed
+using BlueStore.  This is the default behavior so no specific change
+is needed.</p>
+<p>Similarly, any OSDs that are reprovisioned after replacing a failed drive
+can use BlueStore.</p>
+</div>
+<div class="section" id="osd">
+<h2>转换已有 OSD<a class="headerlink" href="#osd" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="out">
+<h3>标记为 out 并替换<a class="headerlink" href="#out" title="Permalink to this headline">¶</a></h3>
+<p>The simplest approach is to mark out each device in turn, wait for the
+data to replicate across the cluster, reprovision the OSD, and mark
+it back in again.  It is simple and easy to automate.  However, it requires
+more data migration than should be necessary, so it is not optimal.</p>
+<ol class="arabic">
+<li><p>Identify a FileStore OSD to replace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ID</span><span class="o">=&lt;</span><span class="n">osd</span><span class="o">-</span><span class="nb">id</span><span class="o">-</span><span class="n">number</span><span class="o">&gt;</span>
+<span class="n">DEVICE</span><span class="o">=&lt;</span><span class="n">disk</span><span class="o">-</span><span class="n">device</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>You can tell whether a given OSD is FileStore or BlueStore with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph osd metadata $ID | grep osd_objectstore
+</pre></div>
+</div>
+<p>You can get a current count of filestore vs bluestore with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">count</span><span class="o">-</span><span class="n">metadata</span> <span class="n">osd_objectstore</span>
+</pre></div>
+</div>
+</li>
+<li><p>Mark the filestore OSD out:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph osd out $ID
+</pre></div>
+</div>
+</li>
+<li><p>Wait for the data to migrate off the OSD in question:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>while ! ceph osd safe-to-destroy $ID ; do sleep 60 ; done
+</pre></div>
+</div>
+</li>
+<li><p>Stop the OSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>systemctl kill ceph-osd@$ID
+</pre></div>
+</div>
+</li>
+<li><p>Make note of which device this OSD is using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mount | grep /var/lib/ceph/osd/ceph-$ID
+</pre></div>
+</div>
+</li>
+<li><p>Unmount the OSD:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>umount /var/lib/ceph/osd/ceph-$ID
+</pre></div>
+</div>
+</li>
+<li><p>Destroy the OSD data. Be <em>EXTREMELY CAREFUL</em> as this will destroy
+the contents of the device; be certain the data on the device is
+not needed (i.e., that the cluster is healthy) before proceeding.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph-volume lvm zap $DEVICE
+</pre></div>
+</div>
+</li>
+<li><p>告诉集群这个 OSD 已销毁（且新的 OSD 可以使用同一 ID ）：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph osd destroy $ID --yes-i-really-mean-it
+</pre></div>
+</div>
+</li>
+<li><p>Reprovision a BlueStore OSD in its place with the same OSD ID.
+This requires you do identify which device to wipe based on what you saw
+mounted above. BE CAREFUL!</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph-volume lvm create --bluestore --data $DEVICE --osd-id $ID
+</pre></div>
+</div>
+</li>
+<li><p>Repeat.</p></li>
+</ol>
+<p>You can allow the refilling of the replacement OSD to happen
+concurrently with the draining of the next OSD, or follow the same
+procedure for multiple OSDs in parallel, as long as you ensure the
+cluster is fully clean (all data has all replicas) before destroying
+any OSDs.  Failure to do so will reduce the redundancy of your data
+and increase the risk of (or potentially even cause) data loss.</p>
+<p>Advantages:</p>
+<ul class="simple">
+<li><p>Simple.</p></li>
+<li><p>Can be done on a device-by-device basis.</p></li>
+<li><p>No spare devices or hosts are required.</p></li>
+</ul>
+<p>Disadvantages:</p>
+<ul class="simple">
+<li><p>Data is copied over the network twice: once to some other OSD in the
+cluster (to maintain the desired number of replicas), and then again
+back to the reprovisioned BlueStore OSD.</p></li>
+</ul>
+</div>
+<div class="section" id="id1">
+<h3>整机替换<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>If you have a spare host in the cluster, or have sufficient free space
+to evacuate an entire host in order to use it as a spare, then the
+conversion can be done on a host-by-host basis with each stored copy of
+the data migrating only once.</p>
+<p>First, you need have empty host that has no data.  There are two ways to do this: either by starting with a new, empty host that isn’t yet part of the cluster, or by offloading data from an existing host that in the cluster.</p>
+<div class="section" id="id2">
+<h4>利用新的、空主机<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>Ideally the host should have roughly the
+same capacity as other hosts you will be converting (although it
+doesn’t strictly matter).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">NEWHOST</span><span class="o">=&lt;</span><span class="n">empty</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Add the host to the CRUSH hierarchy, but do not attach it to the root:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph osd crush add-bucket $NEWHOST host
+</pre></div>
+</div>
+<p>Make sure the ceph packages are installed.</p>
+</div>
+<div class="section" id="id3">
+<h4>利用已有主机<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>If you would like to use an existing host
+that is already part of the cluster, and there is sufficient free
+space on that host so that all of its data can be migrated off,
+then you can instead do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>OLDHOST=&lt;existing-cluster-host-to-offload&gt;
+ceph osd crush unlink $OLDHOST default
+</pre></div>
+</div>
+<p>where “default” is the immediate ancestor in the CRUSH map. (For
+smaller clusters with unmodified configurations this will normally
+be “default”, but it might also be a rack name.)  You should now
+see the host at the top of the OSD tree output with no parent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ bin/ceph osd tree
+ID CLASS WEIGHT  TYPE NAME     STATUS REWEIGHT PRI-AFF
+-5             0 host oldhost
+10   ssd 1.00000     osd.10        up  1.00000 1.00000
+11   ssd 1.00000     osd.11        up  1.00000 1.00000
+12   ssd 1.00000     osd.12        up  1.00000 1.00000
+-1       3.00000 root default
+-2       3.00000     host foo
+ 0   ssd 1.00000         osd.0     up  1.00000 1.00000
+ 1   ssd 1.00000         osd.1     up  1.00000 1.00000
+ 2   ssd 1.00000         osd.2     up  1.00000 1.00000
+...
+</pre></div>
+</div>
+<p>If everything looks good, jump directly to the “Wait for data
+migration to complete” step below and proceed from there to clean up
+the old OSDs.</p>
+</div>
+<div class="section" id="id4">
+<h4>迁移过程<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>If you’re using a new host, start at step #1.  For an existing host,
+jump to step #5 below.</p>
+<ol class="arabic">
+<li><p>Provision new BlueStore OSDs for all devices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph-volume lvm create --bluestore --data /dev/$DEVICE
+</pre></div>
+</div>
+</li>
+<li><p>用此命令核对各 OSD 是否加入集群：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">tree</span>
+</pre></div>
+</div>
+<p>你应该能看到这个新主机 <code class="docutils literal notranslate"><span class="pre">$NEWHOST</span></code> ，它下面还挂着所有的
+OSD ，但是这台主机<em>不应该</em>嵌入分级结构的其它任何节点（像 <code class="docutils literal notranslate"><span class="pre">root</span> <span class="pre">default</span></code> ）。例如，假设 <code class="docutils literal notranslate"><span class="pre">newhost</span></code> 就是这台空主机，你可能看到类似的：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ bin/ceph osd tree
+ID CLASS WEIGHT  TYPE NAME     STATUS REWEIGHT PRI-AFF
+-5             0 host newhost
+10   ssd 1.00000     osd.10        up  1.00000 1.00000
+11   ssd 1.00000     osd.11        up  1.00000 1.00000
+12   ssd 1.00000     osd.12        up  1.00000 1.00000
+-1       3.00000 root default
+-2       3.00000     host oldhost1
+ 0   ssd 1.00000         osd.0     up  1.00000 1.00000
+ 1   ssd 1.00000         osd.1     up  1.00000 1.00000
+ 2   ssd 1.00000         osd.2     up  1.00000 1.00000
+...
+</pre></div>
+</div>
+</li>
+<li><p>Identify the first target host to convert</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OLDHOST</span><span class="o">=&lt;</span><span class="n">existing</span><span class="o">-</span><span class="n">cluster</span><span class="o">-</span><span class="n">host</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">convert</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Swap the new host into the old host’s position in the cluster:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph osd crush swap-bucket $NEWHOST $OLDHOST
+</pre></div>
+</div>
+<p>At this point all data on <code class="docutils literal notranslate"><span class="pre">$OLDHOST</span></code> will start migrating to OSDs
+on <code class="docutils literal notranslate"><span class="pre">$NEWHOST</span></code>.  If there is a difference in the total capacity of
+the old and new hosts you may also see some data migrate to or from
+other nodes in the cluster, but as long as the hosts are similarly
+sized this will be a relatively small amount of data.</p>
+</li>
+<li><p>Wait for data migration to complete:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>while ! ceph osd safe-to-destroy $(ceph osd ls-tree $OLDHOST); do sleep 60 ; done
+</pre></div>
+</div>
+</li>
+<li><p>Stop all old OSDs on the now-empty <code class="docutils literal notranslate"><span class="pre">$OLDHOST</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ssh $OLDHOST
+systemctl kill ceph-osd.target
+umount /var/lib/ceph/osd/ceph-*
+</pre></div>
+</div>
+</li>
+<li><p>Destroy and purge the old OSDs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>for osd in `ceph osd ls-tree $OLDHOST`; do
+    ceph osd purge $osd --yes-i-really-mean-it
+done
+</pre></div>
+</div>
+</li>
+<li><p>Wipe the old OSD devices. This requires you do identify which
+devices are to be wiped manually (BE CAREFUL!). For each device,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ceph-volume lvm zap $DEVICE
+</pre></div>
+</div>
+</li>
+<li><p>Use the now-empty host as the new host, and repeat:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>NEWHOST=$OLDHOST
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Advantages:</p>
+<ul class="simple">
+<li><p>Data is copied over the network only once.</p></li>
+<li><p>Converts an entire host’s OSDs at once.</p></li>
+<li><p>Can parallelize to converting multiple hosts at a time.</p></li>
+<li><p>No spare devices are required on each host.</p></li>
+</ul>
+<p>Disadvantages:</p>
+<ul class="simple">
+<li><p>A spare host is required.</p></li>
+<li><p>An entire host’s worth of OSDs will be migrating data at a time.  This
+is like likely to impact overall cluster performance.</p></li>
+<li><p>All migrated data still makes one full hop over the network.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="per-osd-device-copy">
+<h3>Per-OSD device copy<a class="headerlink" href="#per-osd-device-copy" title="Permalink to this headline">¶</a></h3>
+<p>A single logical OSD can be converted by using the <code class="docutils literal notranslate"><span class="pre">copy</span></code> function
+of <code class="docutils literal notranslate"><span class="pre">ceph-objectstore-tool</span></code>.  This requires that the host have a free
+device (or devices) to provision a new, empty BlueStore OSD.  For
+example, if each host in your cluster has 12 OSDs, then you’d need a
+13th available device so that each OSD can be converted in turn before the
+old device is reclaimed to convert the next OSD.</p>
+<p>Caveats:</p>
+<ul class="simple">
+<li><p>This strategy requires that a blank BlueStore OSD be prepared
+without allocating a new OSD ID, something that the <code class="docutils literal notranslate"><span class="pre">ceph-volume</span></code>
+tool doesn’t support.  More importantly, the setup of <em>dmcrypt</em> is
+closely tied to the OSD identity, which means that this approach
+does not work with encrypted OSDs.</p></li>
+<li><p>The device must be manually partitioned.</p></li>
+<li><p>Tooling not implemented!</p></li>
+<li><p>Not documented!</p></li>
+</ul>
+<p>优点：</p>
+<ul class="simple">
+<li><p>转换期间只有少量或没有数据通过网络迁移。</p></li>
+</ul>
+<p>缺点：</p>
+<ul class="simple">
+<li><p>工具链尚未完全实现；</p></li>
+<li><p>Process not documented.</p></li>
+<li><p>Each host must have a spare or empty device.</p></li>
+<li><p>The OSD is offline during the conversion, which means new writes will
+be written to only a subset of the OSDs.  This increases the risk of data
+loss due to a subsequent failure.  (However, if there is a failure before
+conversion is complete, the original FileStore OSD can be started to provide
+access to its original data.)</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../health-checks/">健康检查</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg-repair/">修复 PG 不一致状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../balancer/">均衡器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upmap/">使用 pg-upmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map-edits/">手动编辑一个 CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devices/">设备管理</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">迁移到 BlueStore</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bluestore-osd">用 BlueStore 部署一个新 OSD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osd">转换已有 OSD</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#out">标记为 out 并替换</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id1">整机替换</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#id2">利用新的、空主机</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id3">利用已有主机</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id4">迁移过程</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#per-osd-device-copy">Per-OSD device copy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../control/" title="控制命令"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../devices/" title="设备管理"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

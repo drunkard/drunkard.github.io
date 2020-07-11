@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Influx 模块 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex/" />
+    <link rel="search" title="Search" href="../../search/" />
+    <link rel="next" title="Hello World 模块" href="../hello/" />
+    <link rel="prev" title="Prometheus 模块" href="../prometheus/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../hello/" title="Hello World 模块"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../prometheus/" title="Prometheus 模块"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" accesskey="U">Ceph 管理器守护进程</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/mgr/influx.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="influx">
+<h1>Influx 模块<a class="headerlink" href="#influx" title="Permalink to this headline">¶</a></h1>
+<p>influx 模块持续收集并向 influxdb 数据库发送时序数据。</p>
+<p>influx 模块是在 13.x <em>Mimic</em> 版首次引进的。</p>
+<div class="section" id="id1">
+<h2>启用<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>启用模块用下列命令：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">enable</span> <span class="n">influx</span>
+</pre></div>
+</div>
+<p>If you wish to subsequently disable the module, you can use the equivalent
+<em>disable</em> command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">mgr</span> <span class="n">module</span> <span class="n">disable</span> <span class="n">influx</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>配置<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>For the influx module to send statistics to an InfluxDB server, it
+is necessary to configure the servers address and some authentication
+credentials.</p>
+<p>Set configuration values using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">influx</span><span class="o">/&lt;</span><span class="n">key</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The most important settings are <code class="docutils literal notranslate"><span class="pre">hostname</span></code>, <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code>.
+For example, a typical configuration might look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">influx</span><span class="o">/</span><span class="n">hostname</span> <span class="n">influx</span><span class="o">.</span><span class="n">mydomain</span><span class="o">.</span><span class="n">com</span>
+<span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">influx</span><span class="o">/</span><span class="n">username</span> <span class="n">admin123</span>
+<span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">mgr</span> <span class="n">mgr</span><span class="o">/</span><span class="n">influx</span><span class="o">/</span><span class="n">password</span> <span class="n">p4ssw0rd</span>
+</pre></div>
+</div>
+<p>Additional optional configuration settings are:</p>
+<dl class="field-list simple">
+<dt class="field-odd">interval</dt>
+<dd class="field-odd"><p>Time between reports to InfluxDB.  Default 30 seconds.</p>
+</dd>
+<dt class="field-even">database</dt>
+<dd class="field-even"><p>InfluxDB database name.  Default “ceph”.  You will need to create this database and grant write privileges to the configured username or the username must have admin privileges to create it.</p>
+</dd>
+<dt class="field-odd">port</dt>
+<dd class="field-odd"><p>InfluxDB server port.  Default 8086</p>
+</dd>
+<dt class="field-even">ssl</dt>
+<dd class="field-even"><p>Use https connection for InfluxDB server. Use “true” or “false”. Default false</p>
+</dd>
+<dt class="field-odd">verify_ssl</dt>
+<dd class="field-odd"><p>Verify https cert for InfluxDB server. Use “true” or “false”. Default true</p>
+</dd>
+<dt class="field-even">threads</dt>
+<dd class="field-even"><p>How many worker threads should be spawned for sending data to InfluxDB. Default is 5</p>
+</dd>
+<dt class="field-odd">batch_size</dt>
+<dd class="field-odd"><p>How big batches of data points should be when sending to InfluxDB. Default is 5000</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="id3">
+<h2>调试<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>By default, a few debugging statements as well as error statements have been set to print in the log files. Users can add more if necessary.
+To make use of the debugging option in the module:</p>
+<ul>
+<li><p>Add this to the ceph.conf file.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mgr</span><span class="p">]</span>
+    <span class="n">debug_mgr</span> <span class="o">=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+</li>
+<li><p>Use this command <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">influx</span> <span class="pre">self-test</span></code>.</p></li>
+<li><p>Check the log files. Users may find it easier to filter the log files using <em>mgr[influx]</em>.</p></li>
+</ul>
+</div>
+<div class="section" id="interesting-counters">
+<h2>Interesting counters<a class="headerlink" href="#interesting-counters" title="Permalink to this headline">¶</a></h2>
+<p>The following tables describe a subset of the values output by
+this module.</p>
+<div class="section" id="pools">
+<h3>Pools<a class="headerlink" href="#pools" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Counter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>stored</p></td>
+<td><p>Bytes stored in the pool not including copies</p></td>
+</tr>
+<tr class="row-odd"><td><p>max_avail</p></td>
+<td><p>Max available number of bytes in the pool</p></td>
+</tr>
+<tr class="row-even"><td><p>objects</p></td>
+<td><p>Number of objects in the pool</p></td>
+</tr>
+<tr class="row-odd"><td><p>wr_bytes</p></td>
+<td><p>Number of bytes written in the pool</p></td>
+</tr>
+<tr class="row-even"><td><p>dirty</p></td>
+<td><p>Number of bytes dirty in the pool</p></td>
+</tr>
+<tr class="row-odd"><td><p>rd_bytes</p></td>
+<td><p>Number of bytes read in the pool</p></td>
+</tr>
+<tr class="row-even"><td><p>stored_raw</p></td>
+<td><p>Bytes used in pool including copies made</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="osds">
+<h3>OSDs<a class="headerlink" href="#osds" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Counter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>op_w</p></td>
+<td><p>Client write operations</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_in_bytes</p></td>
+<td><p>Client operations total write size</p></td>
+</tr>
+<tr class="row-even"><td><p>op_r</p></td>
+<td><p>Client read operations</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_out_bytes</p></td>
+<td><p>Client operations total read size</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Counter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>op_wip</p></td>
+<td><p>Replication operations currently being processed (primary)</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_latency</p></td>
+<td><p>Latency of client operations (including queue time)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_process_latency</p></td>
+<td><p>Latency of client operations (excluding queue time)</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_prepare_latency</p></td>
+<td><p>Latency of client operations (excluding queue time and wait for finished)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_r_latency</p></td>
+<td><p>Latency of read operation (including queue time)</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_r_process_latency</p></td>
+<td><p>Latency of read operation (excluding queue time)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_w_in_bytes</p></td>
+<td><p>Client data written</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_w_latency</p></td>
+<td><p>Latency of write operation (including queue time)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_w_process_latency</p></td>
+<td><p>Latency of write operation (excluding queue time)</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_w_prepare_latency</p></td>
+<td><p>Latency of write operations (excluding queue time and wait for finished)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_rw</p></td>
+<td><p>Client read-modify-write operations</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_rw_in_bytes</p></td>
+<td><p>Client read-modify-write operations write in</p></td>
+</tr>
+<tr class="row-even"><td><p>op_rw_out_bytes</p></td>
+<td><p>Client read-modify-write operations read out</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_rw_latency</p></td>
+<td><p>Latency of read-modify-write operation (including queue time)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_rw_process_latency</p></td>
+<td><p>Latency of read-modify-write operation (excluding queue time)</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_rw_prepare_latency</p></td>
+<td><p>Latency of read-modify-write operations (excluding queue time
+and wait for finished)</p></td>
+</tr>
+<tr class="row-even"><td><p>op_before_queue_op_lat</p></td>
+<td><p>Latency of IO before calling queue (before really queue into ShardedOpWq)
+op_before_dequeue_op_lat</p></td>
+</tr>
+<tr class="row-odd"><td><p>op_before_dequeue_op_lat</p></td>
+<td><p>Latency of IO before calling dequeue_op(already dequeued and get PG lock)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Latency counters are measured in microseconds unless otherwise specified in the description.</p>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rados/">Ceph 存储集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../">Ceph 管理器守护进程</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../administrator/">安装和配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/">模块编程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator_modules/">编写 orchestrator 插件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dashboard/">仪表盘模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../alerts/">Alerts 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../diskprediction/">DiskPrediction 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../localpool/">localpool 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../restful/">REST 风格模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../zabbix/">Zabbix 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prometheus/">Prometheus 模块</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Influx 模块</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">启用</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">配置</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interesting-counters">Interesting counters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pools">Pools</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osds">OSDs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../hello/">Hello 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telegraf/">Telegraf 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../telemetry/">Telemetry 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../iostat/">Iostat 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../osd_support/">OSD Support 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../crash/">Crash 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../insights/">Insights 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../orchestrator/">Orchestrator 模块</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../rook/">Rook 模块</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../hello/" title="Hello World 模块"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../prometheus/" title="Prometheus 模块"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../" >Ceph 管理器守护进程</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>

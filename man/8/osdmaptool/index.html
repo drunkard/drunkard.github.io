@@ -1,39 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>osdmaptool – ceph osd 运行图操作工具 &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>osdmaptool – ceph osd 运行图操作工具 &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    <link rel="up" title="对象存储手册页" href="../../../rados/man/" />
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
     <link rel="next" title="rados – rados 对象存储工具" href="../rados/" />
-    <link rel="prev" title="monmaptool – ceph 监视器运行图操作工具" href="../monmaptool/" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="prev" title="monmaptool – ceph 监视器运行图操作工具" href="../monmaptool/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -48,24 +36,39 @@
         <li class="right" >
           <a href="../monmaptool/" title="monmaptool – ceph 监视器运行图操作工具"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rados/" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../../../rados/man/" accesskey="U">对象存储手册页</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" accesskey="U">对象存储手册页</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/man/8/osdmaptool.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="osdmaptool-ceph-osd">
-<h1>osdmaptool &#8211; ceph osd 运行图操作工具<a class="headerlink" href="#osdmaptool-ceph-osd" title="Permalink to this headline">¶</a></h1>
+<span id="osdmaptool"></span><h1>osdmaptool – ceph osd 运行图操作工具<a class="headerlink" href="#osdmaptool-ceph-osd" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2>提纲<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
-<div class="line"><strong>osdmaptool</strong> <em>mapfilename</em> [&#8211;print] [&#8211;createsimple <em>numosd</em>
-[&#8211;pgbits <em>bitsperosd</em> ] ] [&#8211;clobber]</div>
+<div class="line"><strong>osdmaptool</strong> <em>mapfilename</em> [–print] [–createsimple <em>numosd</em>
+[–pgbits <em>bitsperosd</em> ] ] [–clobber]</div>
 </div>
 </div>
 <div class="section" id="id2">
@@ -77,131 +80,211 @@ CRUSH 图。</p>
 <div class="section" id="id3">
 <h2>选项<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <dl class="option">
-<dt id="cmdoption-osdmaptool--print">
-<tt class="descname">--print</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-osdmaptool--print" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-osdmaptool-print">
+<code class="sig-name descname">--print</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-print" title="Permalink to this definition">¶</a></dt>
 <dd><p>修改完成后，打印此图的一份纯文本转储。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--clobber">
-<tt class="descname">--clobber</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-osdmaptool--clobber" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-osdmaptool-dump">
+<code class="sig-name descname">--dump</code><code class="sig-prename descclassname"> &lt;format&gt;</code><a class="headerlink" href="#cmdoption-osdmaptool-dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>&lt;format&gt; 为 plain 时以纯文本方式显示运行图，若不支持指定格式就默认为 json 。这是 print 选项的替代品。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-clobber">
+<code class="sig-name descname">--clobber</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-clobber" title="Permalink to this definition">¶</a></dt>
 <dd><p>修改时允许 osdmaptool 覆盖 mapfilename 。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--import-crush">
-<tt class="descname">--import-crush</tt><tt class="descclassname"> mapfile</tt><a class="headerlink" href="#cmdoption-osdmaptool--import-crush" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-osdmaptool-import-crush">
+<code class="sig-name descname">--import-crush</code><code class="sig-prename descclassname"> mapfile</code><a class="headerlink" href="#cmdoption-osdmaptool-import-crush" title="Permalink to this definition">¶</a></dt>
 <dd><p>从 mapfile 载入 CRUSH 图并把它嵌入 OSD 图。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--export-crush">
-<tt class="descname">--export-crush</tt><tt class="descclassname"> mapfile</tt><a class="headerlink" href="#cmdoption-osdmaptool--export-crush" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-osdmaptool-export-crush">
+<code class="sig-name descname">--export-crush</code><code class="sig-prename descclassname"> mapfile</code><a class="headerlink" href="#cmdoption-osdmaptool-export-crush" title="Permalink to this definition">¶</a></dt>
 <dd><p>从 OSD 图提取出 CRUSH 图并写入 mapfile 。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--createsimple">
-<tt class="descname">--createsimple</tt><tt class="descclassname"> numosd [--pgbits bitsperosd]</tt><a class="headerlink" href="#cmdoption-osdmaptool--createsimple" title="Permalink to this definition">¶</a></dt>
-<dd><p>创建有 numosd 个设备的相对通用的 OSD 图。若指定了 &#8211;pgbits
+<dt id="cmdoption-osdmaptool-createsimple">
+<code class="sig-name descname">--createsimple</code><code class="sig-prename descclassname"> numosd [--pg-bits bitsperosd] [--pgp-bits bits]</code><a class="headerlink" href="#cmdoption-osdmaptool-createsimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>创建有 numosd 个设备的相对通用的 OSD 图。若指定了 –pg-bits
 选项，每个 OSD 的归置组数量将是 bitsperosd 个位偏移。也就是
-pg_num 属性将被设置为 numosd 数值再右移 bitsperosd 位。</p>
+pg_num 属性将被设置为 numosd 数值再右移 bitsperosd 位。若指定了 –pgp-bits 选项， pgp_num 属性将被设置为 numosd 数值再右移 bits 位。</p>
+<p>&lt;译者注&gt;: pgp_num map attribute: 意为 osd map 之中的 pgp_num 属性</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--test-map-pgs">
-<tt class="descname">--test-map-pgs</tt><tt class="descclassname"> [--pool poolid]</tt><a class="headerlink" href="#cmdoption-osdmaptool--test-map-pgs" title="Permalink to this definition">¶</a></dt>
-<dd><p>打印出归置组到 OSD 的映射关系。</p>
+<dt id="cmdoption-osdmaptool-create-from-conf">
+<code class="sig-name descname">--create-from-conf</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-create-from-conf" title="Permalink to this definition">¶</a></dt>
+<dd><p>按默认配置创建一份 OSD 图。</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-osdmaptool--test-map-pgs-dump">
-<tt class="descname">--test-map-pgs-dump</tt><tt class="descclassname"> [--pool poolid]</tt><a class="headerlink" href="#cmdoption-osdmaptool--test-map-pgs-dump" title="Permalink to this definition">¶</a></dt>
-<dd><p>打印出所有归置组及其与 OSD 映射关系的汇总。</p>
+<dt id="cmdoption-osdmaptool-test-map-pgs">
+<code class="sig-name descname">--test-map-pgs</code><code class="sig-prename descclassname"> [--pool poolid] [--range-first &lt;first&gt; --range-last &lt;last&gt;]</code><a class="headerlink" href="#cmdoption-osdmaptool-test-map-pgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>打印出归置组到 OSD 的映射关系。如果指定了范围，那它就依次递归 osdmaptool 参数所指目录内 first 到 last 之间的。
+例如： <strong>osdmaptool –test-map-pgs –range-first 0 –range-last 2 osdmap_dir</strong>.
+它会递归 osdmap_dir 内名为 0 、 1 、 2 的文件。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-map-pgs-dump">
+<code class="sig-name descname">--test-map-pgs-dump</code><code class="sig-prename descclassname"> [--pool poolid] [--range-first &lt;first&gt; --range-last &lt;last&gt;]</code><a class="headerlink" href="#cmdoption-osdmaptool-test-map-pgs-dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>打印出所有归置组及其与 OSD 映射关系的汇总。如果指定了范围，那它就依次递归 osdmaptool 参数所指目录内 first 到 last 之间的。
+例如： <strong>osdmaptool –test-map-pgs-dump –range-first 0 –range-last 2 osdmap_dir</strong>.
+它会递归 osdmap_dir 内名为 0 、 1 、 2 的文件。</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-map-pgs-dump-all">
+<code class="sig-name descname">--test-map-pgs-dump-all</code><code class="sig-prename descclassname"> [--pool poolid] [--range-first &lt;first&gt; --range-last &lt;last&gt;]</code><a class="headerlink" href="#cmdoption-osdmaptool-test-map-pgs-dump-all" title="Permalink to this definition">¶</a></dt>
+<dd><p>will print out the summary of all placement groups and the mappings
+from them to all the OSDs.
+If range is specified, then it iterates from first to last in the directory
+specified by argument to osdmaptool.
+Eg: <strong>osdmaptool –test-map-pgs-dump-all –range-first 0 –range-last 2 osdmap_dir</strong>.
+This will iterate through the files named 0,1,2 in osdmap_dir.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-random">
+<code class="sig-name descname">--test-random</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-test-random" title="Permalink to this definition">¶</a></dt>
+<dd><p>does a random mapping of placement groups to the OSDs.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-map-pg">
+<code class="sig-name descname">--test-map-pg</code><code class="sig-prename descclassname"> &lt;pgid&gt;</code><a class="headerlink" href="#cmdoption-osdmaptool-test-map-pg" title="Permalink to this definition">¶</a></dt>
+<dd><p>map a particular placement group(specified by pgid) to the OSDs.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-map-object">
+<code class="sig-name descname">--test-map-object</code><code class="sig-prename descclassname"> &lt;objectname&gt; [--pool &lt;poolid&gt;]</code><a class="headerlink" href="#cmdoption-osdmaptool-test-map-object" title="Permalink to this definition">¶</a></dt>
+<dd><p>map a particular placement group(specified by objectname) to the OSDs.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-test-crush">
+<code class="sig-name descname">--test-crush</code><code class="sig-prename descclassname"> [--range-first &lt;first&gt; --range-last &lt;last&gt;]</code><a class="headerlink" href="#cmdoption-osdmaptool-test-crush" title="Permalink to this definition">¶</a></dt>
+<dd><p>map placement groups to acting OSDs.
+If range is specified, then it iterates from first to last in the directory
+specified by argument to osdmaptool.
+Eg: <strong>osdmaptool –test-crush –range-first 0 –range-last 2 osdmap_dir</strong>.
+This will iterate through the files named 0,1,2 in osdmap_dir.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-mark-up-in">
+<code class="sig-name descname">--mark-up-in</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-mark-up-in" title="Permalink to this definition">¶</a></dt>
+<dd><p>mark osds up and in (but do not persist).</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-tree">
+<code class="sig-name descname">--tree</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a hierarchical tree of the map.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-osdmaptool-clear-temp">
+<code class="sig-name descname">--clear-temp</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-osdmaptool-clear-temp" title="Permalink to this definition">¶</a></dt>
+<dd><p>clears pg_temp and primary_temp variables.</p>
 </dd></dl>
 
 </div>
 <div class="section" id="id4">
 <h2>实例<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>要创建个有 16 个设备的简易图：</p>
-<div class="highlight-python"><pre>osdmaptool --createsimple 16 osdmap --clobber</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osdmaptool</span> <span class="o">--</span><span class="n">createsimple</span> <span class="mi">16</span> <span class="n">osdmap</span> <span class="o">--</span><span class="n">clobber</span>
+</pre></div>
 </div>
 <p>查看结果：</p>
-<div class="highlight-python"><pre>osdmaptool --print osdmap</pre>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osdmaptool</span> <span class="o">--</span><span class="nb">print</span> <span class="n">osdmap</span>
+</pre></div>
 </div>
 <p>要查看存储池 0 的归置组映射情况：</p>
-<div class="highlight-python"><pre>osdmaptool --test-map-pgs-dump rbd --pool 0
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">osdmaptool</span> <span class="o">--</span><span class="n">test</span><span class="o">-</span><span class="nb">map</span><span class="o">-</span><span class="n">pgs</span><span class="o">-</span><span class="n">dump</span> <span class="n">rbd</span> <span class="o">--</span><span class="n">pool</span> <span class="mi">0</span>
 
-pool 0 pg_num 8
-0.0     [0,2,1] 0
-0.1     [2,0,1] 2
-0.2     [0,1,2] 0
-0.3     [2,0,1] 2
-0.4     [0,2,1] 0
-0.5     [0,2,1] 0
-0.6     [0,1,2] 0
-0.7     [1,0,2] 1
-#osd    count   first   primary c wt    wt
-osd.0   8       5       5       1       1
-osd.1   8       1       1       1       1
-osd.2   8       2       2       1       1
- in 3
- avg 8 stddev 0 (0x) (expected 2.3094 0.288675x))
- min osd.0 8
- max osd.0 8
-size 0  0
-size 1  0
-size 2  0
-size 3  8</pre>
+<span class="n">pool</span> <span class="mi">0</span> <span class="n">pg_num</span> <span class="mi">8</span>
+<span class="mf">0.0</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="mi">0</span>
+<span class="mf">0.1</span>     <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="mi">2</span>
+<span class="mf">0.2</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="mi">0</span>
+<span class="mf">0.3</span>     <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="mi">2</span>
+<span class="mf">0.4</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="mi">0</span>
+<span class="mf">0.5</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="mi">0</span>
+<span class="mf">0.6</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="mi">0</span>
+<span class="mf">0.7</span>     <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="mi">1</span>
+<span class="c1">#osd    count   first   primary c wt    wt</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">0</span>   <span class="mi">8</span>       <span class="mi">5</span>       <span class="mi">5</span>       <span class="mi">1</span>       <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">1</span>   <span class="mi">8</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">2</span>   <span class="mi">8</span>       <span class="mi">2</span>       <span class="mi">2</span>       <span class="mi">1</span>       <span class="mi">1</span>
+ <span class="ow">in</span> <span class="mi">3</span>
+ <span class="n">avg</span> <span class="mi">8</span> <span class="n">stddev</span> <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="n">x</span><span class="p">)</span> <span class="p">(</span><span class="n">expected</span> <span class="mf">2.3094</span> <span class="mf">0.288675</span><span class="n">x</span><span class="p">))</span>
+ <span class="nb">min</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="mi">8</span>
+ <span class="nb">max</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="mi">8</span>
+<span class="n">size</span> <span class="mi">0</span>  <span class="mi">0</span>
+<span class="n">size</span> <span class="mi">1</span>  <span class="mi">0</span>
+<span class="n">size</span> <span class="mi">2</span>  <span class="mi">0</span>
+<span class="n">size</span> <span class="mi">3</span>  <span class="mi">8</span>
+</pre></div>
 </div>
-<dl class="docutils">
-<dt>在上面的输出结果中，</dt>
-<dd><ol class="first last arabic simple">
-<li>存储池 0 有 8 个归置组，及后面的两张表：</li>
-<li>一张表是归置组。每行表示一个归置组，列分别是：<ul>
-<li>归置组 id ，</li>
-<li>acting set ，和</li>
-<li>主 OSD 。</li>
+<dl class="simple">
+<dt>在上面的输出结果中，</dt><dd><ol class="arabic simple">
+<li><p>存储池 0 有 8 个归置组，及后面的两张表：</p></li>
+<li><p>一张表是归置组。每行表示一个归置组，列分别是：</p>
+<ul class="simple">
+<li><p>归置组 id ，</p></li>
+<li><p>acting set ，和</p></li>
+<li><p>主 OSD 。</p></li>
 </ul>
 </li>
-<li>一张表是所有的 OSD 。每行表示一个 OSD ，列分别是：<ul>
-<li>映射到此 OSD 的归置组数量，</li>
-<li>此 OSD 是它所属 acting set 的第一个，这样的归置组数量，</li>
-<li>此 OSD 是归置组的主 OSD ，这样的归置组数量，</li>
-<li>此 OSD 的 CRUSH 权重，还有</li>
-<li>此 OSD 的权重。</li>
+<li><p>一张表是所有的 OSD 。每行表示一个 OSD ，列分别是：</p>
+<ul class="simple">
+<li><p>映射到此 OSD 的归置组数量，</p></li>
+<li><p>此 OSD 是它所属 acting set 的第一个，这样的归置组数量，</p></li>
+<li><p>此 OSD 是归置组的主 OSD ，这样的归置组数量，</p></li>
+<li><p>此 OSD 的 CRUSH 权重，还有</p></li>
+<li><p>此 OSD 的权重。</p></li>
 </ul>
 </li>
-<li>再看是托管着归置组的 OSD 数量，是 3 个。接下来是<ul>
-<li>avarge, stddev （标准偏差）, stddev/average, expected stddev, expected stddev / average</li>
-<li>min and max</li>
+<li><p>再看是托管着归置组的 OSD 数量，是 3 个。接下来是</p>
+<ul class="simple">
+<li><p>avarge, stddev （标准偏差）, stddev/average, expected stddev, expected stddev / average</p></li>
+<li><p>min and max</p></li>
 </ul>
 </li>
-<li>映射到 n 个 OSD 的归置组数量。在本例中，全部的 8 个归置组都映射到了 3 个不同的 OSD 。</li>
+<li><p>映射到 n 个 OSD 的归置组数量。在本例中，全部的 8 个归置组都映射到了 3 个不同的 OSD 。</p></li>
 </ol>
 </dd>
 </dl>
 <p>在一个均衡得不太好的集群中，我们也许会看到类似如下的归置组分布统计，其标准偏差是 1.41421 :</p>
-<div class="highlight-python"><pre>#osd    count   first   primary c wt    wt
-osd.0   8       5       5       1       1
-osd.1   8       1       1       1       1
-osd.2   8       2       2       1       1
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#osd    count   first   primary c wt    wt</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">0</span>   <span class="mi">8</span>       <span class="mi">5</span>       <span class="mi">5</span>       <span class="mi">1</span>       <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">1</span>   <span class="mi">8</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">2</span>   <span class="mi">8</span>       <span class="mi">2</span>       <span class="mi">2</span>       <span class="mi">1</span>       <span class="mi">1</span>
 
-#osd    count   first    primary c wt    wt
-osd.0   33      9        9       0.0145874     1
-osd.1   34      14       14      0.0145874     1
-osd.2   31      7        7       0.0145874     1
-osd.3   31      13       13      0.0145874     1
-osd.4   30      14       14      0.0145874     1
-osd.5   33      7        7       0.0145874     1
- in 6
- avg 32 stddev 1.41421 (0.0441942x) (expected 5.16398 0.161374x))
- min osd.4 30
- max osd.1 34
-size 00
-size 10
-size 20
-size 364</pre>
+<span class="c1">#osd    count   first    primary c wt    wt</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">0</span>   <span class="mi">33</span>      <span class="mi">9</span>        <span class="mi">9</span>       <span class="mf">0.0145874</span>     <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">1</span>   <span class="mi">34</span>      <span class="mi">14</span>       <span class="mi">14</span>      <span class="mf">0.0145874</span>     <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">2</span>   <span class="mi">31</span>      <span class="mi">7</span>        <span class="mi">7</span>       <span class="mf">0.0145874</span>     <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">3</span>   <span class="mi">31</span>      <span class="mi">13</span>       <span class="mi">13</span>      <span class="mf">0.0145874</span>     <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">4</span>   <span class="mi">30</span>      <span class="mi">14</span>       <span class="mi">14</span>      <span class="mf">0.0145874</span>     <span class="mi">1</span>
+<span class="n">osd</span><span class="o">.</span><span class="mi">5</span>   <span class="mi">33</span>      <span class="mi">7</span>        <span class="mi">7</span>       <span class="mf">0.0145874</span>     <span class="mi">1</span>
+ <span class="ow">in</span> <span class="mi">6</span>
+ <span class="n">avg</span> <span class="mi">32</span> <span class="n">stddev</span> <span class="mf">1.41421</span> <span class="p">(</span><span class="mf">0.0441942</span><span class="n">x</span><span class="p">)</span> <span class="p">(</span><span class="n">expected</span> <span class="mf">5.16398</span> <span class="mf">0.161374</span><span class="n">x</span><span class="p">))</span>
+ <span class="nb">min</span> <span class="n">osd</span><span class="o">.</span><span class="mi">4</span> <span class="mi">30</span>
+ <span class="nb">max</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span> <span class="mi">34</span>
+<span class="n">size</span> <span class="mi">00</span>
+<span class="n">size</span> <span class="mi">10</span>
+<span class="n">size</span> <span class="mi">20</span>
+<span class="n">size</span> <span class="mi">364</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="id5">
@@ -210,16 +293,17 @@ size 364</pre>
 </div>
 <div class="section" id="id6">
 <h2>参考<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="../ceph/"><em>ceph</em></a>(8),
-<a class="reference internal" href="../crushtool/"><em>crushtool</em></a>(8),</p>
+<p><a class="reference internal" href="../ceph/"><span class="doc">ceph</span></a>(8),
+<a class="reference internal" href="../crushtool/"><span class="doc">crushtool</span></a>(8),</p>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
@@ -227,30 +311,31 @@ size 364</pre>
 <h3><a href="../../../">Table Of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/configuration/">配置</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/deployment/">部署</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/operations/">运维</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../../rados/man/">手册页</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../ceph-disk/">ceph-disk &#8211; Ceph 的磁盘工具，适用于 OSD</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph/">ceph &#8211; Ceph 管理工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">ceph-deploy &#8211; Ceph 部署工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-rest-api/">ceph-rest-api &#8211; ceph 的 REST 风格管理服务器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-authtool/">ceph-authtool &#8211; ceph 密钥环操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-clsinfo/">ceph-clsinfo &#8211; 查看类对象信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">ceph-conf &#8211; ceph 配置文件工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-debugpack/">ceph-debugpack &#8211; ceph 调试信息打包工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-dencoder/">ceph-dencoder &#8211; ceph 编码器/解码器工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-mon/">ceph-mon &#8211; ceph 监视器守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-osd/">ceph-osd &#8211; ceph 对象存储守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-run/">ceph-run &#8211; 发生核心转储后重启守护进程</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-syn/">ceph-syn &#8211; ceph 的人造负载生成器</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../crushtool/">crushtool &#8211; CRUSH 图操作工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../librados-config/">librados-config &#8211; 显示关于 librados 的信息</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../monmaptool/">monmaptool &#8211; ceph 监视器运行图操作工具</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="">osdmaptool &#8211; ceph osd 运行图操作工具</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-volume/">ceph-volume – Ceph OSD 部署和检查工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-volume-systemd/">ceph-volume-systemd – systemd ceph-volume 辅助工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph/">ceph – Ceph 管理工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-deploy/">ceph-deploy – Ceph 部署工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-authtool/">ceph-authtool – ceph 密钥环操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-clsinfo/">ceph-clsinfo – 查看类对象信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-conf/">ceph-conf – ceph 配置文件工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-debugpack/">ceph-debugpack – ceph 调试信息打包工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-dencoder/">ceph-dencoder – ceph 编码器/解码器工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-mon/">ceph-mon – ceph 监视器守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-osd/">ceph-osd – ceph 对象存储守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-kvstore-tool/">ceph-kvstore-tool – ceph 的 kvstore 操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-run/">ceph-run – 发生核心转储后重启守护进程</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-syn/">ceph-syn – ceph 的人造负载生成器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crushtool/">crushtool – CRUSH 图操作工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../librados-config/">librados-config – 显示关于 librados 的信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monmaptool/">monmaptool – ceph 监视器运行图操作工具</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">osdmaptool – ceph osd 运行图操作工具</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id1">提纲</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id2">描述</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id3">选项</a></li>
@@ -259,8 +344,8 @@ size 364</pre>
 <li class="toctree-l4"><a class="reference internal" href="#id6">参考</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../rados/">rados &#8211; rados 对象存储工具</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../ceph-post-file/">ceph-post-file &#8211; 把文件上传给 ceph 开发者</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rados/">rados – rados 对象存储工具</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ceph-post-file/">ceph-post-file – 把文件上传给 ceph 开发者</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../rados/troubleshooting/">故障排除</a></li>
@@ -268,40 +353,41 @@ size 364</pre>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../dev/">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -316,13 +402,13 @@ size 364</pre>
         <li class="right" >
           <a href="../monmaptool/" title="monmaptool – ceph 监视器运行图操作工具"
              >previous</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li>
-          <li><a href="../../../rados/" >Ceph 存储集群</a> &raquo;</li>
-          <li><a href="../../../rados/man/" >对象存储手册页</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../rados/" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../../rados/man/" >对象存储手册页</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

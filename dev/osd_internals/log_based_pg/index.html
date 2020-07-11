@@ -1,36 +1,27 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Log Based PG &mdash; Ceph Documentation</title>
-    
+    <meta charset="utf-8" />
+    <title>Log Based PG &#8212; Ceph Documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     'dev',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
     <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
-    <link rel="top" title="Ceph Documentation" href="../../../" />
-    
-
-  </head>
-  <body>
-    <div class="related">
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="Map and PG Message handling" href="../map_message_handling/" />
+    <link rel="prev" title="last_epoch_started" href="../last_epoch_started/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,17 +30,40 @@
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../map_message_handling/" title="Map and PG Message handling"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../last_epoch_started/" title="last_epoch_started"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../internals/" >Ceph 内幕</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">OSD 开发者文档</a> &#187;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/dev/osd_internals/log_based_pg.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
   <div class="section" id="log-based-pg">
-<h1>Log Based PG<a class="headerlink" href="#log-based-pg" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Log Based PG<a class="headerlink" href="#log-based-pg" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="background">
 <h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="why-primarylogpg">
@@ -62,7 +76,7 @@ replicated pools.</p>
 <h3>Primary log-based replication<a class="headerlink" href="#primary-log-based-replication" title="Permalink to this headline">¶</a></h3>
 <p>Reads must return data written by any write which completed (where the
 client could possibly have received a commit message).  There are lots
-of ways to handle this, but ceph&#8217;s architecture makes it easy for
+of ways to handle this, but ceph’s architecture makes it easy for
 everyone at any map epoch to know who the primary is.  Thus, the easy
 answer is to route all writes for a particular pg through a single
 ordering primary and then out to the replicas.  Though we only
@@ -72,16 +86,16 @@ writes on overlapping regions), we might as well serialize writes on
 the whole PG since it lets us represent the current state of the PG
 using two numbers: the epoch of the map on the primary in which the
 most recent write started (this is a bit stranger than it might seem
-since map distribution itself is asyncronous &#8211; see Peering and the
+since map distribution itself is asyncronous – see Peering and the
 concept of interval changes) and an increasing per-pg version number
-&#8211; this is referred to in the code with type eversion_t and stored as
-pg_info_t::last_update.  Furthermore, we maintain a log of &#8220;recent&#8221;
+– this is referred to in the code with type eversion_t and stored as
+pg_info_t::last_update.  Furthermore, we maintain a log of “recent”
 operations extending back at least far enough to include any
 <em>unstable</em> writes (writes which have been started but not committed)
-and objects which aren&#8217;t uptodate locally (see recovery and
+and objects which aren’t uptodate locally (see recovery and
 backfill).  In practice, the log will extend much further
 (osd_pg_min_log_entries when clean, osd_pg_max_log_entries when not
-clean) because it&#8217;s handy for quickly performing recovery.</p>
+clean) because it’s handy for quickly performing recovery.</p>
 <p>Using this log, as long as we talk to a non-empty subset of the OSDs
 which must have accepted any completed writes from the most recent
 interval in which we accepted writes, we can determine a conservative
@@ -90,7 +104,7 @@ as committed.  There is some freedom here, we can choose any log entry
 between the oldest head remembered by an element of that set (any
 newer cannot have completed without that log containing it) and the
 newest head remembered (clearly, all writes in the log were started,
-so it&#8217;s fine for us to remember them) as the new head.  This is the
+so it’s fine for us to remember them) as the new head.  This is the
 main point of divergence between replicated pools and ec pools in
 PG/PrimaryLogPG: replicated pools try to choose the newest valid
 option to avoid the client needing to replay those operations and
@@ -100,8 +114,8 @@ the <em>oldest</em> option available to them.</p>
 in implementation: one copy will not generally be enough to
 reconstruct an ec object.  Indeed, there are encodings where some log
 combinations would leave unrecoverable objects (as with a 4+2 encoding
-where 3 of the replicas remember a write, but the other 3 do not &#8211; we
-don&#8217;t have 3 copies of either version).  For this reason, log entries
+where 3 of the replicas remember a write, but the other 3 do not – we
+don’t have 3 copies of either version).  For this reason, log entries
 representing <em>unstable</em> writes (writes not yet committed to the
 client) must be rollbackable using only local information on ec pools.
 Log entries in general may therefore be rollbackable (and in that case,
@@ -122,35 +136,35 @@ cannot.  It would be really annoying if we needed to have two entire
 implementations of PrimaryLogPG, one for each of the two, if there
 are really only a few fundamental differences:</p>
 <ol class="arabic simple">
-<li>How reads work &#8211; async only, requires remote reads for ec</li>
-<li>How writes work &#8211; either restricted to append, or must write aside and do a
-tpc</li>
-<li>Whether we choose the oldest or newest possible head entry during peering</li>
-<li>A bit of extra information in the log entry to enable rollback</li>
+<li><p>How reads work – async only, requires remote reads for ec</p></li>
+<li><p>How writes work – either restricted to append, or must write aside and do a
+tpc</p></li>
+<li><p>Whether we choose the oldest or newest possible head entry during peering</p></li>
+<li><p>A bit of extra information in the log entry to enable rollback</p></li>
 </ol>
 <p>and so many similarities</p>
 <ol class="arabic simple">
-<li>All of the stats and metadata for objects</li>
-<li>The high level locking rules for mixing client IO with recovery and scrub</li>
-<li>The high level locking rules for mixing reads and writes without exposing
-uncommitted state (which might be rolled back or forgotten later)</li>
-<li>The process, metadata, and protocol needed to determine the set of osds
-which partcipated in the most recent interval in which we accepted writes</li>
-<li>etc.</li>
+<li><p>All of the stats and metadata for objects</p></li>
+<li><p>The high level locking rules for mixing client IO with recovery and scrub</p></li>
+<li><p>The high level locking rules for mixing reads and writes without exposing
+uncommitted state (which might be rolled back or forgotten later)</p></li>
+<li><p>The process, metadata, and protocol needed to determine the set of osds
+which partcipated in the most recent interval in which we accepted writes</p></li>
+<li><p>etc.</p></li>
 </ol>
 <p>Instead, we choose a few abstractions (and a few kludges) to paper over the differences:</p>
 <ol class="arabic simple">
-<li>PGBackend</li>
-<li>PGTransaction</li>
-<li>PG::choose_acting chooses between calc_replicated_acting and calc_ec_acting</li>
-<li>Various bits of the write pipeline disallow some operations based on pool
-type &#8211; like omap operations, class operation reads, and writes which are
-not aligned appends (officially, so far) for ec</li>
-<li>Misc other kludges here and there</li>
+<li><p>PGBackend</p></li>
+<li><p>PGTransaction</p></li>
+<li><p>PG::choose_acting chooses between calc_replicated_acting and calc_ec_acting</p></li>
+<li><p>Various bits of the write pipeline disallow some operations based on pool
+type – like omap operations, class operation reads, and writes which are
+not aligned appends (officially, so far) for ec</p></li>
+<li><p>Misc other kludges here and there</p></li>
 </ol>
 <p>PGBackend and PGTransaction enable abstraction of differences 1, 2,
 and the addition of 4 as needed to the log entries.</p>
-<p>The replicated implementation is in ReplicatedBackend.h/cc and doesn&#8217;t
+<p>The replicated implementation is in ReplicatedBackend.h/cc and doesn’t
 require much explanation, I think.  More detail on the ECBackend can be
 found in doc/dev/osd_internals/erasure_coding/ecbackend.rst.</p>
 </div>
@@ -169,7 +183,7 @@ when recovery is required to serve a read vs a write.  This also
 changes the rules for when peering has enough logs to prove that it</p>
 <p>Core Changes:</p>
 <ul>
-<li><div class="first line-block">
+<li><div class="line-block">
 <div class="line">PGBackend needs to be able to return IsPG(Recoverable|Readable)Predicate</div>
 <div class="line">objects to allow the user to make these determinations.</div>
 </div>
@@ -183,21 +197,21 @@ synchronously out of the primary OSD.  With an erasure coded strategy,
 the primary will need to request data from some number of replicas in
 order to satisfy a read.  PGBackend will therefore need to provide
 seperate objects_read_sync and objects_read_async interfaces where
-the former won&#8217;t be implemented by the ECBackend.</p>
+the former won’t be implemented by the ECBackend.</p>
 <p>PGBackend interfaces:</p>
 <ul class="simple">
-<li>objects_read_sync</li>
-<li>objects_read_async</li>
+<li><p>objects_read_sync</p></li>
+<li><p>objects_read_async</p></li>
 </ul>
 </div>
 <div class="section" id="scrub">
 <h3>Scrub<a class="headerlink" href="#scrub" title="Permalink to this headline">¶</a></h3>
 <p>We currently have two scrub modes with different default frequencies:</p>
 <ol class="arabic simple">
-<li>[shallow] scrub: compares the set of objects and metadata, but not
-the contents</li>
-<li>deep scrub: compares the set of objects, metadata, and a crc32 of
-the object contents (including omap)</li>
+<li><p>[shallow] scrub: compares the set of objects and metadata, but not
+the contents</p></li>
+<li><p>deep scrub: compares the set of objects, metadata, and a crc32 of
+the object contents (including omap)</p></li>
 </ol>
 <p>The primary requests a scrubmap from each replica for a particular
 range of objects.  The replica fills out this scrubmap for the range
@@ -209,7 +223,7 @@ the caveat that the PGBackend implementation must be in charge of
 actually doing the scan.</p>
 <p>PGBackend interfaces:</p>
 <ul class="simple">
-<li>be_*</li>
+<li><p>be_*</p></li>
 </ul>
 </div>
 <div class="section" id="recovery">
@@ -221,77 +235,176 @@ With the erasure coded strategy, we probably want to read the
 minimum number of replica chunks required to reconstruct the object
 and push out the replacement chunks concurrently.</p>
 <p>Another difference is that objects in erasure coded pg may be
-unrecoverable without being unfound.  The &#8220;unfound&#8221; concept
+unrecoverable without being unfound.  The “unfound” concept
 should probably then be renamed to unrecoverable.  Also, the
 PGBackend implementation will have to be able to direct the search
 for pg replicas with unrecoverable object chunks and to be able
 to determine whether a particular object is recoverable.</p>
 <p>Core changes:</p>
 <ul class="simple">
-<li>s/unfound/unrecoverable</li>
+<li><p>s/unfound/unrecoverable</p></li>
 </ul>
 <p>PGBackend interfaces:</p>
 <ul class="simple">
-<li><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L60">on_local_recover_start</a></li>
-<li><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L66">on_local_recover</a></li>
-<li><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L78">on_global_recover</a></li>
-<li><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L83">on_peer_recover</a></li>
-<li><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L90">begin_peer_recover</a></li>
+<li><p><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L60">on_local_recover_start</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L66">on_local_recover</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L78">on_global_recover</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L83">on_peer_recover</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ceph/ceph/blob/firefly/src/osd/PGBackend.h#L90">begin_peer_recover</a></p></li>
 </ul>
 </div>
 </div>
 </div>
+
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
             <p class="logo"><a href="../../../">
               <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
             </a></p>
 <h3><a href="../../../">Table Of Contents</a></h3>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../start/">安装（快速）</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装（手动）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rados/">Ceph 存储集群</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../rbd/rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../">开发文档</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../release-notes/">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer_guide/">开发者指南</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../internals/">Ceph 内幕</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../blkin/">用 Blkin 追踪 Ceph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../bluestore/">BlueStore Internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cache-pool/">Cache pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cephfs-reclaim/">CephFS Reclaim Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cephfs-snapshots/">CephFS 快照</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cephx_protocol/">Cephx 认证协议详细阐述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config/">配置管理系统</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config-key/">config-key layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../context/">CephContext</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corpus/">资料库结构</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cpu-profiler/">Oprofile 的安装</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../cxx/">C++17 and libstdc++ ABI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../delayed-delete/">CephFS delayed deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_cluster_deployement/">开发集群的部署</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dev_cluster_deployement/#id6">在同一机器上部署多套开发集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../development-workflow/">开发流程</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../documenting/">为 Ceph 写作文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../encoding/">序列化（编码、解码）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../erasure-coded-pool/">纠删码存储池</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../file-striping/">File striping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../freebsd/">FreeBSD Implementation details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generatedocs/">Ceph 文档的构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../iana/">IANA 号</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../kernel-client-troubleshooting/">Kernel client troubleshooting (FS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../kubernetes/">Hacking on Ceph in Kubernetes with Rook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../libs/">Library architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../logging/">集群日志的用法</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../logs/">调试日志</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../macos/">在 MacOS 上构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../messenger/">Messenger notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../mon-bootstrap/">Monitor bootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../mon-on-disk-formats/">ON-DISK FORMAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../mon-osdmap-prune/">FULL OSDMAP VERSION PRUNING</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../msgr2/">msgr2 协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../network-encoding/">Network Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../network-protocol/">网络协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../object-store/">对象存储架构概述</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../osd-class-path/">OSD class path issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../peering/">互联</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../perf/">Using perf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../perf_counters/">性能计数器</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../perf_histograms/">Perf histograms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../placement-group/">PG （归置组）说明</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../quick_guide/">开发者指南（快速）</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rados-client-protocol/">RADOS 客户端协议</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rbd-diff/">RBD 增量备份</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rbd-export/">RBD Export &amp; Import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rbd-layering/">RBD Layering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../release-process/">Ceph Release Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../seastore/">SeaStore</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../sepia/">Sepia 社区测试实验室</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../session_authentication/">Session Authentication for the Cephx Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../testing/">测试笔记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../versions/">Public OSD Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../wireshark/">Wireshark Dissector</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">OSD 开发者文档</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../async_recovery/">Asynchronous Recovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../backfill_reservation/">Backfill Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure_coding/">纠删码编码的归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../last_epoch_started/">last_epoch_started</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Log Based PG</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#background">Background</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#why-primarylogpg">Why PrimaryLogPG?</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#primary-log-based-replication">Primary log-based replication</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#replicatedbackend-ecbackend-unification-strategy">ReplicatedBackend/ECBackend unification strategy</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pgbackend">PGBackend</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#pgbackend-interface-explanation">PGBackend Interface Explanation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#readable-vs-degraded">Readable vs Degraded</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#client-reads">Client Reads</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#scrub">Scrub</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#recovery">Recovery</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../map_message_handling/">Map and PG Message handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../osd_overview/">OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../osd_throttles/">OSD 油门（ throttle ）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg/">PG</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg_removal/">PG Removal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pgpool/">PGPool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../recovery_reservation/">Recovery Reservation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../scrub/">Scrubbing Behavior Table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../snaps/">快照</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../watch_notify/">关注通知</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../wbthrottle/">回写抑制</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../mds_internals/">MDS 开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../radosgw/">RADOS 网关开发者文档</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ceph-volume/">ceph-volume 开发者文档</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../README/">中文版翻译说明</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../translation-convention/">中文版词语翻译惯例</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
 </ul>
 
 
 <!-- ugly kludge to make genindex look like it's part of the toc -->
 <ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search/" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -300,11 +413,19 @@ to determine whether a particular object is recoverable.</p>
         <li class="right" >
           <a href="../../../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../../">Ceph Documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="../map_message_handling/" title="Map and PG Message handling"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../last_epoch_started/" title="last_epoch_started"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../internals/" >Ceph 内幕</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >OSD 开发者文档</a> &#187;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2016, Red Hat, Inc, and contributors. Licensed under Creative Commons BY-SA.
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
     </div>
   </body>
 </html>

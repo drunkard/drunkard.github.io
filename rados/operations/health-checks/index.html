@@ -1,0 +1,945 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>健康检查 &#8212; Ceph Documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../_static/js/ceph.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex/" />
+    <link rel="search" title="Search" href="../../../search/" />
+    <link rel="next" title="监控集群" href="../monitoring/" />
+    <link rel="prev" title="操纵集群" href="../operating/" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../monitoring/" title="监控集群"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../operating/" title="操纵集群"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" accesskey="U">集群运维</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+
+<div id="dev-warning" class="admonition note" style="display:none;">
+  <p class="first admonition-title">Notice</p>
+  <p class="last">This document is for a development version of Ceph.</p>
+</div>
+
+<div id="eol-warning" class="admonition warning" style="display:none;">
+  <p class="first admonition-title">Warning</p>
+  <p class="last">This document is for an unsupported version of Ceph.</p>
+</div>
+  <div id="docubetter" align="right" style="display:none; padding: 15px; font-weight: bold;">
+    <a id="edit-on-github" href="https://github.com/ceph/ceph/edit/master/doc/rados/operations/health-checks.rst" rel="nofollow">Edit on GitHub</a> | <a href="https://pad.ceph.com/p/Report_Documentation_Bugs">Report a Documentation Bug</a>
+  </div>
+
+  
+  <div class="section" id="health-checks">
+<span id="id1"></span><h1>健康检查<a class="headerlink" href="#health-checks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id2">
+<h2>概览<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>Ceph 集群可能产生的健康消息是有限的——它们通通被定义为<em>健康检查</em>，都有唯一标识符。</p>
+<p>The identifier is a terse pseudo-human-readable (i.e. like a variable name)
+string.  It is intended to enable tools (such as UIs) to make sense of
+health checks, and present them in a way that reflects their meaning.</p>
+<p>This page lists the health checks that are raised by the monitor and manager
+daemons.  In addition to these, you may also see health checks that originate
+from MDS daemons (see <a class="reference internal" href="../../../cephfs/health-messages/#cephfs-health-messages"><span class="std std-ref">CephFS 健康消息</span></a>), and health checks
+that are defined by ceph-mgr python modules.</p>
+</div>
+<div class="section" id="id3">
+<h2>状态定义<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id4">
+<h3>监视器<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="mon-down">
+<h4>MON_DOWN<a class="headerlink" href="#mon-down" title="Permalink to this headline">¶</a></h4>
+<p>One or more monitor daemons is currently down.  The cluster requires a
+majority (more than 1/2) of the monitors in order to function.  When
+one or more monitors are down, clients may have a harder time forming
+their initial connection to the cluster as they may need to try more
+addresses before they reach an operating monitor.</p>
+<p>The down monitor daemon should generally be restarted as soon as
+possible to reduce the risk of a subsequen monitor failure leading to
+a service outage.</p>
+</div>
+<div class="section" id="mon-clock-skew">
+<h4>MON_CLOCK_SKEW<a class="headerlink" href="#mon-clock-skew" title="Permalink to this headline">¶</a></h4>
+<p>The clocks on the hosts running the ceph-mon monitor daemons are not
+sufficiently well synchronized.  This health alert is raised if the
+cluster detects a clock skew greater than <code class="docutils literal notranslate"><span class="pre">mon_clock_drift_allowed</span></code>.</p>
+<p>This is best resolved by synchronizing the clocks using a tool like
+<code class="docutils literal notranslate"><span class="pre">ntpd</span></code> or <code class="docutils literal notranslate"><span class="pre">chrony</span></code>.</p>
+<p>If it is impractical to keep the clocks closely synchronized, the
+<code class="docutils literal notranslate"><span class="pre">mon_clock_drift_allowed</span></code> threshold can also be increased, but this
+value must stay significantly below the <code class="docutils literal notranslate"><span class="pre">mon_lease</span></code> interval in
+order for monitor cluster to function properly.</p>
+</div>
+<div class="section" id="mon-msgr2-not-enabled">
+<h4>MON_MSGR2_NOT_ENABLED<a class="headerlink" href="#mon-msgr2-not-enabled" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">ms_bind_msgr2</span></code> option is enabled but one or more monitors is
+not configured to bind to a v2 port in the cluster’s monmap.  This
+means that features specific to the msgr2 protocol (e.g., encryption)
+are not available on some or all connections.</p>
+<p>In most cases this can be corrected by issuing the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">mon</span> <span class="n">enable</span><span class="o">-</span><span class="n">msgr2</span>
+</pre></div>
+</div>
+<p>That command will change any monitor configured for the old default
+port 6789 to continue to listen for v1 connections on 6789 and also
+listen for v2 connections on the new default 3300 port.</p>
+<p>If a monitor is configured to listen for v1 connections on a non-standard port (not 6789), then the monmap will need to be modified manually.</p>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>管理器<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="mgr-down">
+<h4>MGR_DOWN<a class="headerlink" href="#mgr-down" title="Permalink to this headline">¶</a></h4>
+<p>All manager daemons are currently down.  The cluster should normally
+have at least one running manager (<code class="docutils literal notranslate"><span class="pre">ceph-mgr</span></code>) daemon.  If no
+manager daemon is running, the cluster’s ability to monitor itself will
+be compromised, and parts of the management API will become
+unavailable (for example, the dashboard will not work, and most CLI
+commands that report metrics or runtime state will block).  However,
+the cluster will still be able to perform all IO operations and
+recover from failures.</p>
+<p>The down manager daemon should generally be restarted as soon as
+possible to ensure that the cluster can be monitored (e.g., so that
+the <code class="docutils literal notranslate"><span class="pre">ceph</span> <span class="pre">-s</span></code> information is up to date, and/or metrics can be
+scraped by Prometheus).</p>
+</div>
+<div class="section" id="mgr-module-dependency">
+<h4>MGR_MODULE_DEPENDENCY<a class="headerlink" href="#mgr-module-dependency" title="Permalink to this headline">¶</a></h4>
+<p>An enabled manager module is failing its dependency check.  This health check
+should come with an explanatory message from the module about the problem.</p>
+<p>For example, a module might report that a required package is not installed:
+install the required package and restart your manager daemons.</p>
+<p>This health check is only applied to enabled modules.  If a module is
+not enabled, you can see whether it is reporting dependency issues in
+the output of <cite>ceph module ls</cite>.</p>
+</div>
+<div class="section" id="mgr-module-error">
+<h4>MGR_MODULE_ERROR<a class="headerlink" href="#mgr-module-error" title="Permalink to this headline">¶</a></h4>
+<p>A manager module has experienced an unexpected error.  Typically,
+this means an unhandled exception was raised from the module’s <cite>serve</cite>
+function.  The human readable description of the error may be obscurely
+worded if the exception did not provide a useful description of itself.</p>
+<p>This health check may indicate a bug: please open a Ceph bug report if you
+think you have encountered a bug.</p>
+<p>If you believe the error is transient, you may restart your manager
+daemon(s), or use <cite>ceph mgr fail</cite> on the active daemon to prompt
+a failover to another daemon.</p>
+</div>
+</div>
+<div class="section" id="osd">
+<h3>OSD<a class="headerlink" href="#osd" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="osd-down">
+<h4>OSD_DOWN<a class="headerlink" href="#osd-down" title="Permalink to this headline">¶</a></h4>
+<p>至少有一个 OSD 被标记成了 down 状态，其 ceph-osd 守护进程可能已经停掉了、或者是对端 OSD 与此 OSD 之间的网络不通。常见起因有守护进程停止或崩溃、主机挂了、或者网络中断。</p>
+<p>核实一下此主机是否健康、守护进程是否启动、网络是否正常。如果那个守护进程崩溃了，其守护进程日志文件（
+<code class="docutils literal notranslate"><span class="pre">/var/log/ceph/ceph-osd.*</span></code> ）里会包含调试信息。</p>
+</div>
+<div class="section" id="osd-crush-type-down">
+<h4>OSD_&lt;crush type&gt;_DOWN<a class="headerlink" href="#osd-crush-type-down" title="Permalink to this headline">¶</a></h4>
+<p>(例如 OSD_HOST_DOWN, OSD_ROOT_DOWN)</p>
+<p>某一个 CRUSH 子树里的所有 OSD 都被标记成 down 了，例如一台主机上的所有 OSD 。</p>
+</div>
+<div class="section" id="osd-orphan">
+<h4>OSD_ORPHAN<a class="headerlink" href="#osd-orphan" title="Permalink to this headline">¶</a></h4>
+<p>CRUSH 图分级结构里提到了这个 OSD ，但它并不存在。</p>
+<p>CRUSH 图分级结构里的这个 OSD 可以用以下命令删除：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">crush</span> <span class="n">rm</span> <span class="n">osd</span><span class="o">.&lt;</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osd-out-of-order-full">
+<h4>OSD_OUT_OF_ORDER_FULL<a class="headerlink" href="#osd-out-of-order-full" title="Permalink to this headline">¶</a></h4>
+<p>The utilization thresholds for <cite>backfillfull</cite>, <cite>nearfull</cite>, <cite>full</cite>,
+and/or <cite>failsafe_full</cite> are not ascending.  In particular, we expect
+<cite>backfillfull &lt; nearfull</cite>, <cite>nearfull &lt; full</cite>, and <cite>full &lt;
+failsafe_full</cite>.</p>
+<p>The thresholds can be adjusted with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">backfillfull</span><span class="o">-</span><span class="n">ratio</span> <span class="o">&lt;</span><span class="n">ratio</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">nearfull</span><span class="o">-</span><span class="n">ratio</span> <span class="o">&lt;</span><span class="n">ratio</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">full</span><span class="o">-</span><span class="n">ratio</span> <span class="o">&lt;</span><span class="n">ratio</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osd-full">
+<h4>OSD_FULL<a class="headerlink" href="#osd-full" title="Permalink to this headline">¶</a></h4>
+<p>One or more OSDs has exceeded the <cite>full</cite> threshold and is preventing
+the cluster from servicing writes.</p>
+<p>Utilization by pool can be checked with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">df</span>
+</pre></div>
+</div>
+<p>The currently defined <cite>full</cite> ratio can be seen with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">dump</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">full_ratio</span>
+</pre></div>
+</div>
+<p>A short-term workaround to restore write availability is to raise the full
+threshold by a small amount:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">full</span><span class="o">-</span><span class="n">ratio</span> <span class="o">&lt;</span><span class="n">ratio</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>New storage should be added to the cluster by deploying more OSDs or
+existing data should be deleted in order to free up space.</p>
+</div>
+<div class="section" id="osd-backfillfull">
+<h4>OSD_BACKFILLFULL<a class="headerlink" href="#osd-backfillfull" title="Permalink to this headline">¶</a></h4>
+<p>One or more OSDs has exceeded the <cite>backfillfull</cite> threshold, which will
+prevent data from being allowed to rebalance to this device.  This is
+an early warning that rebalancing may not be able to complete and that
+the cluster is approaching full.</p>
+<p>Utilization by pool can be checked with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osd-nearfull">
+<h4>OSD_NEARFULL<a class="headerlink" href="#osd-nearfull" title="Permalink to this headline">¶</a></h4>
+<p>One or more OSDs has exceeded the <cite>nearfull</cite> threshold.  This is an early
+warning that the cluster is approaching full.</p>
+<p>Utilization by pool can be checked with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osdmap-flags">
+<h4>OSDMAP_FLAGS<a class="headerlink" href="#osdmap-flags" title="Permalink to this headline">¶</a></h4>
+<p>One or more cluster flags of interest has been set.  These flags include:</p>
+<ul class="simple">
+<li><p><em>full</em> - the cluster is flagged as full and cannot service writes</p></li>
+<li><p><em>pauserd</em>, <em>pausewr</em> - paused reads or writes</p></li>
+<li><p><em>noup</em> - OSDs are not allowed to start</p></li>
+<li><p><em>nodown</em> - OSD failure reports are being ignored, such that the
+monitors will not mark OSDs <cite>down</cite></p></li>
+<li><p><em>noin</em> - OSDs that were previously marked <cite>out</cite> will not be marked
+back <cite>in</cite> when they start</p></li>
+<li><p><em>noout</em> - down OSDs will not automatically be marked out after the
+configured interval</p></li>
+<li><p><em>nobackfill</em>, <em>norecover</em>, <em>norebalance</em> - recovery or data
+rebalancing is suspended</p></li>
+<li><p><em>noscrub</em>, <em>nodeep_scrub</em> - scrubbing is disabled</p></li>
+<li><p><em>notieragent</em> - cache tiering activity is suspended</p></li>
+</ul>
+<p>With the exception of <em>full</em>, these flags can be set or cleared with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">flag</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">unset</span> <span class="o">&lt;</span><span class="n">flag</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osd-flags">
+<h4>OSD_FLAGS<a class="headerlink" href="#osd-flags" title="Permalink to this headline">¶</a></h4>
+<p>One or more OSDs or CRUSH {nodes,device classes} has a flag of interest set.
+These flags include:</p>
+<ul class="simple">
+<li><p><em>noup</em>: OSD is not allowed to start</p></li>
+<li><p><em>nodown</em>: failure reports for this OSD will be ignored</p></li>
+<li><p><em>noin</em>: if this OSD was previously marked <cite>out</cite> automatically
+after a failure, it will not be marked in when it stats</p></li>
+<li><p><em>noout</em>: if this OSD is down it will not automatically be marked
+<cite>out</cite> after the configured interval</p></li>
+</ul>
+<p>这些标记可以这样批量设置和清除：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">group</span> <span class="o">&lt;</span><span class="n">flags</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">who</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">unset</span><span class="o">-</span><span class="n">group</span> <span class="o">&lt;</span><span class="n">flags</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">who</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>例如：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">unset</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">osd</span><span class="o">.</span><span class="mi">0</span> <span class="n">osd</span><span class="o">.</span><span class="mi">1</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">host</span><span class="o">-</span><span class="n">foo</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">unset</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">host</span><span class="o">-</span><span class="n">foo</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">class</span><span class="o">-</span><span class="n">hdd</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">unset</span><span class="o">-</span><span class="n">group</span> <span class="n">noup</span><span class="p">,</span><span class="n">noout</span> <span class="n">class</span><span class="o">-</span><span class="n">hdd</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="old-crush-tunables">
+<h4>OLD_CRUSH_TUNABLES<a class="headerlink" href="#old-crush-tunables" title="Permalink to this headline">¶</a></h4>
+<p>CRUSH 图在使用很老的选项，应该更新它。还能使用（即，可连接此集群的最老客户端版本号）而不会触发此健康告警的最老可调选项由
+<code class="docutils literal notranslate"><span class="pre">mon_crush_min_required_version</span></code> 配置选项决定。详情见
+ref:<cite>crush-map-tunables</cite> 。</p>
+</div>
+<div class="section" id="old-crush-straw-calc-version">
+<h4>OLD_CRUSH_STRAW_CALC_VERSION<a class="headerlink" href="#old-crush-straw-calc-version" title="Permalink to this headline">¶</a></h4>
+<p>The CRUSH map is using an older, non-optimal method for calculating
+intermediate weight values for <code class="docutils literal notranslate"><span class="pre">straw</span></code> buckets.</p>
+<p>The CRUSH map should be updated to use the newer method
+(<code class="docutils literal notranslate"><span class="pre">straw_calc_version=1</span></code>).  See
+<a class="reference internal" href="../crush-map/#crush-map-tunables"><span class="std std-ref">可调选项</span></a> for more information.</p>
+</div>
+<div class="section" id="cache-pool-no-hit-set">
+<h4>CACHE_POOL_NO_HIT_SET<a class="headerlink" href="#cache-pool-no-hit-set" title="Permalink to this headline">¶</a></h4>
+<p>One or more cache pools is not configured with a <em>hit set</em> to track
+utilization, which will prevent the tiering agent from identifying
+cold objects to flush and evict from the cache.</p>
+<p>Hit sets can be configured on the cache pool with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">hit_set_type</span> <span class="o">&lt;</span><span class="nb">type</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">hit_set_period</span> <span class="o">&lt;</span><span class="n">period</span><span class="o">-</span><span class="ow">in</span><span class="o">-</span><span class="n">seconds</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">hit_set_count</span> <span class="o">&lt;</span><span class="n">number</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">hitsets</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">hit_set_fpp</span> <span class="o">&lt;</span><span class="n">target</span><span class="o">-</span><span class="n">false</span><span class="o">-</span><span class="n">positive</span><span class="o">-</span><span class="n">rate</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="osd-no-sortbitwise">
+<h4>OSD_NO_SORTBITWISE<a class="headerlink" href="#osd-no-sortbitwise" title="Permalink to this headline">¶</a></h4>
+<p>No pre-luminous v12.y.z OSDs are running but the <code class="docutils literal notranslate"><span class="pre">sortbitwise</span></code> flag has not
+been set.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">sortbitwise</span></code> flag must be set before luminous v12.y.z or newer
+OSDs can start.  You can safely set the flag with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="nb">set</span> <span class="n">sortbitwise</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pool-full">
+<h4>POOL_FULL<a class="headerlink" href="#pool-full" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools has reached its quota and is no longer allowing writes.</p>
+<p>Pool quotas and utilization can be seen with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">df</span> <span class="n">detail</span>
+</pre></div>
+</div>
+<p>You can either raise the pool quota with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">max_objects</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">-</span><span class="n">objects</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span> <span class="n">max_bytes</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">-</span><span class="nb">bytes</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>or delete some existing data to reduce utilization.</p>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>设备健康<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="device-health">
+<h4>DEVICE_HEALTH<a class="headerlink" href="#device-health" title="Permalink to this headline">¶</a></h4>
+<p>One or more devices is expected to fail soon, where the warning
+threshold is controlled by the <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/warn_threshold</span></code>
+config option.</p>
+<p>This warning only applies to OSDs that are currently marked “in”, so
+the expected response to this failure is to mark the device “out” so
+that data is migrated off of the device, and then to remove the
+hardware from the system.  Note that the marking out is normally done
+automatically if <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/self_heal</span></code> is enabled based on
+the <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/mark_out_threshold</span></code>.</p>
+<p>Device health can be checked with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">device</span> <span class="n">info</span> <span class="o">&lt;</span><span class="n">device</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Device life expectancy is set by a prediction model run by
+the mgr or an by external tool via the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">device</span> <span class="nb">set</span><span class="o">-</span><span class="n">life</span><span class="o">-</span><span class="n">expectancy</span> <span class="o">&lt;</span><span class="n">device</span><span class="o">-</span><span class="nb">id</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">from</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">to</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>You can change the stored life expectancy manually, but that usually
+doesn’t accomplish anything as whatever tool originally set it will
+probably set it again, and changing the stored value does not affect
+the actual health of the hardware device.</p>
+</div>
+<div class="section" id="device-health-in-use">
+<h4>DEVICE_HEALTH_IN_USE<a class="headerlink" href="#device-health-in-use" title="Permalink to this headline">¶</a></h4>
+<p>One or more devices is expected to fail soon and has been marked “out”
+of the cluster based on <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/mark_out_threshold</span></code>, but it
+is still participating in one more PGs.  This may be because it was
+only recently marked “out” and data is still migrating, or because data
+cannot be migrated off for some reason (e.g., the cluster is nearly
+full, or the CRUSH hierarchy is such that there isn’t another suitable
+OSD to migrate the data too).</p>
+<p>This message can be silenced by disabling the self heal behavior
+(setting <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/self_heal</span></code> to false), by adjusting the
+<code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/mark_out_threshold</span></code>, or by addressing what is
+preventing data from being migrated off of the ailing device.</p>
+</div>
+<div class="section" id="device-health-toomany">
+<h4>DEVICE_HEALTH_TOOMANY<a class="headerlink" href="#device-health-toomany" title="Permalink to this headline">¶</a></h4>
+<p>Too many devices is expected to fail soon and the
+<code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/self_heal</span></code> behavior is enabled, such that marking
+out all of the ailing devices would exceed the clusters
+<code class="docutils literal notranslate"><span class="pre">mon_osd_min_in_ratio</span></code> ratio that prevents too many OSDs from being
+automatically marked “out”.</p>
+<p>This generally indicates that too many devices in your cluster are
+expected to fail soon and you should take action to add newer
+(healthier) devices before too many devices fail and data is lost.</p>
+<p>The health message can also be silenced by adjusting parameters like
+<code class="docutils literal notranslate"><span class="pre">mon_osd_min_in_ratio</span></code> or <code class="docutils literal notranslate"><span class="pre">mgr/devicehealth/mark_out_threshold</span></code>,
+but be warned that this will increase the likelihood of unrecoverable
+data loss in the cluster.</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h3>数据健康（存储池和归置组们）<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="pg-availability">
+<h4>PG_AVAILABILITY<a class="headerlink" href="#pg-availability" title="Permalink to this headline">¶</a></h4>
+<p>Data availability is reduced, meaning that the cluster is unable to
+service potential read or write requests for some data in the cluster.
+Specifically, one or more PGs is in a state that does not allow IO
+requests to be serviced.  Problematic PG states include <em>peering</em>,
+<em>stale</em>, <em>incomplete</em>, and the lack of <em>active</em> (if those conditions do not clear
+quickly).</p>
+<p>Detailed information about which PGs are affected is available from:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">health</span> <span class="n">detail</span>
+</pre></div>
+</div>
+<p>In most cases the root cause is that one or more OSDs is currently
+down; see the discussion for <code class="docutils literal notranslate"><span class="pre">OSD_DOWN</span></code> above.</p>
+<p>The state of specific problematic PGs can be queried with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="o">&lt;</span><span class="n">pgid</span><span class="o">&gt;</span> <span class="n">query</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pg-degraded">
+<h4>PG_DEGRADED<a class="headerlink" href="#pg-degraded" title="Permalink to this headline">¶</a></h4>
+<p>Data redundancy is reduced for some data, meaning the cluster does not
+have the desired number of replicas for all data (for replicated
+pools) or erasure code fragments (for erasure coded pools).
+Specifically, one or more PGs:</p>
+<ul class="simple">
+<li><p>has the <em>degraded</em> or <em>undersized</em> flag set, meaning there are not
+enough instances of that placement group in the cluster;</p></li>
+<li><p>has not had the <em>clean</em> flag set for some time.</p></li>
+</ul>
+<p>Detailed information about which PGs are affected is available from:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">health</span> <span class="n">detail</span>
+</pre></div>
+</div>
+<p>In most cases the root cause is that one or more OSDs is currently
+down; see the dicussion for <code class="docutils literal notranslate"><span class="pre">OSD_DOWN</span></code> above.</p>
+<p>The state of specific problematic PGs can be queried with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="o">&lt;</span><span class="n">pgid</span><span class="o">&gt;</span> <span class="n">query</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pg-degraded-full">
+<h4>PG_DEGRADED_FULL<a class="headerlink" href="#pg-degraded-full" title="Permalink to this headline">¶</a></h4>
+<p>Data redundancy may be reduced or at risk for some data due to a lack
+of free space in the cluster.  Specifically, one or more PGs has the
+<em>backfill_toofull</em> or <em>recovery_toofull</em> flag set, meaning that the
+cluster is unable to migrate or recover data because one or more OSDs
+is above the <em>backfillfull</em> threshold.</p>
+<p>See the discussion for <em>OSD_BACKFILLFULL</em> or <em>OSD_FULL</em> above for
+steps to resolve this condition.</p>
+</div>
+<div class="section" id="pg-backfill-full">
+<h4>PG_BACKFILL_FULL<a class="headerlink" href="#pg-backfill-full" title="Permalink to this headline">¶</a></h4>
+<p>Data redundancy may be reduced or at risk for some data due to a lack
+of free space in the cluster.  Specifically, one or more PGs has the
+<em>backfill_toofull</em> flag set, meaning that the
+cluster is unable to migrate or recover data because one or more OSDs
+is above the <em>backfillfull</em> threshold.</p>
+<p>See the discussion for <em>OSD_BACKFILLFULL</em> above for
+steps to resolve this condition.</p>
+</div>
+<div class="section" id="pg-damaged">
+<h4>PG_DAMAGED<a class="headerlink" href="#pg-damaged" title="Permalink to this headline">¶</a></h4>
+<p>Data scrubbing has discovered some problems with data consistency in
+the cluster.  Specifically, one or more PGs has the <em>inconsistent</em> or
+<em>snaptrim_error</em> flag is set, indicating an earlier scrub operation
+found a problem, or that the <em>repair</em> flag is set, meaning a repair
+for such an inconsistency is currently in progress.</p>
+<p>详情见 <a class="reference internal" href="../pg-repair/"><span class="doc">修复 PG 不一致状态</span></a> 。</p>
+</div>
+<div class="section" id="osd-scrub-errors">
+<h4>OSD_SCRUB_ERRORS<a class="headerlink" href="#osd-scrub-errors" title="Permalink to this headline">¶</a></h4>
+<p>近期的 OSD 洗刷出现了明显不一致的地方。这个错误一般和
+<em>PG_DAMAGED</em> （见上文）成对出现。</p>
+<p>详情见 <a class="reference internal" href="../pg-repair/"><span class="doc">修复 PG 不一致状态</span></a> 。</p>
+</div>
+<div class="section" id="large-omap-objects">
+<h4>LARGE_OMAP_OBJECTS<a class="headerlink" href="#large-omap-objects" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools contain large omap objects as determined by
+<code class="docutils literal notranslate"><span class="pre">osd_deep_scrub_large_omap_object_key_threshold</span></code> (threshold for number of keys
+to determine a large omap object) or
+<code class="docutils literal notranslate"><span class="pre">osd_deep_scrub_large_omap_object_value_sum_threshold</span></code> (the threshold for
+summed size (bytes) of all key values to determine a large omap object) or both.
+More information on the object name, key count, and size in bytes can be found
+by searching the cluster log for ‘Large omap object found’. Large omap objects
+can be caused by RGW bucket index objects that do not have automatic resharding
+enabled. Please see <a class="reference internal" href="../../../radosgw/dynamicresharding/#rgw-dynamic-bucket-index-resharding"><span class="std std-ref">RGW Dynamic Bucket Index Resharding</span></a> for more information on resharding.</p>
+<p>The thresholds can be adjusted with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">osd</span> <span class="n">osd_deep_scrub_large_omap_object_key_threshold</span> <span class="o">&lt;</span><span class="n">keys</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">config</span> <span class="nb">set</span> <span class="n">osd</span> <span class="n">osd_deep_scrub_large_omap_object_value_sum_threshold</span> <span class="o">&lt;</span><span class="nb">bytes</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cache-pool-near-full">
+<h4>CACHE_POOL_NEAR_FULL<a class="headerlink" href="#cache-pool-near-full" title="Permalink to this headline">¶</a></h4>
+<p>A cache tier pool is nearly full.  Full in this context is determined
+by the <code class="docutils literal notranslate"><span class="pre">target_max_bytes</span></code> and <code class="docutils literal notranslate"><span class="pre">target_max_objects</span></code> properties on
+the cache pool.  Once the pool reaches the target threshold, write
+requests to the pool may block while data is flushed and evicted
+from the cache, a state that normally leads to very high latencies and
+poor performance.</p>
+<p>The cache pool target size can be adjusted with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">cache</span><span class="o">-</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">target_max_bytes</span> <span class="o">&lt;</span><span class="nb">bytes</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">cache</span><span class="o">-</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">target_max_objects</span> <span class="o">&lt;</span><span class="n">objects</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Normal cache flush and evict activity may also be throttled due to reduced
+availability or performance of the base tier, or overall cluster load.</p>
+</div>
+<div class="section" id="too-few-pgs">
+<h4>TOO_FEW_PGS<a class="headerlink" href="#too-few-pgs" title="Permalink to this headline">¶</a></h4>
+<p>The number of PGs in use in the cluster is below the configurable
+threshold of <code class="docutils literal notranslate"><span class="pre">mon_pg_warn_min_per_osd</span></code> PGs per OSD.  This can lead
+to suboptimal distribution and balance of data across the OSDs in
+the cluster, and similarly reduce overall performance.</p>
+<p>This may be an expected condition if data pools have not yet been
+created.</p>
+<p>The PG count for existing pools can be increased or new pools can be created.
+Please refer to <a class="reference internal" href="../placement-groups/#choosing-number-of-placement-groups"><span class="std std-ref">确定归置组数量</span></a> for more
+information.</p>
+</div>
+<div class="section" id="pool-too-few-pgs">
+<h4>POOL_TOO_FEW_PGS<a class="headerlink" href="#pool-too-few-pgs" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools should probably have more PGs, based on the amount
+of data that is currently stored in the pool.  This can lead to
+suboptimal distribution and balance of data across the OSDs in the
+cluster, and similarly reduce overall performance.  This warning is
+generated if the <code class="docutils literal notranslate"><span class="pre">pg_autoscale_mode</span></code> property on the pool is set to
+<code class="docutils literal notranslate"><span class="pre">warn</span></code>.</p>
+<p>To disable the warning, you can disable auto-scaling of PGs for the
+pool entirely with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_autoscale_mode</span> <span class="n">off</span>
+</pre></div>
+</div>
+<p>To allow the cluster to automatically adjust the number of PGs,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_autoscale_mode</span> <span class="n">on</span>
+</pre></div>
+</div>
+<p>You can also manually set the number of PGs for the pool to the
+recommended amount with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_num</span> <span class="o">&lt;</span><span class="n">new</span><span class="o">-</span><span class="n">pg</span><span class="o">-</span><span class="n">num</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Please refer to <a class="reference internal" href="../placement-groups/#choosing-number-of-placement-groups"><span class="std std-ref">确定归置组数量</span></a> and
+<a class="reference internal" href="../placement-groups/#pg-autoscaler"><span class="std std-ref">自伸缩归置组</span></a> for more information.</p>
+</div>
+<div class="section" id="too-many-pgs">
+<h4>TOO_MANY_PGS<a class="headerlink" href="#too-many-pgs" title="Permalink to this headline">¶</a></h4>
+<p>The number of PGs in use in the cluster is above the configurable
+threshold of <code class="docutils literal notranslate"><span class="pre">mon_max_pg_per_osd</span></code> PGs per OSD.  If this threshold is
+exceed the cluster will not allow new pools to be created, pool <cite>pg_num</cite> to
+be increased, or pool replication to be increased (any of which would lead to
+more PGs in the cluster).  A large number of PGs can lead
+to higher memory utilization for OSD daemons, slower peering after
+cluster state changes (like OSD restarts, additions, or removals), and
+higher load on the Manager and Monitor daemons.</p>
+<p>The simplest way to mitigate the problem is to increase the number of
+OSDs in the cluster by adding more hardware.  Note that the OSD count
+used for the purposes of this health check is the number of “in” OSDs,
+so marking “out” OSDs “in” (if there are any) can also help:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">osd</span> <span class="nb">id</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Please refer to <a class="reference internal" href="../placement-groups/#choosing-number-of-placement-groups"><span class="std std-ref">确定归置组数量</span></a> for more
+information.</p>
+</div>
+<div class="section" id="pool-too-many-pgs">
+<h4>POOL_TOO_MANY_PGS<a class="headerlink" href="#pool-too-many-pgs" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools should probably have more PGs, based on the amount
+of data that is currently stored in the pool.  This can lead to higher
+memory utilization for OSD daemons, slower peering after cluster state
+changes (like OSD restarts, additions, or removals), and higher load
+on the Manager and Monitor daemons.  This warning is generated if the
+<code class="docutils literal notranslate"><span class="pre">pg_autoscale_mode</span></code> property on the pool is set to <code class="docutils literal notranslate"><span class="pre">warn</span></code>.</p>
+<p>To disable the warning, you can disable auto-scaling of PGs for the
+pool entirely with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_autoscale_mode</span> <span class="n">off</span>
+</pre></div>
+</div>
+<p>To allow the cluster to automatically adjust the number of PGs,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_autoscale_mode</span> <span class="n">on</span>
+</pre></div>
+</div>
+<p>You can also manually set the number of PGs for the pool to the
+recommended amount with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">pg_num</span> <span class="o">&lt;</span><span class="n">new</span><span class="o">-</span><span class="n">pg</span><span class="o">-</span><span class="n">num</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Please refer to <a class="reference internal" href="../placement-groups/#choosing-number-of-placement-groups"><span class="std std-ref">确定归置组数量</span></a> and
+<a class="reference internal" href="../placement-groups/#pg-autoscaler"><span class="std std-ref">自伸缩归置组</span></a> for more information.</p>
+</div>
+<div class="section" id="pool-target-size-ratio-overcommitted">
+<h4>POOL_TARGET_SIZE_RATIO_OVERCOMMITTED<a class="headerlink" href="#pool-target-size-ratio-overcommitted" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools have a <code class="docutils literal notranslate"><span class="pre">target_size_ratio</span></code> property set to
+estimate the expected size of the pool as a fraction of total storage,
+but the value(s) exceed the total available storage (either by
+themselves or in combination with other pools’ actual usage).</p>
+<p>This is usually an indication that the <code class="docutils literal notranslate"><span class="pre">target_size_ratio</span></code> value for
+the pool is too large and should be reduced or set to zero with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">target_size_ratio</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>For more information, see <a class="reference internal" href="../placement-groups/#specifying-pool-target-size"><span class="std std-ref">配置期望的存储池尺寸</span></a>.</p>
+</div>
+<div class="section" id="pool-target-size-bytes-overcommitted">
+<h4>POOL_TARGET_SIZE_BYTES_OVERCOMMITTED<a class="headerlink" href="#pool-target-size-bytes-overcommitted" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools have a <code class="docutils literal notranslate"><span class="pre">target_size_bytes</span></code> property set to
+estimate the expected size of the pool,
+but the value(s) exceed the total available storage (either by
+themselves or in combination with other pools’ actual usage).</p>
+<p>This is usually an indication that the <code class="docutils literal notranslate"><span class="pre">target_size_bytes</span></code> value for
+the pool is too large and should be reduced or set to zero with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="n">target_size_bytes</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>For more information, see <a class="reference internal" href="../placement-groups/#specifying-pool-target-size"><span class="std std-ref">配置期望的存储池尺寸</span></a>.</p>
+</div>
+<div class="section" id="too-few-osds">
+<h4>TOO_FEW_OSDS<a class="headerlink" href="#too-few-osds" title="Permalink to this headline">¶</a></h4>
+<p>The number of OSDs in the cluster is below the configurable
+threshold of <code class="docutils literal notranslate"><span class="pre">osd_pool_default_size</span></code>.</p>
+</div>
+<div class="section" id="smaller-pgp-num">
+<h4>SMALLER_PGP_NUM<a class="headerlink" href="#smaller-pgp-num" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools has a <code class="docutils literal notranslate"><span class="pre">pgp_num</span></code> value less than <code class="docutils literal notranslate"><span class="pre">pg_num</span></code>.  This
+is normally an indication that the PG count was increased without
+also increasing the placement behavior.</p>
+<p>This is sometimes done deliberately to separate out the <cite>split</cite> step
+when the PG count is adjusted from the data migration that is needed
+when <code class="docutils literal notranslate"><span class="pre">pgp_num</span></code> is changed.</p>
+<p>This is normally resolved by setting <code class="docutils literal notranslate"><span class="pre">pgp_num</span></code> to match <code class="docutils literal notranslate"><span class="pre">pg_num</span></code>,
+triggering the data migration, with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span> <span class="n">pgp_num</span> <span class="o">&lt;</span><span class="n">pg</span><span class="o">-</span><span class="n">num</span><span class="o">-</span><span class="n">value</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="many-objects-per-pg">
+<h4>MANY_OBJECTS_PER_PG<a class="headerlink" href="#many-objects-per-pg" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools has an average number of objects per PG that is
+significantly higher than the overall cluster average.  The specific
+threshold is controlled by the <code class="docutils literal notranslate"><span class="pre">mon_pg_warn_max_object_skew</span></code>
+configuration value.</p>
+<p>This is usually an indication that the pool(s) containing most of the
+data in the cluster have too few PGs, and/or that other pools that do
+not contain as much data have too many PGs.  See the discussion of
+<em>TOO_MANY_PGS</em> above.</p>
+<p>The threshold can be raised to silence the health warning by adjusting
+the <code class="docutils literal notranslate"><span class="pre">mon_pg_warn_max_object_skew</span></code> config option on the monitors.</p>
+</div>
+<div class="section" id="pool-app-not-enabled">
+<h4>POOL_APP_NOT_ENABLED<a class="headerlink" href="#pool-app-not-enabled" title="Permalink to this headline">¶</a></h4>
+<p>A pool exists that contains one or more objects but has not been
+tagged for use by a particular application.</p>
+<p>Resolve this warning by labeling the pool for use by an application.  For
+example, if the pool is used by RBD,:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rbd</span> <span class="n">pool</span> <span class="n">init</span> <span class="o">&lt;</span><span class="n">poolname</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>If the pool is being used by a custom application ‘foo’, you can also label
+via the low-level command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="n">application</span> <span class="n">enable</span> <span class="n">foo</span>
+</pre></div>
+</div>
+<p>For more information, see <a class="reference internal" href="../pools/#associate-pool-to-application"><span class="std std-ref">关联存储池与应用程序</span></a>.</p>
+</div>
+<div class="section" id="id8">
+<h4>POOL_FULL<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools has reached (or is very close to reaching) its
+quota.  The threshold to trigger this error condition is controlled by
+the <code class="docutils literal notranslate"><span class="pre">mon_pool_quota_crit_threshold</span></code> configuration option.</p>
+<p>Pool quotas can be adjusted up or down (or removed) with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span> <span class="n">max_bytes</span> <span class="o">&lt;</span><span class="nb">bytes</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span> <span class="n">max_objects</span> <span class="o">&lt;</span><span class="n">objects</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Setting the quota value to 0 will disable the quota.</p>
+</div>
+<div class="section" id="pool-near-full">
+<h4>POOL_NEAR_FULL<a class="headerlink" href="#pool-near-full" title="Permalink to this headline">¶</a></h4>
+<p>One or more pools is approaching is quota.  The threshold to trigger
+this warning condition is controlled by the
+<code class="docutils literal notranslate"><span class="pre">mon_pool_quota_warn_threshold</span></code> configuration option.</p>
+<p>Pool quotas can be adjusted up or down (or removed) with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span> <span class="n">max_bytes</span> <span class="o">&lt;</span><span class="nb">bytes</span><span class="o">&gt;</span>
+<span class="n">ceph</span> <span class="n">osd</span> <span class="n">pool</span> <span class="nb">set</span><span class="o">-</span><span class="n">quota</span> <span class="o">&lt;</span><span class="n">pool</span><span class="o">&gt;</span> <span class="n">max_objects</span> <span class="o">&lt;</span><span class="n">objects</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Setting the quota value to 0 will disable the quota.</p>
+</div>
+<div class="section" id="object-misplaced">
+<h4>OBJECT_MISPLACED<a class="headerlink" href="#object-misplaced" title="Permalink to this headline">¶</a></h4>
+<p>One or more objects in the cluster is not stored on the node the
+cluster would like it to be stored on.  This is an indication that
+data migration due to some recent cluster change has not yet completed.</p>
+<p>Misplaced data is not a dangerous condition in and of itself; data
+consistency is never at risk, and old copies of objects are never
+removed until the desired number of new copies (in the desired
+locations) are present.</p>
+</div>
+<div class="section" id="object-unfound">
+<h4>OBJECT_UNFOUND<a class="headerlink" href="#object-unfound" title="Permalink to this headline">¶</a></h4>
+<p>One or more objects in the cluster cannot be found.  Specifically, the
+OSDs know that a new or updated copy of an object should exist, but a
+copy of that version of the object has not been found on OSDs that are
+currently online.</p>
+<p>Read or write requests to unfound objects will block.</p>
+<p>Ideally, a down OSD can be brought back online that has the more
+recent copy of the unfound object.  Candidate OSDs can be identified from the
+peering state for the PG(s) responsible for the unfound object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">tell</span> <span class="o">&lt;</span><span class="n">pgid</span><span class="o">&gt;</span> <span class="n">query</span>
+</pre></div>
+</div>
+<p>If the latest copy of the object is not available, the cluster can be
+told to roll back to a previous version of the object. See
+<a class="reference internal" href="../../troubleshooting/troubleshooting-pg/#failures-osd-unfound"><span class="std std-ref">未找到的对象</span></a> for more information.</p>
+</div>
+<div class="section" id="slow-ops">
+<h4>SLOW_OPS<a class="headerlink" href="#slow-ops" title="Permalink to this headline">¶</a></h4>
+<p>One or more OSD requests is taking a long time to process.  This can
+be an indication of extreme load, a slow storage device, or a software
+bug.</p>
+<p>The request queue on the OSD(s) in question can be queried with the
+following command, executed from the OSD host:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">daemon</span> <span class="n">osd</span><span class="o">.&lt;</span><span class="nb">id</span><span class="o">&gt;</span> <span class="n">ops</span>
+</pre></div>
+</div>
+<p>A summary of the slowest recent requests can be seen with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">daemon</span> <span class="n">osd</span><span class="o">.&lt;</span><span class="nb">id</span><span class="o">&gt;</span> <span class="n">dump_historic_ops</span>
+</pre></div>
+</div>
+<p>OSD 的位置可用此命令找到：</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">osd</span> <span class="n">find</span> <span class="n">osd</span><span class="o">.&lt;</span><span class="nb">id</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pg-not-scrubbed">
+<h4>PG_NOT_SCRUBBED<a class="headerlink" href="#pg-not-scrubbed" title="Permalink to this headline">¶</a></h4>
+<p>One or more PGs has not been scrubbed recently.  PGs are normally
+scrubbed every <code class="docutils literal notranslate"><span class="pre">mon_scrub_interval</span></code> seconds, and this warning
+triggers when <code class="docutils literal notranslate"><span class="pre">mon_warn_pg_not_scrubbed_ratio</span></code> percentage of interval has elapsed
+without a scrub since it was due.</p>
+<p>PGs will not scrub if they are not flagged as <em>clean</em>, which may
+happen if they are misplaced or degraded (see <em>PG_AVAILABILITY</em> and
+<em>PG_DEGRADED</em> above).</p>
+<p>You can manually initiate a scrub of a clean PG with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">pg</span> <span class="n">scrub</span> <span class="o">&lt;</span><span class="n">pgid</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pg-not-deep-scrubbed">
+<h4>PG_NOT_DEEP_SCRUBBED<a class="headerlink" href="#pg-not-deep-scrubbed" title="Permalink to this headline">¶</a></h4>
+<p>One or more PGs has not been deep scrubbed recently.  PGs are normally
+scrubbed every <code class="docutils literal notranslate"><span class="pre">osd_deep_mon_scrub_interval</span></code> seconds, and this warning
+triggers when <code class="docutils literal notranslate"><span class="pre">mon_warn_pg_not_deep_scrubbed_ratio</span></code> percentage of interval has elapsed
+without a scrub since it was due.</p>
+<p>PGs will not (deep) scrub if they are not flagged as <em>clean</em>, which may
+happen if they are misplaced or degraded (see <em>PG_AVAILABILITY</em> and
+<em>PG_DEGRADED</em> above).</p>
+<p>You can manually initiate a scrub of a clean PG with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ceph</span> <span class="n">pg</span> <span class="n">deep</span><span class="o">-</span><span class="n">scrub</span> <span class="o">&lt;</span><span class="n">pgid</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../">
+              <img class="logo" src="../../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<h3><a href="../../../">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../start/intro/">Ceph 简介</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/">安装 Ceph</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephadm/">Cephadm</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../">Ceph 存储集群</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../configuration/">配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../deployment/">部署</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../">运维</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../operating/">操纵集群</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">健康检查</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">概览</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">状态定义</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id4">监视器</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#mon-down">MON_DOWN</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mon-clock-skew">MON_CLOCK_SKEW</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mon-msgr2-not-enabled">MON_MSGR2_NOT_ENABLED</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id5">管理器</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#mgr-down">MGR_DOWN</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mgr-module-dependency">MGR_MODULE_DEPENDENCY</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#mgr-module-error">MGR_MODULE_ERROR</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#osd">OSD</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#osd-down">OSD_DOWN</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-crush-type-down">OSD_&lt;crush type&gt;_DOWN</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-orphan">OSD_ORPHAN</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-out-of-order-full">OSD_OUT_OF_ORDER_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-full">OSD_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-backfillfull">OSD_BACKFILLFULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-nearfull">OSD_NEARFULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osdmap-flags">OSDMAP_FLAGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-flags">OSD_FLAGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#old-crush-tunables">OLD_CRUSH_TUNABLES</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#old-crush-straw-calc-version">OLD_CRUSH_STRAW_CALC_VERSION</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#cache-pool-no-hit-set">CACHE_POOL_NO_HIT_SET</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-no-sortbitwise">OSD_NO_SORTBITWISE</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-full">POOL_FULL</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id6">设备健康</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#device-health">DEVICE_HEALTH</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#device-health-in-use">DEVICE_HEALTH_IN_USE</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#device-health-toomany">DEVICE_HEALTH_TOOMANY</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#id7">数据健康（存储池和归置组们）</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pg-availability">PG_AVAILABILITY</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-degraded">PG_DEGRADED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-degraded-full">PG_DEGRADED_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-backfill-full">PG_BACKFILL_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-damaged">PG_DAMAGED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#osd-scrub-errors">OSD_SCRUB_ERRORS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#large-omap-objects">LARGE_OMAP_OBJECTS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#cache-pool-near-full">CACHE_POOL_NEAR_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#too-few-pgs">TOO_FEW_PGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-too-few-pgs">POOL_TOO_FEW_PGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#too-many-pgs">TOO_MANY_PGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-too-many-pgs">POOL_TOO_MANY_PGS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-target-size-ratio-overcommitted">POOL_TARGET_SIZE_RATIO_OVERCOMMITTED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-target-size-bytes-overcommitted">POOL_TARGET_SIZE_BYTES_OVERCOMMITTED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#too-few-osds">TOO_FEW_OSDS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#smaller-pgp-num">SMALLER_PGP_NUM</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#many-objects-per-pg">MANY_OBJECTS_PER_PG</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-app-not-enabled">POOL_APP_NOT_ENABLED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#id8">POOL_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pool-near-full">POOL_NEAR_FULL</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#object-misplaced">OBJECT_MISPLACED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#object-unfound">OBJECT_UNFOUND</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#slow-ops">SLOW_OPS</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-not-scrubbed">PG_NOT_SCRUBBED</a></li>
+<li class="toctree-l6"><a class="reference internal" href="#pg-not-deep-scrubbed">PG_NOT_DEEP_SCRUBBED</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring/">监控集群</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../monitoring-osd-pg/">监控 OSD 和归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../user-management/">用户管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pg-repair/">修复 PG 不一致状态</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data-placement/">数据归置概览</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pools/">存储池</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../erasure-code/">纠删码</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cache-tiering/">分级缓存</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../placement-groups/">归置组</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../balancer/">均衡器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../upmap/">使用 pg-upmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map/">CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../crush-map-edits/">手动编辑一个 CRUSH 图</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-osds/">增加/删除 OSD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../add-or-rm-mons/">增加/删除监视器</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../devices/">设备管理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../bluestore-migration/">迁移到 BlueStore</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../control/">命令参考</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/community/">Ceph 社区</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-mon/">监视器故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-osd/">OSD 故障排除</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/troubleshooting-pg/">归置组排障</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/log-and-debug/">日志记录和调试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/cpu-profiling/">CPU 剖析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/memory-profiling/">内存剖析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../man/">手册页</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/">故障排除</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/">APIs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cephfs/">Ceph 文件系统</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbd/">Ceph 块设备</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../radosgw/">Ceph 对象网关</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/">Ceph 管理器守护进程</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mgr/dashboard/">Ceph 仪表盘</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/">API 文档</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture/">体系结构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/developer_guide/">开发者指南</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev/internals/">Ceph 内幕</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../governance/">项目管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../foundation/">Ceph 基金会</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ceph-volume/">ceph-volume</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/general/">Ceph 版本（总目录）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../releases/">Ceph 版本（索引）</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary/">Ceph 术语</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../translation_cn/">中文版翻译资源</a></li>
+</ul>
+
+
+<!-- ugly kludge to make genindex look like it's part of the toc -->
+<ul style="margin-top: -10px"><li class="toctree-l1"><a class="reference internal" href="../../../genindex/">Index</a></li></ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../monitoring/" title="监控集群"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../operating/" title="操纵集群"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../">Ceph Documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../" >Ceph 存储集群</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../" >集群运维</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Ceph authors and contributors. Licensed under Creative Commons Attribution Share Alike 3.0 (CC-BY-SA-3.0).
+    </div>
+  </body>
+</html>
